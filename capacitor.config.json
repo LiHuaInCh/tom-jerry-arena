@@ -1,0 +1,9 @@
+{
+  "appId": "com.fan.tomjerry",
+  "appName": "猫鼠大作战",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "android": {
+    "allowMixedContent": true
+  }
+}

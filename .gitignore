@@ -1,0 +1,12 @@
+node_modules/
+www/
+shots/
+.edge/
+tools/spec.json
+*.log
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/app/src/main/assets/public/
+*.keystore

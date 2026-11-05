@@ -1,0 +1,22 @@
+{
+  "name": "tom-jerry-arrow-chase",
+  "version": "0.2.0",
+  "private": true,
+  "description": "猫鼠大作战 — 猫和老鼠 × 弓箭手大作战 网页小游戏（生存 + 乱斗）",
+  "scripts": {
+    "serve": "python -m http.server 8123",
+    "pack": "node tools/pack-web.mjs",
+    "test": "node tools/sim.mjs",
+    "test:arena": "node tools/sim-arena.mjs",
+    "cap:add": "cap add android",
+    "cap:sync": "cap sync android",
+    "build:apk": "cap sync android && cd android && gradlew.bat assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/core": "^6.2.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.2.0"
+  }
+}
