@@ -337,7 +337,6 @@
     if (TJ.Audio) {
       TJ.Audio.unlock();
       TJ.Audio.startMusic();
-      setTimeout(function () { TJ.Audio.say(selected, 'start'); }, 400);
     }
     if (god) {
       g.player.maxHp = 1e9;
@@ -521,7 +520,6 @@
     };
     wrap.appendChild(rf);
     $('levelup').classList.remove('hidden');
-    if (TJ.Audio) TJ.Audio.say(selected, 'level');
     if (g && g.effects) g.effects.push({ kind: 'tex', src: 'assets/fx/kenney/star_04.png', x: g.player.x, y: g.player.y - 10, life: 0.6, max: 0.6, s0: 20, s1: 90, alpha: 0.9, spin: 1 });
   }
 
