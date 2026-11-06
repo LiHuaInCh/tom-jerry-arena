@@ -1032,7 +1032,7 @@
 
   function elemChoices(g, slot) {
     const names = { fire: '火', ice: '冰', thunder: '雷', light: '光', dark: '暗' };
-    const all = Object.keys(names).filter(function (e) { return slot === 0 || e !== g.player.elemSlots[0]; });
+    const all = Object.keys(names);
     const two = [];
     while (two.length < 2 && all.length) two.push(all.splice(Math.floor(g.rng() * all.length), 1)[0]);
     return two.map(function (e) {
