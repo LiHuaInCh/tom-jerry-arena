@@ -162,7 +162,7 @@
       }
     }
     g.kills++;
-    g.score += e.def.score + Math.floor(g.wave * 2);
+    g.score += Math.round((e.def.score + Math.floor(g.wave * 2)) * ((g.cov && g.cov.score) || 1));
     burst(g, e.x, e.y, e.def.fur, 14, 260, 5);
     g.effects.push({ kind: 'ring', x: e.x, y: e.y, r: 8, maxR: e.r * 2.4, life: 0.28, max: 0.28, color: '#FFFFFF' });
     const orbCount = e.def.boss ? 22 : (e.def.xp >= 6 ? 3 : 1);
@@ -174,7 +174,7 @@
       });
     }
     if (g.rng() < 0.04) g.pickups.push({ kind: 'magnet', x: e.x, y: e.y, vx: 0, vy: 0, r: 13, value: 0, life: 24, pull: false });
-    if (g.rng() < 0.04) g.pickups.push({ kind: 'heart', x: e.x, y: e.y, vx: 0, vy: 0, r: 11, value: 22, life: 22, pull: false });
+    if (g.rng() < 0.04 && !(g.cov && g.cov.noHeal)) g.pickups.push({ kind: 'heart', x: e.x, y: e.y, vx: 0, vy: 0, r: 11, value: 22, life: 22, pull: false });
     if (g.rng() < 0.055) g.pickups.push({ kind: 'cheese', x: e.x + 12, y: e.y, vx: 0, vy: 0, r: 12, value: 60, life: 22, pull: false });
     if (e.def.boss) {
       g.shake = 18; g.boss = null; sfx(g, 'bossdown');
@@ -365,7 +365,7 @@
       state: 'idle', stateT: 0, atkCd: rand(g, 0.6, 1.6), charge: null,
       pending: null, summoned: 0, walk: rand(g, 0, TAU), boss: !!def.boss, recoil: 0
     };
-    if (!def.boss && wave >= 2 && g.rng() < Math.min(0.30, 0.08 + wave * 0.012)) {
+    if (!def.boss && wave >= 2 && g.rng() < Math.min(0.30, 0.08 + wave * 0.012) * ((g.cov && g.cov.elite) || 1)) {
       e.elite = true;
       e.mod = ['shield', 'swift', 'split'][Math.floor(g.rng() * 3)];
       e.hp = Math.round(e.hp * (e.mod === 'shield' ? 2.0 : 1.5));
@@ -929,7 +929,7 @@
     g.spawnTimer -= dt * (g.boss ? 0.55 : 1);
     if (g.spawnTimer <= 0 && g.enemies.filter(e => !e.dead).length < 110) {
       const waveNow = Math.max(1, g.wave);
-      g.spawnTimer = Math.max(0.28, 1.35 - waveNow * 0.10);
+      g.spawnTimer = Math.max(0.28, 1.35 - waveNow * 0.10) * ((g.cov && g.cov.spawn) || 1);
       let n = waveNow <= 2 ? 1 : (1 + (g.rng() < Math.min(0.9, 0.25 + waveNow * 0.07) ? 1 : 0));
       if (waveNow >= 8 && g.rng() < 0.45) n += 1;
       const pool = ['kitten', 'kitten', 'kitten'];

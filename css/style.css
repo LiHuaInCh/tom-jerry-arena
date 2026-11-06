@@ -673,3 +673,10 @@ button { font-family: inherit; }
   display: none; align-items: center; justify-content: center;
   box-shadow: 0 4px 0 #B8905F, 0 8px 18px rgba(0,0,0,.25); cursor: pointer;
 }
+
+.cov-panel { display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 4px 0 6px; }
+.cov-head { font-size: 12px; font-weight: 800; color: #7A4A2E; letter-spacing: .04em; }
+.cov-head span { font-weight: 600; color: #A98A6C; margin-left: 6px; }
+.cov-list { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.cov { border: 2px solid #E3CBA8; background: #FFF8E7; color: #8A6A52; border-radius: 999px; padding: 4px 12px; font-size: 11px; font-weight: 800; cursor: pointer; font-family: inherit; }
+.cov.on { background: #3A2418; color: #FFF6E0; border-color: #3A2418; }

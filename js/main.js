@@ -19,6 +19,7 @@
   };
   let state = 'title';
   let selected = params.get('char') || 'jerry';
+  const covenants = new Set();
   let faction = (D.characters.find(function (c) { return c.id === selected; }) || D.characters[0]).faction || 'mouse';
   let mode = params.get('mode') === 'arena' ? 'arena' : 'survival';
   function portraitSrc(id) { return 'assets/portraits/' + id + '.png'; }
@@ -163,6 +164,12 @@
   function startRun() {
     TJ.Audio.unlock();
     g = mode === 'arena' ? TJ.createArenaGame({ charId: selected }) : TJ.createGame({ charId: selected });
+    g.cov = { spawn: 1, elite: 1, noHeal: 0, score: 1, list: [] };
+    if (mode !== 'arena') {
+      if (covenants.has('horde')) { g.cov.spawn = 0.8; g.cov.score *= 1.2; g.cov.list.push('怪潮'); }
+      if (covenants.has('elite')) { g.cov.elite = 2; g.cov.score *= 1.2; g.cov.list.push('精英'); }
+      if (covenants.has('noheal')) { g.cov.noHeal = 1; g.cov.score *= 1.3; g.cov.list.push('禁疗'); }
+    }
     g.mode = g.mode || 'survival';
     window.__tjG = g;
     if (god) {
@@ -712,6 +719,14 @@
       b.classList.toggle('sel', f === faction);
     });
   }
+  document.querySelectorAll('.cov').forEach(function (b) {
+    b.addEventListener('click', function () {
+      const k = b.dataset.cov;
+      if (covenants.has(k)) { covenants.delete(k); b.classList.remove('on'); }
+      else { covenants.add(k); b.classList.add('on'); }
+      TJ.Audio.play('click');
+    });
+  });
   refreshModeUI();
   refreshFactionUI();
 
