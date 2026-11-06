@@ -76,7 +76,15 @@
       </div>
       <div class="char-grid" id="charGrid"></div>
       <div class="title-actions">
-        <button id="startBtn" class="btn primary">开 始 游 戏</button>
+        <div class="cov-panel" id="covPanel">
+        <div class="cov-head">试炼盟约 <span>可选 · 越难分数越高</span></div>
+        <div class="cov-list">
+          <button class="cov" data-cov="horde" type="button">怪潮 +25%</button>
+          <button class="cov" data-cov="elite" type="button">精英翻倍</button>
+          <button class="cov" data-cov="noheal" type="button">禁血包 +经验</button>
+        </div>
+      </div>
+      <button id="startBtn" class="btn primary">开 始 游 戏</button>
         <div class="meta">
           <div class="best"><span id="bestLabel">最佳成绩</span> <b id="bestScore">0</b></div>
           <div class="hint">WASD / 摇杆移动 · 自动瞄准 · 空格 / 按钮技能</div>
