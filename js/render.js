@@ -1144,13 +1144,14 @@
     const largeMap = D.W > 3000;
     const bg = largeMap ? null : buildBackground();
     let floorPattern = null;
-    function makeFloorTile() {
+    function makeFloorTile(variant) {
+      const PAL = [['#E9D3B0', '#E5CDA7', '#EAD5B3'], ['#E6CDA6', '#E1C69C', '#E8D0AA'], ['#EBD6B6', '#E6CDA9', '#EDD8BA'], ['#E4C9A0', '#DFC294', '#E6CDA6']][(variant || 0) % 4];
       const t = document.createElement('canvas');
       t.width = 512; t.height = 512;
       const c = t.getContext('2d');
-      c.fillStyle = '#E9D3B0'; c.fillRect(0, 0, 512, 512);
+      c.fillStyle = PAL[0]; c.fillRect(0, 0, 512, 512);
       for (let y = 0; y < 512; y += 64) {
-        c.fillStyle = (y / 64) % 2 ? '#E5CDA7' : '#EAD5B3';
+        c.fillStyle = (y / 64) % 2 ? PAL[1] : PAL[2];
         c.fillRect(0, y, 512, 64);
         c.strokeStyle = 'rgba(122,85,50,0.20)'; c.lineWidth = 2;
         c.beginPath(); c.moveTo(0, y); c.lineTo(512, y); c.stroke();
@@ -1221,13 +1222,39 @@
       ctx.translate(-camX, -camY);
 
       if (largeMap) {
-        if (!floorPattern) floorPattern = ctx.createPattern(makeFloorTile(), 'repeat');
+        if (!floorPattern) floorPattern = ctx.createPattern(makeFloorTile((g.seed || 0) % 4), 'repeat');
         ctx.fillStyle = floorPattern;
         ctx.fillRect(camX - vw / 2 - 80, camY - vh / 2 - 80, vw + 160, vh + 160);
       } else {
         ctx.drawImage(bg, 0, 0, D.W, D.H);
       }
       drawZones(ctx, g);
+      if (g.escort) {
+        const e = g.escort;
+        ctx.save();
+        ctx.fillStyle = '#F2D4A8';
+        ctx.beginPath(); ctx.arc(e.x, e.y, e.r, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#8A6A52'; ctx.lineWidth = 3; ctx.stroke();
+        ctx.fillStyle = '#E4572E';
+        ctx.beginPath(); ctx.arc(e.x - 6, e.y - 6, 4, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(e.x + 6, e.y - 6, 4, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+      if (g.decor) {
+        for (const d of g.decor) {
+          ctx.save();
+          ctx.globalAlpha = 0.85;
+          if (d.k === 0) {
+            ctx.fillStyle = '#C9A16B'; ctx.fillRect(d.x - d.s / 2, d.y - d.s / 2, d.s, d.s);
+            ctx.strokeStyle = '#8A6A52'; ctx.lineWidth = 2; ctx.strokeRect(d.x - d.s / 2, d.y - d.s / 2, d.s, d.s);
+          } else if (d.k === 1) {
+            ctx.fillStyle = '#7FA36B'; ctx.beginPath(); ctx.arc(d.x, d.y, d.s / 2, 0, Math.PI * 2); ctx.fill();
+          } else {
+            ctx.fillStyle = '#B8926A'; ctx.beginPath(); ctx.arc(d.x, d.y, d.s / 2.4, 0, Math.PI * 2); ctx.fill();
+          }
+          ctx.restore();
+        }
+      }
       if (g.holes) {
         for (const h of g.holes) {
           ctx.save();

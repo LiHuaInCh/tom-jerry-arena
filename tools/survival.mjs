@@ -3,7 +3,7 @@ import vm from 'node:vm';
 
 const ctx = { window: {}, console, Math, Set, Object, Array, Number, JSON, Date };
 vm.createContext(ctx);
-for (const f of ['js/data.js', 'js/core.js', 'js/skills.js']) {
+for (const f of ['js/data-chars.js', 'js/data-enemies.js', 'js/data.js', 'js/feedback.js', 'js/pickups.js', 'js/combat.js', 'js/systems.js', 'js/core.js', 'js/skills.js']) {
   vm.runInContext(fs.readFileSync(new URL('../' + f, import.meta.url), 'utf8'), ctx, { filename: f });
 }
 const TJ = ctx.window.TJ;

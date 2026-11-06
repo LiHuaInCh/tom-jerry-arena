@@ -164,6 +164,8 @@
       H.sfx(g, 'shield');
       return;
     }
+    if (attacker && attacker !== v) { attacker.dmgDealt = (attacker.dmgDealt || 0) + dmg; attacker.hits = (attacker.hits || 0) + 1; }
+    v.dmgTaken = (v.dmgTaken || 0) + dmg;
     v.hp -= dmg;
     v.invuln = Math.max(v.invuln, 0.12);
     v.hitFlash = 0.16;
@@ -535,6 +537,7 @@
       pierce += f.evoPierce || 0;
       bounce += f.evoBounce || 0;
       let speed = w.speed * s.projSpeed * (w.proj === 'arrow' && lv >= 5 ? 1.2 : 1) * (f.turret ? 0.7 : 1);
+      f.shots = (f.shots || 0) + 1;
       g.projectiles.push({
         x: f.x + Math.cos(a) * (f.r + 8), y: f.y + Math.sin(a) * (f.r + 8),
         vx: Math.cos(a) * speed, vy: Math.sin(a) * speed,

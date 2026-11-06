@@ -161,10 +161,17 @@
 
   */
 
+  function setMood(mood) {
+    if (!bgmEl) return;
+    const conf = { battle: { v: 0.32, r: 1.05 }, title: { v: 0.24, r: 1.0 }, over: { v: 0.12, r: 0.92 } }[mood] || { v: 0.3, r: 1.0 };
+    try { bgmEl.volume = conf.v; bgmEl.playbackRate = conf.r; } catch (e) {}
+  }
+
   TJ.Audio = {
     unlock() { ensure(); },
     startMusic,
     stopMusic,
+    setMood,
     play(name) {
       if (muted) return;
       const fn = SFX[name];
