@@ -95,14 +95,14 @@ tomjerry/
 │  ├─ arena.js         乱斗模式：斗士模型、仿真人 AI、武器进化/切换、复活与排名
 │  ├─ render.js        Canvas 渲染：场景、角色、弹道、名牌血条、特效
 │  ├─ input.js         键盘 + 触屏摇杆
-│  ├─ audio.js         WebAudio 合成音效（无音频文件）
+│  ├─ audio.js         WebAudio 合成音效 + 程序化 BGM + 角色 TTS 语音
 │  ├─ main.js          状态机、模式切换、HUD、升级弹窗、主循环
 │  └─ ...
 ├─ assets/brand/       标题主视觉与图标（官方立绘拼合）
 ├─ assets/portraits/   选角/头像用的官方角色立绘
 ├─ tools/
-│  ├─ sim.mjs          生存模式无头数值模拟
-│  ├─ sim-arena.mjs    乱斗模式无头模拟（击杀/复活/排名/稳定性）
+│  ├─ survival.mjs     生存模式无头模拟（死亡率 / 到达波次）
+│  ├─ balance.mjs      乱斗模式无头模拟（胜率矩阵 / 击杀 / 名次）
 │  ├─ shot.mjs         CDP 无头截图/探针工具
 │  └─ pack-web.mjs     生成 www/ 供 Capacitor 打包
 ├─ shots/              开发过程截图
@@ -118,8 +118,8 @@ tomjerry/
 改完跑无头验证：
 
 ```bash
-node tools/sim.mjs
-node tools/sim-arena.mjs
+node tools/survival.mjs 1
+node tools/balance.mjs 4
 ```
 
 ## 调试参数

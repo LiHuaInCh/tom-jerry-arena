@@ -171,14 +171,51 @@
   });
 
   (function initGuide() {
+    var mh = document.getElementById('missionHud');
+    if (mh && mh.parentElement !== document.body) document.body.appendChild(mh);
     var host = document.querySelector('.title-inner');
     if (!host) return;
+    var toolsRow = document.createElement('div');
+    toolsRow.className = 'title-tools';
+    var modeTabs = document.getElementById('modeTabs');
+    if (modeTabs && modeTabs.parentNode) modeTabs.parentNode.insertBefore(toolsRow, modeTabs.nextSibling);
+    else host.appendChild(toolsRow);
     var btn = document.createElement('button');
     btn.id = 'guideBtn';
     btn.className = 'guide-btn';
     btn.type = 'button';
     btn.textContent = '玩法说明';
-    host.appendChild(btn);
+    toolsRow.appendChild(btn);
+    var mbtn = document.createElement('button');
+    mbtn.id = 'muteBtn';
+    mbtn.className = 'guide-btn';
+    mbtn.type = 'button';
+    mbtn.textContent = TJ.Audio && TJ.Audio.isMuted() ? '音效：关' : '音效：开';
+    toolsRow.appendChild(mbtn);
+    mbtn.onclick = function () {
+      var m = TJ.Audio.toggle();
+      mbtn.textContent = m ? '音效：关' : '音效：开';
+    };
+    var mapBtn = document.createElement('button');
+    mapBtn.id = 'mapBtn';
+    mapBtn.className = 'guide-btn';
+    mapBtn.type = 'button';
+    var isLarge = false;
+    try { isLarge = localStorage.getItem('tj_mapsize') === 'large'; } catch (e) {}
+    mapBtn.textContent = isLarge ? '地图：大型' : '地图：标准';
+    toolsRow.appendChild(mapBtn);
+    mapBtn.onclick = function () {
+      try { localStorage.setItem('tj_mapsize', isLarge ? 'standard' : 'large'); } catch (e) {}
+      location.reload();
+    };
+    var dbtn = document.createElement('button');
+    dbtn.id = 'dailyBtn';
+    dbtn.className = 'guide-btn';
+    dbtn.type = 'button';
+    var dbest = TJ.meta && TJ.meta.dailyBest ? TJ.meta.dailyBest(String(dailySeed())) : 0;
+    dbtn.textContent = dbest ? ('每日挑战 · 最佳 ' + dbest) : '每日挑战';
+    toolsRow.appendChild(dbtn);
+    dbtn.onclick = function () { mode = 'survival'; document.querySelectorAll('.mode-tab').forEach(function (n) { n.classList.toggle('sel', n.dataset.mode === 'survival'); }); startRun(true); };
 
     var SECTIONS = [
       ['基础操作', [
@@ -243,9 +280,15 @@
   }
 
   /* ---------- 开局 ---------- */
-  function startRun() {
+  function dailySeed() {
+    const d = new Date();
+    return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+  }
+
+  function startRun(daily) {
     TJ.Audio.unlock();
-    g = mode === 'arena' ? TJ.createArenaGame({ charId: selected }) : TJ.createGame({ charId: selected });
+    g = mode === 'arena' ? TJ.createArenaGame({ charId: selected }) : TJ.createGame({ charId: selected, seed: daily ? dailySeed() : undefined });
+    if (daily) { g.daily = true; g.dailyDate = String(dailySeed()); }
     g.cov = { spawn: 1, elite: 1, noHeal: 0, score: 1, list: [] };
     if (mode !== 'arena') {
       if (covenants.has('horde')) { g.cov.spawn = 0.8; g.cov.score *= 1.2; g.cov.list.push('怪潮'); }
@@ -264,6 +307,7 @@
       if (g.stats) g.stats.xpMul = (g.stats.xpMul || 1) * (1 + rb.xp);
       g.player.maxHp = Math.round(g.player.maxHp * (1 + rb.hp));
       g.player.hp = g.player.maxHp;
+      if (TJ.meta.attrBonus) { const ab = TJ.meta.attrBonus(); if (ab.dmg) st.damage *= 1 + ab.dmg; if (ab.speed) st.speed *= 1 + ab.speed; if (ab.hp) { g.player.maxHp = Math.round(g.player.maxHp * (1 + ab.hp)); g.player.hp = g.player.maxHp; } if (ab.xp) g.stats.xpMul = (g.stats.xpMul || 1) * (1 + ab.xp); }
       const tt = g.player.char.talent;
       if (tt) {
         if (tt.damage) st.damage *= tt.damage;
@@ -284,6 +328,17 @@
     }
     g.mode = g.mode || 'survival';
     window.__tjG = g;
+    try {
+      if (screen.orientation && screen.orientation.lock) {
+        const p = screen.orientation.lock('landscape');
+        if (p && p.catch) p.catch(function () {});
+      }
+    } catch (e) {}
+    if (TJ.Audio) {
+      TJ.Audio.unlock();
+      TJ.Audio.startMusic();
+      setTimeout(function () { TJ.Audio.say(selected, 'start'); }, 400);
+    }
     if (god) {
       g.player.maxHp = 1e9;
       g.player.hp = 1e9;
@@ -369,13 +424,46 @@
     showLevelUp();
   }
 
+  const MISSION_SPECIALS = [
+    { id: 'm_regen', name: '回春', desc: '每秒回复 +0.5% 最大生命', icon: '春', rarity: 'epic' },
+    { id: 'm_life', name: '吸血', desc: '回复造成伤害的 0.4%', icon: '吸', rarity: 'epic' },
+    { id: 'm_dmg', name: '蛮力', desc: '伤害 +20%', icon: '力', rarity: 'epic' },
+    { id: 'm_spd', name: '疾风', desc: '移速 +8%', icon: '风', rarity: 'epic' }
+  ];
+
+  const ULTIMATE_CARD = { id: 'm_ult', name: '终极强化', desc: '伤害 +35%，每秒回复 +1%，移速 +10%', icon: '终', rarity: 'epic' };
+  function applyMissionPick(id) {
+    if (id === 'm_ult') {
+      g.stats.damage *= 1.35; g.stats.regen = Math.min(0.03, (g.stats.regen || 0) + 0.01); g.stats.speed *= 1.1;
+      g.ultUsed = true; TJ.Audio.play('bossdown'); return;
+    }
+    if (id === 'm_regen') g.stats.regen = Math.min(0.02, (g.stats.regen || 0) + 0.005);
+    else if (id === 'm_life') g.stats.lifesteal = Math.min(0.02, (g.stats.lifesteal || 0) + 0.004);
+    else if (id === 'm_dmg') g.stats.damage *= 1.2;
+    else if (id === 'm_spd') g.stats.speed *= 1.08;
+    TJ.Audio.play('levelup');
+  }
+
   function showLevelUp() {
     if (!g) return;
-    const choices = g.mode === 'arena' ? TJ.getArenaChoices(g, g.player) : TJ.getUpgradeChoices(g);
+    const missionMode = g.mode !== 'arena' && (g.missionPicks || 0) > 0;
+    let choices;
+    if (missionMode) {
+      choices = MISSION_SPECIALS.slice().sort(function () { return g.rng() - 0.5; }).slice(0, 3);
+      if (g.ultGiven && !g.ultUsed) choices = [ULTIMATE_CARD].concat(choices.slice(0, 2));
+    } else {
+      choices = g.mode === 'arena' ? TJ.getArenaChoices(g, g.player) : TJ.getUpgradeChoices(g);
+    }
+    if (!missionMode && g._lastChoices && g._lastChoices.length) {
+      const filtered = choices.filter(function (c) { return g._lastChoices.indexOf(c.id || c.key) < 0; });
+      if (filtered.length >= 2) choices = filtered;
+    }
+    g._lastChoices = choices.map(function (c) { return c.id || c.key; });
+    if (!choices.length) { if (missionMode) { g.missionPicks = 0; } else { clearPending(); } return; }
     if (!choices.length) { clearPending(); return; }
     state = 'levelup';
     input.setEnabled(false);
-    $('luLeft').textContent = pendingCount();
+    $('luLeft').textContent = missionMode ? ('任务奖励 ' + g.missionPicks) : pendingCount();
     const wrap = $('cards');
     wrap.innerHTML = '';
     choices.forEach(function (u, i) {
@@ -420,11 +508,35 @@
       el.addEventListener('click', function () { choose(u.key || u.id); });
       wrap.appendChild(el);
     });
+    const rf = document.createElement('button');
+    rf.className = 'lu-refresh';
+    const hpCost = Math.max(1, Math.floor(g.player.hp / 2));
+    rf.textContent = '刷新（消耗一半生命：' + hpCost + '）';
+    rf.onclick = function (ev) {
+      ev.stopPropagation();
+      if (g.player.hp <= 2) return;
+      g.player.hp -= Math.floor(g.player.hp / 2);
+      TJ.Audio.play('click');
+      showLevelUp();
+    };
+    wrap.appendChild(rf);
     $('levelup').classList.remove('hidden');
+    if (TJ.Audio) TJ.Audio.say(selected, 'level');
     if (g && g.effects) g.effects.push({ kind: 'tex', src: 'assets/fx/kenney/star_04.png', x: g.player.x, y: g.player.y - 10, life: 0.6, max: 0.6, s0: 20, s1: 90, alpha: 0.9, spin: 1 });
   }
 
   function choose(key) {
+    if (String(key).indexOf('m_') === 0) {
+      applyMissionPick(key);
+      if (g.missionPicks > 0) g.missionPicks--;
+      $('levelup').classList.add('hidden');
+      state = 'playing';
+      input.setEnabled(true);
+      last = performance.now(); acc = 0;
+      renderBuffs(); updateHud();
+      if (g.missionPicks > 0) setTimeout(showLevelUp, 180);
+      return;
+    }
     if (g.mode === 'arena') TJ.applyArenaChoice(g, g.player, key);
     else TJ.applyUpgrade(g, key);
     TJ.Audio.play('click');
@@ -635,14 +747,15 @@
         return '<div class="rm-row"><div class="rm-info"><b>' + R[k].name + '</b><span>' + R[k].desc + '</span></div>' +
           '<div class="rm-ctl"><button data-r="' + k + '" data-d="-1">−</button><em>' + TJ.meta.runeLv(k) + '</em><button data-r="' + k + '" data-d="1">＋</button></div></div>';
       }).join('') +
+      '<div class="rm-attr"><b>属性点 ' + TJ.meta.attrPoints() + '</b>' +
+        [['dmg', '伤害+2%'], ['spd', '移速+1.5%'], ['hp', '生命+3%'], ['xp', '经验+2%']].map(function (a) {
+          const alloc = (TJ.meta.attrAlloc ? TJ.meta.attrAlloc()[a[0]] : 0) || 0;
+          return '<button data-a="' + a[0] + '">' + a[1] + (alloc ? ' (' + alloc + ')' : '') + '</button>';
+        }).join('') + '</div>' +
       '<div class="rm-foot"><button id="rmReset">免费重置</button></div></div>';
-    const ob = ov.querySelector('#rmOrigin');
-    if (ob) ob.onclick = function () {
-      const list = ['fire', 'ice', 'thunder', 'light', 'dark'];
-      const i = list.indexOf(TJ.meta.originElement());
-      TJ.meta.setOriginElement(list[(i + 1) % list.length]);
-      renderRunes(ov);
-    };
+    ov.querySelectorAll('[data-a]').forEach(function (b) {
+      b.onclick = function () { if (TJ.meta.spendAttr(b.dataset.a)) renderRunes(ov); };
+    });
     ov.querySelector('.rm-close').onclick = function () { ov.classList.remove('on'); };
     ov.querySelectorAll('.rm-ctl button').forEach(function (b) {
       b.onclick = function () {
@@ -683,6 +796,7 @@
   }
 
   function showOver() {
+    if (g && g.daily && TJ.meta && TJ.meta.setDaily) TJ.meta.setDaily(g.dailyDate, g.score);
     if (g && !g.__metaDone && TJ.meta) {
       g.__metaDone = true;
       TJ.meta.addRun({ id: g.player.char.id, score: g.score || 0, kills: g.kills || 0, win: mode === 'arena' ? g.winner === g.player : false, cov: !!(g.cov && g.cov.list.length) });
@@ -875,15 +989,25 @@
     if (state === 'playing' && g) {
       if (!g.over) {
         acc += dt;
+        const slow = (g.hitStop || 0) > 0 ? 0.35 : 1;
+        if (g.hitStop) g.hitStop = Math.max(0, g.hitStop - dt);
         let guard = 0;
         while (acc >= 1 / 60 && guard < 5) {
           acc -= 1 / 60; guard++;
-          if (g.mode === 'arena') TJ.updateArena(g, 1 / 60, auto ? arenaAI(g) : input.sample());
-          else TJ.update(g, 1 / 60, auto ? aiInput(g) : input.sample());
+          const step = (1 / 60) * slow;
+          if (g.mode === 'arena') TJ.updateArena(g, step, auto ? arenaAI(g) : input.sample());
+          else TJ.update(g, step, auto ? aiInput(g) : input.sample());
           drainEvents();
           if (pendingCount() > 0) { acc = 0; break; }
         }
         if (pendingCount() > 0) maybeLevelUp();
+        if (g.missions && g.missionPicks > 0 && state === 'playing') showLevelUp();
+        if (g.missions) {
+          const el = $('missionHud');
+          if (el) el.innerHTML = g.missions.filter(function (m) { return m.active; }).map(function (m) {
+            return '<div class="m-row' + (m.done ? ' done' : '') + '">' + m.text + ' ' + Math.min(m.cur, m.need) + '/' + m.need + '</div>';
+          }).join('');
+        }
       }
       if (g.over) {
         state = 'over';

@@ -7,6 +7,32 @@ import path from 'node:path';
 const EDGE = 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe';
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
+const livePids = new Set();
+function killPid(pid) {
+  try { spawnSync('taskkill', ['/PID', String(pid), '/T', '/F'], { stdio: 'ignore' }); } catch (e) {}
+}
+function killAll() {
+  for (const pid of livePids) killPid(pid);
+  livePids.clear();
+}
+process.on('exit', killAll);
+for (const sig of ['SIGINT', 'SIGTERM', 'SIGHUP']) {
+  process.on(sig, function () { killAll(); process.exit(1); });
+}
+async function sweepStale() {
+  try {
+    spawnSync('powershell', ['-NoProfile', '-Command',
+      "Get-CimInstance Win32_Process -Filter \"Name='msedge.exe'\" | Where-Object { $_.CommandLine -match 'tj-edge-' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }"
+    ], { stdio: 'ignore' });
+  } catch (e) {}
+  try {
+    const dirs = await fs.readdir(os.tmpdir());
+    for (const d of dirs) {
+      if (d.indexOf('tj-edge-') === 0) await fs.rm(path.join(os.tmpdir(), d), { recursive: true, force: true }).catch(function () {});
+    }
+  } catch (e) {}
+}
+
 async function waitForPort(port, timeout = 20000) {
   const t0 = Date.now();
   while (Date.now() - t0 < timeout) {
@@ -67,6 +93,7 @@ export async function capture(spec) {
     'about:blank'
   ];
   const proc = spawn(EDGE, args, { stdio: 'ignore', windowsHide: true });
+  livePids.add(proc.pid);
   try {
     if (!await waitForPort(port)) throw new Error('devtools port not ready');
     const list = await (await fetch('http://127.0.0.1:' + port + '/json/list')).json();
@@ -104,10 +131,13 @@ export async function capture(spec) {
   } catch (e) {
     console.log(spec.name, 'FAIL', String(e).slice(0, 300));
   } finally {
-    try { spawnSync('taskkill', ['/PID', String(proc.pid), '/T', '/F'], { stdio: 'ignore' }); } catch (e) {}
+    killPid(proc.pid);
+    livePids.delete(proc.pid);
+    await sweepStale();
     try { await fs.rm(profile, { recursive: true, force: true, maxRetries: 2 }); } catch (e) {}
   }
 }
 
+await sweepStale();
 const specs = JSON.parse(await fs.readFile(process.argv[2], 'utf8'));
 for (const s of specs) await capture(s);

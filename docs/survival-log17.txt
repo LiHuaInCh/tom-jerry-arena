@@ -1,0 +1,23 @@
+chars 57 avgDeathRate 0.89 reach5 0.72 reach10 0.37 reach15 0.14 avgTime 193
+TOP10
+米特 reach10 1 wave 0 kills 1870 lvl 27
+侍卫汤姆 reach10 1 wave 0 kills 1700 lvl 27
+玛丽 reach10 1 wave 15 kills 1513 lvl 25
+图多盖洛 reach10 1 wave 0 kills 1139 lvl 24
+剑客泰菲 reach10 1 wave 13 kills 1085 lvl 24
+侦探汤姆 reach10 1 wave 0 kills 974 lvl 23
+剑客杰瑞 reach10 1 wave 0 kills 821 lvl 22
+罗宾汉杰瑞 reach10 1 wave 13 kills 756 lvl 22
+汤姆 reach10 1 wave 12 kills 749 lvl 23
+杰瑞 reach10 1 wave 11 kills 686 lvl 21
+BOTTOM10
+莱恩 reach10 0 wave 4 kills 67 lvl 9
+鲍姆 reach10 0 wave 4 kills 67 lvl 8
+魔术师 reach10 0 wave 4 kills 62 lvl 8
+牛仔汤姆 reach10 0 wave 4 kills 62 lvl 8
+苏蕊 reach10 0 wave 4 kills 60 lvl 8
+佩克斯 reach10 0 wave 4 kills 51 lvl 8
+剑客莉莉 reach10 0 wave 4 kills 51 lvl 7
+国王杰瑞 reach10 0 wave 4 kills 51 lvl 8
+罗宾汉泰菲 reach10 0 wave 4 kills 51 lvl 6
+恶魔汤姆 reach10 0 wave 4 kills 51 lvl 8

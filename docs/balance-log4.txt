@@ -1,0 +1,23 @@
+TOP10
+塔拉     win 1 kills 8.5 place 1 talent 重击
+侦探汤姆   win 0.75 kills 8.3 place 1.25 talent 铁壁
+恶魔杰瑞   win 0.75 kills 7.5 place 1.25 talent 元素亲和
+米特     win 0.75 kills 6 place 1.5 talent 处决
+泰菲     win 0.5 kills 7.5 place 2.5 talent 弹幕
+天使杰瑞   win 0.5 kills 7 place 2 talent 回春
+玛丽     win 0.5 kills 5.5 place 2.5 talent 铁壁
+米雪儿    win 0.5 kills 5.5 place 2.75 talent 重击
+天使泰菲   win 0.5 kills 5.3 place 3 talent 铁壁
+布奇     win 0.5 kills 5.3 place 2.5 talent 处决
+BOTTOM10
+罗宾汉杰瑞  win 0 kills 1.3 place 4.25 talent 疾行
+剑客汤姆   win 0 kills 1.3 place 4.75 talent 重击
+拿坡里鼠   win 0 kills 1 place 5.25 talent 重击
+牛仔杰瑞   win 0 kills 1 place 5.75 talent 回春
+佩克斯    win 0 kills 0.8 place 6 talent 疾行
+巴特     win 0 kills 0.8 place 5.5 talent 回春
+侍卫汤姆   win 0 kills 0.8 place 5.5 talent 疾行
+如玉     win 0 kills 0.8 place 5.75 talent 疾行
+托普斯    win 0 kills 0.8 place 4.5 talent 元素亲和
+库博     win 0 kills 0.5 place 4.75 talent 铁壁
+AVG win 0.197 chars 57

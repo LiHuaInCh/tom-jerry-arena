@@ -6,8 +6,8 @@
   "scripts": {
     "serve": "python -m http.server 8123",
     "pack": "node tools/pack-web.mjs",
-    "test": "node tools/sim.mjs",
-    "test:arena": "node tools/sim-arena.mjs",
+    "test": "node tools/survival.mjs 1",
+    "test:arena": "node tools/balance.mjs 4",
     "cap:add": "cap add android",
     "cap:sync": "cap sync android",
     "build:apk": "cap sync android && cd android && gradlew.bat assembleDebug"

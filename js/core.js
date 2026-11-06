@@ -20,7 +20,7 @@
   function baseStats() {
     return {
       damage: 1, fireRate: 1.3, speed: 1, maxHp: 0, crit: 0.08, critMul: 1.8,
-      pierce: 0, multishot: 0, bounce: 0, homing: 0, explode: 0, lifesteal: 0,
+      pierce: 0, multishot: 0, bounce: 0, homing: 0, explode: 0, lifesteal: 0, regen: 0,
       magnet: 78, armor: 0, dashCd: 2.0, dashDamage: 0, skillCdMul: 1, projSpeed: 1, range: 0,
       shieldMax: 0, luck: 0
     };
@@ -39,7 +39,20 @@
       kills: 0, score: 0, wave: 0, spawnTimer: 1.0, boss: null, shake: 0, revived: false,
       events: [], cam: { x: D.W / 2, y: D.H / 2 }, seed: opts.seed
     };
+    g.missions = MISSION_DEFS.map(function (m) { return { id: m.id, text: m.text, need: m.need, cur: 0, done: false }; });
+    g.missionIdx = 0;
+    g.missions.forEach(function (m, i) { m.active = i === 0; });
+    g.holes = [
+      { x: 60, y: g.H / 2 }, { x: g.W - 60, y: g.H / 2 },
+      { x: g.W / 2, y: 60 }, { x: g.W / 2, y: g.H - 60 }
+    ];
+    g.cheeseT = 4;
+    const z = ZONES[Math.floor(g.rng() * ZONES.length)];
+    const zm = g.missions.find(function (m) { return m.id === 'zone'; });
+    zm.zoneId = z.id; zm.text = '在' + z.name + '击倒 15 只';
+    g.missionRewardIdx = 0;
     g.player = makePlayer(g, opts.charId);
+    if (g.W > 3000) { g.player.x = Math.round(g.W * 0.28); g.player.y = Math.round(g.H * 0.30); }
     g.cam.x = g.player.x; g.cam.y = g.player.y;
     return g;
   };
@@ -148,7 +161,7 @@
         }
         else if (fu.kind === 'heal' || fu.kind === 'leech') {
           const pct = fu.kind === 'leech' ? 0.12 : 0.02;
-          g.player.hp = Math.min(g.player.maxHp, g.player.hp + g.player.maxHp * pct);
+          healPlayer(g, g.player.maxHp * pct);
         }
         else if (fu.kind === 'splash') {
           for (const n of g.enemies) {
@@ -161,14 +174,13 @@
         if (pslots.length > 1) dmg *= 1.1;
       }
     }
+    if (g.stats.lifesteal > 0) healPlayer(g, dmg * g.stats.lifesteal);
     g.pressure = Math.min(100, (g.pressure || 0) + dmg * 0.004);
+    g.dmgDealt = (g.dmgDealt || 0) + dmg;
     e.hp -= dmg;
     e.flash = 0.09;
     addText(g, e.x + rand(g, -8, 8), e.y - e.r - 6, Math.round(dmg), crit ? '#FFD34D' : '#FFFFFF', crit ? 24 : 17);
     burst(g, e.x, e.y, crit ? '#FFD34D' : '#FFB4A2', crit ? 8 : 4, 150, 3);
-    if (g.stats.lifesteal > 0) {
-      g.player.hp = Math.min(g.player.maxHp, g.player.hp + dmg * g.stats.lifesteal);
-    }
     if (e.boss && e.hp > 0) {
       e.phase = e.phase || 1;
       if (e.phase === 1 && e.hp <= e.maxHp * 0.66) {
@@ -198,9 +210,14 @@
       }
     }
     g.kills++;
+    if (e.kind === 'bomber' && !e.exploded) { e.exploded = true; explodeAt(g, e.x, e.y, 150, 40 + g.wave * 4, e); }
+    bumpMission(g, 'kill', 1);
+    bumpMission(g, 'zone', 1, zoneOf(g, e.x, e.y));
+    if (e.elite) bumpMission(g, 'elite', 1);
     g.score += Math.round((e.def.score + Math.floor(g.wave * 2)) * ((g.cov && g.cov.score) || 1));
+    if (e.def.boss || e.elite) g.hitStop = 0.07;
     const tk = g.player.char.talent;
-    if (tk && tk.healKill) g.player.hp = Math.min(g.player.maxHp, g.player.hp + g.player.maxHp * tk.healKill);
+    if (tk && tk.healKill) healPlayer(g, Math.min(g.player.maxHp * 0.03, 4 + g.wave * 0.5));
     burst(g, e.x, e.y, e.def.fur, 14, 260, 5);
     g.effects.push({ kind: 'spark', x: e.x, y: e.y, life: 0.3, max: 0.3, color: e.def.fur, n: 10, r1: 40, width: 3, rot: rand(g, 0, 6.28) });
     g.effects.push({ kind: 'tex', src: 'assets/fx/kenney/flame_03.png', x: e.x, y: e.y, life: 0.32, max: 0.32, s0: 14, s1: 44, rot: rand(g, 0, 6.28), spin: 1.4 });
@@ -223,20 +240,47 @@
       g.player.hp = Math.min(g.player.maxHp, g.player.hp + 30);
       g.effects.push({ kind: 'ring', x: e.x, y: e.y, r: 10, maxR: 320, life: 0.6, max: 0.6, color: '#FFD34D' });
       addText(g, e.x, e.y - 60, 'BOSS 击破！', '#FFD34D', 30);
+      if ((g.stats.lifesteal || 0) < 0.02) { g.stats.lifesteal += 0.004; addText(g, g.player.x, g.player.y - 80, '特殊强化：吸血 0.4%', '#FF9AA2', 22); }
     } else {
       sfx(g, 'kill');
     }
   }
 
-  function hurtPlayer(g, dmg, sx, sy) {
+  function healPlayer(g, amt) {
     const p = g.player;
-    if (p.invuln > 0 || g.over) return;
-    if (p.shield > 0) {
+    if (!p || p.hp <= 0) return;
+    p.hp = Math.min(p.maxHp, p.hp + amt * ((p.noHealT || 0) > 0 ? 0.35 : 1));
+  }
+
+  function explodeAt(g, x, y, radius, dmg, chainFrom) {
+    for (const n of g.enemies) {
+      if (n.dead || n === chainFrom) continue;
+      const d = Math.hypot(n.x - x, n.y - y);
+      if (d > radius) continue;
+      n.hp -= dmg * (1 - 0.5 * d / radius);
+      if (n.hp <= 0) killEnemy(g, n);
+    }
+    const p = g.player;
+    const pd = Math.hypot(p.x - x, p.y - y);
+    if (pd < radius) hurtPlayer(g, dmg * (1 - 0.55 * pd / radius), x, y);
+    g.effects.push({ kind: 'ring', x: x, y: y, r: 12, maxR: radius, life: 0.35, max: 0.35, color: '#FF9A5C' });
+    g.effects.push({ kind: 'tex', src: 'assets/fx/kenney/flame_03.png', x: x, y: y, life: 0.3, max: 0.3, s0: 20, s1: 80 });
+    g.shake = Math.max(g.shake || 0, 8);
+    sfx(g, 'explode');
+  }
+
+  function hurtPlayer(g, dmg, sx, sy, pierce) {
+    const p = g.player;
+    if ((!pierce && p.invuln > 0) || g.over) return;
+    if (pierce) p.noHealT = Math.max(p.noHealT || 0, 3);
+    if (!pierce && p.shield > 0) {
       p.shield--; p.shieldCd = 9; p.invuln = 0.6;
       g.effects.push({ kind: 'ring', x: p.x, y: p.y, r: 12, maxR: 80, life: 0.35, max: 0.35, color: '#7FD1FF' });
       sfx(g, 'shield'); g.shake = 5;
       return;
     }
+    if (g.wave <= 5) dmg *= 0.85;
+    if (g.wave >= 10) p.noHealT = Math.max(p.noHealT || 0, 2);
     p.hp -= dmg * (1 - g.stats.armor);
     p.invuln = 0.65; p.hitFlash = 0.3; p.hurtT = 0; g.shake = Math.max(g.shake, 8);
     sfx(g, 'hurt');
@@ -398,12 +442,16 @@
       ok = dd > 380 && !inObstacle(g, x, y, def.radius + 10);
     }
     if (!ok) return;
-    const scale = def.boss ? (1 + Math.max(0, wave - 1) * 0.10) : (1 + Math.max(0, wave - 1) * 0.24);
+    const late = wave > 10 ? Math.pow(1.05, wave - 10) : 1;
+    const dyn = Math.max(0.85, Math.min(2.0, Math.sqrt((g.dps || 80) / 100)));
+    let scale = (def.boss ? (1 + Math.max(0, wave - 1) * 0.10) : (1 + Math.max(0, wave - 1) * 0.24)) * late * dyn;
+    if (!def.boss && wave >= 8 && rand(g, 0, 1) < 0.08) scale *= 1.5;
     const e = {
       id: ++g._eid || (g._eid = 1), kind, def, x, y, vx: 0, vy: 0, r: def.radius,
       hp: Math.round(def.hp * scale), maxHp: Math.round(def.hp * scale),
-      speed: def.speed * (1 + Math.min(0.45, wave * 0.016)), dmg: def.dmg * 2.5 * (1 + wave * 0.045),
+      speed: def.speed * (1 + Math.min(0.45, wave * 0.016)), dmg: def.dmg * Math.min(2.5, 2.0 + Math.max(0, wave - 5) * 0.05) * (1 + wave * 0.045),
       flash: 0, hitCd: 0, spawnT: 0.35, dead: false, kx: 0, ky: 0,
+      armor: (!def.boss && wave >= 8 && rand(g, 0, 1) < 0.12) ? 0.3 : 0,
       state: 'idle', stateT: 0, atkCd: rand(g, 0.6, 1.6), charge: null,
       pending: null, summoned: 0, walk: rand(g, 0, TAU), boss: !!def.boss, recoil: 0
     };
@@ -416,7 +464,7 @@
       if (e.mod === 'swift') e.speed *= 1.45;
       if (e.mod === 'shield') e.armor = 0.35;
     }
-    e.element = { kitten: 'light', spitter: 'ice', bruiser: 'fire', dasher: 'thunder', tom: 'dark', spike: 'light' }[kind] || null;
+    e.element = { kitten: 'light', spitter: 'ice', bruiser: 'fire', dasher: 'thunder', tom: 'dark', spike: 'light', hunter: 'dark' }[kind] || null;
     g.enemies.push(e);
     if (def.boss) {
       g.boss = e; sfx(g, 'boss'); g.shake = 14;
@@ -457,7 +505,21 @@
     p.moving = ml > 0.05;
 
     p.skillCd = Math.max(0, p.skillCd - dt);
-    if (p.char.talent && p.char.talent.regen) p.hp = Math.min(p.maxHp, p.hp + p.maxHp * p.char.talent.regen * dt);
+    p.noHealT = Math.max(0, (p.noHealT || 0) - dt);
+    if (p.carry && g.holes) {
+      for (const h of g.holes) {
+        if (Math.hypot(p.x - h.x, p.y - h.y) < 46) {
+          p.carry = false;
+          g.cheeseDelivered = (g.cheeseDelivered || 0) + 1;
+          bumpMission(g, 'carry', 1);
+          addText(g, p.x, p.y - 50, '奶酪入库！', '#9CE8A8', 20);
+          sfx(g, 'coin');
+          break;
+        }
+      }
+    }
+    if (p.char.talent && p.char.talent.regen) healPlayer(g, p.maxHp * p.char.talent.regen * dt);
+    if (g.stats.regen > 0) healPlayer(g, p.maxHp * g.stats.regen * dt);
     p.hasteT = Math.max(0, p.hasteT - dt);
     p.stealthT = Math.max(0, (p.stealthT || 0) - dt);
     p.slowT = Math.max(0, (p.slowT || 0) - dt);
@@ -501,7 +563,7 @@
       p.orbitA = (p.orbitA || 0) + dt * 3.4;
       p.orbitBonus = st.orbitBonus || 0; p.orbitRBonus = st.orbitRBonus || 0;
       const on = (ow.orbitN || 2) + (p.orbitBonus || 0);
-      const orad = (ow.orbitR || 78) + (p.orbitRBonus || 0);
+      const orad = (ow.orbitR || 78) + 8 + (p.orbitRBonus || 0);
       for (const e of g.enemies) {
         if (e.dead) continue;
         e.orbitCd = Math.max(0, (e.orbitCd || 0) - dt);
@@ -511,7 +573,8 @@
           const ox = p.x + Math.cos(a) * orad;
           const oy = p.y + Math.sin(a) * orad;
           if (Math.hypot(e.x - ox, e.y - oy) < e.r + 16) {
-            damageEnemy(g, e, ow.dmg * st.damage * (st.orbitDmgMul || 1), false);
+            damageEnemy(g, e, ow.dmg * 1.2 * st.damage * (st.orbitDmgMul || 1), false);
+            healPlayer(g, p.maxHp * 0.008);
             if (g.rng() < 0.4) sfx(g, 'hit');
             e.orbitCd = (ow.hitCd || 0.45) / (st.fireRate || 1);
             g.effects.push({ kind: 'ring', x: ox, y: oy, r: 6, maxR: 24, life: 0.18, max: 0.18, color: '#FFE08A' });
@@ -531,11 +594,11 @@
         } else {
           g.projectiles.push({
             x: p.x, y: p.y, vx: Math.cos(sa) * (sw.speed || 500), vy: Math.sin(sa) * (sw.speed || 500),
-            r: 7, dmg: sw.dmg * st.damage * 0.8, from: 'player', kind: sw.proj || 'orb',
+            r: 8, dmg: sw.dmg * st.damage * 1.15, from: 'player', kind: sw.proj || 'orb',
             life: 2, hit: {}, color: sw.color || '#BFE9FF',
             splash: sw.splash || 0, explodeOnDeath: !!sw.splash, pierce: sw.pierce || 0
           });
-          p.subCd = (sw.cd || 1) * 1.2;
+          p.subCd = (sw.cd || 1) * 0.7;
           sfx(g, 'shoot');
         }
       }
@@ -550,8 +613,8 @@
           const ox = p.x + Math.cos(p.subOrbitA) * sr;
           const oy = p.y + Math.sin(p.subOrbitA) * sr;
           if (Math.hypot(e.x - ox, e.y - oy) < e.r + 14) {
-            damageEnemy(g, e, sw.dmg * st.damage * 0.6, false);
-            e.subOrbitCd = g.t + 0.4;
+            damageEnemy(g, e, sw.dmg * st.damage * 0.9, false);
+            e.subOrbitCd = g.t + 0.3;
             g.effects.push({ kind: 'ring', x: ox, y: oy, r: 5, maxR: 20, life: 0.16, max: 0.16, color: '#9FE7FF' });
           }
         }
@@ -639,6 +702,31 @@
             }
             sfx(g, 'eshoot');
           }
+          break;
+        }
+        case 'bomber': {
+          if (d < 170) {
+            e.fuseT = (e.fuseT == null ? 2 : e.fuseT) - dt;
+            if (e.fuseT <= 0) { e.exploded = true; explodeAt(g, e.x, e.y, 150, 40 + g.wave * 4, e); e.dead = true; continue; }
+          } else if (e.fuseT != null) e.fuseT = 2;
+          e.x += ux * e.def.speed * dt; e.y += uy * e.def.speed * dt;
+          break;
+        }
+        case 'hunter': {
+          e.atkCd -= dt;
+          if (d < 900 && e.atkCd <= 0) {
+            e.atkCd = 2.4;
+            const ha = Math.atan2(dy, dx);
+            g.projectiles.push({
+              x: e.x, y: e.y, vx: Math.cos(ha) * 520, vy: Math.sin(ha) * 520,
+              r: 9, dmg: e.dmg * 0.9, from: 'enemy', kind: 'fishbone',
+              pierce: true, life: 3, hit: {}, color: '#C9A0FF'
+            });
+            sfx(g, 'eshoot');
+          }
+          const keep = 260;
+          if (d > keep) { e.x += ux * e.def.speed * dt; e.y += uy * e.def.speed * dt; }
+          else { e.x -= ux * e.def.speed * 0.4 * dt; e.y -= uy * e.def.speed * 0.4 * dt; }
           break;
         }
         case 'dasher': {
@@ -753,7 +841,7 @@
       } else if (d > 150) {
         e.x += ux * 100 * dt; e.y += uy * 100 * dt;
       }
-      if (d < e.r + p.r && e.hitCd <= 0) { hurtPlayer(g, e.dmg, e.x, e.y); e.hitCd = 1.1; }
+      if (d < e.r + p.r && e.hitCd <= 0) { hurtPlayer(g, e.dmg, e.x, e.y, e.kind === 'hunter'); e.hitCd = 1.1; }
     } else {
       const frac = e.hp / e.maxHp;
       if (e.summoned === 0 && frac < 0.5) { e.summoned = 1; summonAdds(g, e, 2); }
@@ -765,7 +853,7 @@
       } else if (d > 120) {
         e.x += ux * 88 * dt; e.y += uy * 88 * dt;
       }
-      if (d < e.r + p.r && e.hitCd <= 0) { hurtPlayer(g, e.dmg, e.x, e.y); e.hitCd = 1.1; }
+      if (d < e.r + p.r && e.hitCd <= 0) { hurtPlayer(g, e.dmg, e.x, e.y, e.kind === 'hunter'); e.hitCd = 1.1; }
     }
   }
 
@@ -804,7 +892,7 @@
         pr.r += (pr.grow || 500) * dt;
         if (pr.r > (pr.maxR || 260)) pr.dead = true;
         if (pr.from === 'enemy' && !pr.hit.p && Math.hypot(p.x - pr.x, p.y - pr.y) < pr.r + p.r) {
-          pr.hit.p = 1; hurtPlayer(g, pr.dmg, pr.x, pr.y);
+          pr.hit.p = 1; hurtPlayer(g, pr.dmg, pr.x, pr.y, pr.pierce);
         }
         continue;
       }
@@ -912,7 +1000,8 @@
       }
       if (d < p.r + pk.r + 6) {
         pk.dead = true;
-        if (pk.kind === 'xp') { addXp(g, pk.value); sfx(g, 'xp'); }
+        if (pk.kind === 'xp') { addXp(g, pk.value); sfx(g, 'xp'); bumpMission(g, 'collect', 1); }
+      else if (pk.kind === 'cheese') { p.carry = true; sfx(g, 'coin'); addText(g, p.x, p.y - 40, '搬起奶酪', '#FFD34D', 18); }
         else if (pk.kind === 'magnet') {
           let n = 0;
           for (const q of g.pickups) {
@@ -931,6 +1020,40 @@
       }
     }
     g.pickups = g.pickups.filter(x => !x.dead);
+  }
+
+  const ZONES = [
+    { id: 'kitchen', name: '厨房', x0: 0, y0: 0, x1: 0.5, y1: 0.5 },
+    { id: 'living', name: '客厅', x0: 0.5, y0: 0, x1: 1, y1: 0.5 },
+    { id: 'garden', name: '花园', x0: 0, y0: 0.5, x1: 0.5, y1: 1 },
+    { id: 'cellar', name: '地窖', x0: 0.5, y0: 0.5, x1: 1, y1: 1 }
+  ];
+  function zoneOf(g, x, y) {
+    const fx = x / g.W, fy = y / g.H;
+    for (const z of ZONES) if (fx >= z.x0 && fx < z.x1 && fy >= z.y0 && fy < z.y1) return z.id;
+    return 'kitchen';
+  }
+  const MISSION_DEFS = [
+    { id: 'kill', text: '击倒 40 只猫', need: 40 },
+    { id: 'wave', text: '撑到第 6 波', need: 6 },
+    { id: 'zone', text: '区域任务', need: 15 },
+    { id: 'carry', text: '把 3 块奶酪搬进鼠洞', need: 3 }
+  ];
+  function bumpMission(g, kind, val, zone) {
+    if (!g.missions) return;
+    for (const m of g.missions) {
+      if (m.id !== kind || m.done || !m.active) continue;
+      if (kind === 'zone' && zone !== m.zoneId) continue;
+      m.cur = kind === 'wave' ? Math.max(m.cur, val) : m.cur + val;
+      if (m.cur >= m.need) {
+        m.done = true; m.active = false;
+        g.missionPicks = (g.missionPicks || 0) + 1;
+        if (g.missions[g.missionIdx + 1]) { g.missionIdx++; g.missions[g.missionIdx].active = true; addText(g, g.player.x, g.player.y - 90, '新任务：' + g.missions[g.missionIdx].text, '#FFE08A', 20); }
+        addText(g, g.player.x, g.player.y - 70, '任务完成！选择奖励', '#FFD34D', 22);
+        if (g.missions.every(function (mm) { return mm.done; }) && !g.ultGiven) { g.ultGiven = true; g.missionPicks++; addText(g, g.player.x, g.player.y - 100, '全部完成：终极强化！', '#FFB44D', 26); }
+        g.events.push({ type: 'mission', id: m.id });
+      }
+    }
   }
 
   function addXp(g, v) {
@@ -962,12 +1085,20 @@
 
   function director(g, dt) {
     g.elapsed += dt;
+    const instant = (g.dmgDealt || 0) / Math.max(1, g.elapsed);
+    g.dps = (g.dps == null ? instant : g.dps * 0.99 + instant * 0.01);
     g.pressure = Math.max(0, (g.pressure || 0) - dt * 0.5);
     g.pressure = Math.min(100, g.pressure);
     const wave = Math.floor(g.elapsed / 25) + 1;
     if (wave !== g.wave) {
       g.wave = wave;
+    bumpMission(g, 'wave', wave);
       g.events.push({ type: 'wave', wave });
+      if (wave % 8 === 0) {
+        const bb = spawnEnemy(g, 'bigboss', wave, g.W / 2, g.H / 2);
+        if (bb) { bb.x = g.W / 2; bb.y = g.H / 2; bb.boss = true; g.boss = bb; }
+        addText(g, g.W / 2, g.H / 2 - 80, '鼠王降临！', '#FF7A5C', 32);
+      }
       if (wave % 4 === 0) {
         const kind = (wave / 4) % 2 === 1 ? 'tom' : 'spike';
         spawnBossAt(g, kind, wave);
@@ -989,6 +1120,8 @@
       if (waveNow >= 3) pool.push('bruiser');
       if (waveNow >= 4) pool.push('dasher');
       if (waveNow >= 6) pool.push('bruiser', 'dasher');
+      if (waveNow >= 10) pool.push('hunter');
+      if (waveNow >= 5) pool.push('bomber');
       const fa = rand(g, 0, TAU);
       const fx = clamp(g.player.x + Math.cos(fa) * 700, 100, g.W - 100);
       const fy = clamp(g.player.y + Math.sin(fa) * 700, 100, g.H - 100);
@@ -1000,6 +1133,18 @@
       }
     }
 
+    g.cheeseT -= dt;
+    if (g.cheeseT <= 0) {
+      g.cheeseT = 7;
+      if (g.pickups.filter(function (q) { return q.kind === 'cheese'; }).length < 4) {
+        let cx = 0, cy = 0, okc = false;
+        for (let k = 0; k < 12 && !okc; k++) {
+          cx = rand(g, 120, g.W - 120); cy = rand(g, 120, g.H - 120);
+          okc = !inObstacle(g, cx, cy, 14);
+        }
+        if (okc) g.pickups.push({ kind: 'cheese', x: cx, y: cy, vx: 0, vy: 0, r: 10, life: 999, pull: false });
+      }
+    }
     g.orbTimer = (g.orbTimer == null ? 6 : g.orbTimer) - dt;
     if (g.orbTimer <= 0) {
       g.orbTimer = 4;
@@ -1012,6 +1157,61 @@
         }
         if (!ok) continue;
         g.pickups.push({ kind: 'xp', x: x, y: y, vx: 0, vy: 0, r: 7, value: 2, life: 26, pull: false });
+      }
+    }
+
+    // 风筝惩罚：第 10 波后长时间远离战斗会被围猎
+    if (g.wave >= 10 && g.enemies.length) {
+      let nd = Infinity;
+      for (const e of g.enemies) {
+        if (e.dead) continue;
+        const dd = Math.hypot(e.x - g.player.x, e.y - g.player.y);
+        if (dd < nd) nd = dd;
+      }
+      if (nd > 280) g.kiteT = (g.kiteT || 0) + dt;
+      else g.kiteT = Math.max(0, (g.kiteT || 0) - dt * 2);
+      if (g.kiteT > 2.5) {
+        if (!g.kiteWarned) { g.kiteWarned = 1; addText(g, g.player.x, g.player.y - 60, '围猎！', '#FF7A5C', 26); }
+        g.kiteShot = (g.kiteShot || 0) - dt;
+        if (g.kiteShot <= 0) {
+          g.kiteShot = 0.9;
+          const side = Math.floor(g.rng() * 4);
+          let sx = 60, sy = 60;
+          if (side === 0) { sx = rand(g, 60, g.W - 60); sy = 50; }
+          else if (side === 1) { sx = g.W - 50; sy = rand(g, 60, g.H - 60); }
+          else if (side === 2) { sx = rand(g, 60, g.W - 60); sy = g.H - 50; }
+          else { sx = 50; sy = rand(g, 60, g.H - 60); }
+          const aa = Math.atan2(g.player.y - sy, g.player.x - sx);
+          for (const off of [-0.18, 0, 0.18]) {
+            g.projectiles.push({
+              x: sx, y: sy, vx: Math.cos(aa + off) * 420, vy: Math.sin(aa + off) * 420,
+              r: 8, dmg: 18 + g.wave * 1.0, from: 'enemy', kind: 'fishbone',
+              life: 4, hit: {}, color: '#FFB4A2'
+            });
+          }
+        }
+      } else if (g.kiteT <= 0) { g.kiteWarned = 0; }
+    }
+
+    // 后期围城：无论远近，持续从边缘压制
+    if (g.wave >= 10) {
+      g.siegeT = (g.siegeT == null ? 6 : g.siegeT) - dt;
+      if (g.siegeT <= 0) {
+        g.siegeT = 6;
+        const side = Math.floor(g.rng() * 4);
+        let sx = 60, sy = 60;
+        if (side === 0) { sx = rand(g, 60, g.W - 60); sy = 50; }
+        else if (side === 1) { sx = g.W - 50; sy = rand(g, 60, g.H - 60); }
+        else if (side === 2) { sx = rand(g, 60, g.W - 60); sy = g.H - 50; }
+        else { sx = 50; sy = rand(g, 60, g.H - 60); }
+        const aa = Math.atan2(g.player.y - sy, g.player.x - sx);
+        for (const off of [-0.22, 0, 0.22]) {
+          g.projectiles.push({
+            x: sx, y: sy, vx: Math.cos(aa + off) * 380, vy: Math.sin(aa + off) * 380,
+            r: 9, dmg: 15 + g.wave * 1.2, from: 'enemy', kind: 'fishbone',
+            life: 5, hit: {}, color: '#FF7A5C'
+          });
+        }
       }
     }
   }
@@ -1161,7 +1361,25 @@
     g.upgradeCounts[id] = (g.upgradeCounts[id] || 0) + 1;
     const p = g.player;
     const before = p.maxHp;
+    const dampKeys = ['pierce', 'bounce', 'explode', 'multishot', 'homing'];
+    const snap = {};
+    for (const k of dampKeys) snap[k] = g.stats[k];
     def.apply(g.stats, g);
+    if ((g.upgradeCounts[id] || 0) > 1) {
+      for (const k of dampKeys) {
+        const add = g.stats[k] - snap[k];
+        if (add > 0) g.stats[k] = snap[k] + add * 0.7;
+      }
+    }
+    g.stats.damage = Math.min(g.stats.damage, 8);
+    g.stats.fireRate = Math.min(g.stats.fireRate, 3);
+    g.stats.pierce = Math.min(g.stats.pierce, 5);
+    g.stats.bounce = Math.min(g.stats.bounce, 4);
+    g.stats.multishot = Math.min(g.stats.multishot, 4);
+    g.stats.explode = Math.min(g.stats.explode, 3);
+    g.stats.homing = Math.min(g.stats.homing, 3);
+    g.stats.regen = Math.min(g.stats.regen || 0, 0.02);
+    g.stats.lifesteal = Math.min(g.stats.lifesteal, 0.02);
     p.maxHp = p.char.hp + g.stats.maxHp;
     if (p.maxHp > before) p.hp += p.maxHp - before;
     p.shield = Math.max(p.shield, 0);
