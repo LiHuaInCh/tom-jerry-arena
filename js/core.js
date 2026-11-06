@@ -1030,13 +1030,46 @@
   const RARITY_W = { common: 62, rare: 30, epic: 8 };
   TJ.RARITY = { common: '普通', rare: '稀有', epic: '史诗' };
 
+  const ELEM_TAG = { fire: '爆发 · 暴击', ice: '控制 · 冻结', thunder: '连锁 · 范围', light: '回复 · 净化', dark: '易伤 · 削弱' };
+  const FUSE_TXT = {
+    'fire+fire': '30% 概率双倍伤害',
+    'ice+ice': '冻结 0.8 秒',
+    'thunder+thunder': '150 范围连锁 12',
+    'light+light': '回复 2% 生命',
+    'dark+dark': '易伤 3 秒（+10% 受伤）',
+    'fire+ice': '本次伤害 ×1.6',
+    'ice+thunder': '170 范围追加 18',
+    'dark+light': '回复 12% 生命',
+    'fire+thunder': '90 范围溅射 30%',
+    'dark+ice': '减速 2.5 秒，伤害 ×1.1'
+  };
+  function fuseName(a, b) {
+    const fu = (TJ.DATA.fusions || {})[[a, b].sort().join('+')];
+    if (!fu) return null;
+    const key = [a, b].sort().join('+');
+    return fu.name + '（' + (FUSE_TXT[key] || '') + '）';
+  }
+
   function elemChoices(g, slot) {
     const names = { fire: '火', ice: '冰', thunder: '雷', light: '光', dark: '暗' };
     const all = Object.keys(names);
     const two = [];
     while (two.length < 2 && all.length) two.push(all.splice(Math.floor(g.rng() * all.length), 1)[0]);
     return two.map(function (e) {
-      return { id: 'elem' + slot + '_' + e, name: '元素 · ' + names[e], desc: slot === 0 ? '填充武器第 1 槽' : '填充第 2 槽，形成融合', icon: names[e], rarity: 'epic' };
+      const lines = ['定位：' + ELEM_TAG[e]];
+      if (slot === 1 && g.player.elemSlots[0]) {
+        const other = g.player.elemSlots[0];
+        const line = fuseName(e, other);
+        lines.push(line ? ('与' + names[other] + '融合：' + line) : ('与' + names[other] + '暂无异元素融合'));
+      } else {
+        const list = [];
+        Object.keys(names).forEach(function (o) {
+          const line = fuseName(e, o);
+          if (line && list.indexOf(line) < 0) list.push(line);
+        });
+        lines.push('可融合：' + list.join(' · '));
+      }
+      return { id: 'elem' + slot + '_' + e, name: '元素 · ' + names[e], desc: lines.join('\n'), icon: names[e], rarity: 'epic', stack: slot === 0 ? '第 1 槽' : '第 2 槽' };
     });
   }
 

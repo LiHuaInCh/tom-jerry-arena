@@ -741,3 +741,5 @@ button { font-family: inherit; }
 .guide-body h4 { margin: 12px 0 4px; color: #B5482A; font-size: 14px; }
 .guide-body ul { margin: 0; padding-left: 18px; }
 .guide-body li { font-size: 12px; line-height: 1.7; color: #6B4A33; }
+
+.up-desc { white-space: pre-line; line-height: 1.5; }
