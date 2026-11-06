@@ -737,4 +737,22 @@
     shield: 'assets/item-icons/shield.png', invis: 'assets/item-icons/invis.png', farsight: 'assets/item-icons/farsight.png',
     growth: 'assets/item-icons/growth.png', random: 'assets/item-icons/random.png'
   };
+  const ELEM_RULES = [
+    [/火|炮|火箭|燃烧/, 'fire'],
+    [/冰|冻|雪|寒/, 'ice'],
+    [/雷|电|闪/, 'thunder'],
+    [/光|镜|圣|天使|净化/, 'light'],
+    [/暗|恶魔|影|梦/, 'dark']
+  ];
+  characters.forEach(function (c, i) {
+    const w = weapons[c.weapon];
+    let el = null;
+    for (let k = 0; k < ELEM_RULES.length; k++) {
+      if (ELEM_RULES[k][0].test(w.name)) { el = ELEM_RULES[k][1]; break; }
+    }
+    if (!el) el = ['fire', 'ice', 'thunder', 'light', 'dark'][i % 5];
+    c.element = el;
+  });
+  TJ.DATA.elementNames = { fire: '火', ice: '冰', thunder: '雷', light: '光', dark: '暗' };
+
 })();

@@ -97,8 +97,36 @@
   };
 
   /* ---------------- 伤害 / 死亡 ---------------- */
+  function elemOf(f) { return f && f.char && f.char.element; }
+
   function damageFighter(g, v, dmg, attacker, crit) {
     if (!v.alive || v.invuln > 0) return;
+    const e2 = elemOf(attacker);
+    if (e2 && attacker !== v && v.element && v.element !== e2 && (v.elemT || 0) > 0 && !(v.reactCd > 0)) {
+      const pair = [v.element, e2].sort().join('+');
+      v.reactCd = 2.5;
+      if (pair === 'fire+ice') {
+        dmg *= 1.6;
+        H.addText(g, v.x, v.y - v.r - 26, '融化', '#FF9A3C', 20);
+      } else if (pair === 'ice+thunder') {
+        H.addText(g, v.x, v.y - v.r - 26, '感电', '#9FE7FF', 20);
+        for (const n of g.fighters) {
+          if (n === v || !n.alive || n.invuln > 0) continue;
+          if (Math.hypot(n.x - v.x, n.y - v.y) > 170) continue;
+          n.hp -= 18;
+          n.hitFlash = 0.12;
+          if (n.hp <= 0) killFighter(g, n, attacker);
+        }
+      } else if (pair === 'dark+light') {
+        if (attacker && attacker.alive) {
+          attacker.hp = Math.min(attacker.maxHp, attacker.hp + attacker.maxHp * 0.12);
+          H.addText(g, attacker.x, attacker.y - 36, '净化', '#FFF6E0', 18);
+        }
+      }
+      H.burst(g, v.x, v.y, '#FFE08A', 10, 200, 4);
+      H.sfx(g, 'explode');
+    }
+    if (e2) { v.element = e2; v.elemT = 3; }
     if (v.shield > 0) {
       v.shield--; v.shieldCd = 9; v.hitFlash = 0.1;
       g.effects.push({ kind: 'ring', x: v.x, y: v.y, r: 12, maxR: 70, life: 0.3, max: 0.3, color: '#7FD1FF' });
@@ -260,6 +288,8 @@
     }
     return shuffle(g, picks);
   };
+
+  TJ.debugHit = function (g, a, b, d) { damageFighter(g, b, d, a, false); };
 
   TJ.useItem = function (g, f) {
     if (!f || !f.item) return false;
@@ -507,6 +537,8 @@
     f.farsightT = Math.max(0, (f.farsightT || 0) - dt);
     f.growthT = Math.max(0, (f.growthT || 0) - dt);
     f.shieldT = Math.max(0, (f.shieldT || 0) - dt);
+    f.elemT = Math.max(0, (f.elemT || 0) - dt);
+    f.reactCd = Math.max(0, (f.reactCd || 0) - dt);
     f.rootT = Math.max(0, (f.rootT || 0) - dt);
     f.freezeT = Math.max(0, (f.freezeT || 0) - dt);
     f.stunT = Math.max(0, (f.stunT || 0) - dt);
