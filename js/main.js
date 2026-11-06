@@ -170,6 +170,28 @@
     if (document.hidden && state === 'playing' && g && !g.over) pauseGame();
   });
 
+  (function firstRunTutorial() {
+    var seen = false;
+    try { seen = localStorage.getItem('tj_tut') === '1'; } catch (e) {}
+    if (seen) return;
+    var ov = document.createElement('div');
+    ov.className = 'guide-modal on';
+    ov.innerHTML = '<div class="guide-box"><div class="guide-head">欢迎来到猫鼠大作战</div><div class="guide-body">' +
+      '<h4>三件事</h4><ul>' +
+      '<li>角色会自动瞄准开火，你只需要走位</li>' +
+      '<li>升级三选一，7 / 14 级选元素，组合触发融合</li>' +
+      '<li>左上角是当前任务，完成给特殊强化</li>' +
+      '</ul><h4>操作</h4><ul>' +
+      '<li>WASD / 摇杆移动，空格放技能，E 用道具</li>' +
+      '<li>暂停可以看数据或结束本局</li>' +
+      '</ul><button id="tutGo" class="guide-btn" style="margin-top:10px">开始游戏</button></div></div>';
+    document.body.appendChild(ov);
+    ov.querySelector('#tutGo').onclick = function () {
+      try { localStorage.setItem('tj_tut', '1'); } catch (e) {}
+      ov.remove();
+    };
+  })();
+
   (function initGuide() {
     var mh = document.getElementById('missionHud');
     if (mh && mh.parentElement !== document.body) document.body.appendChild(mh);
@@ -208,6 +230,46 @@
       try { localStorage.setItem('tj_mapsize', isLarge ? 'standard' : 'large'); } catch (e) {}
       location.reload();
     };
+    function saveModal(mode) {
+      var raw = '';
+      try { raw = localStorage.getItem('tj_meta_v2') || ''; } catch (e) {}
+      var ov = document.createElement('div');
+      ov.className = 'guide-modal on';
+      ov.innerHTML = '<div class="guide-box"><div class="guide-head">' + (mode === 'export' ? '导出存档' : '导入存档') +
+        '<button class="guide-close">×</button></div><div class="guide-body">' +
+        '<textarea id="saveText" class="save-text" spellcheck="false"></textarea>' +
+        (mode === 'export' ? '<button id="saveCopy" class="guide-btn">复制</button>' : '<button id="saveApply" class="guide-btn">导入并重载</button>') +
+        '</div></div>';
+      document.body.appendChild(ov);
+      var ta = ov.querySelector('#saveText');
+      ta.value = mode === 'export' ? raw : '';
+      ov.querySelector('.guide-close').onclick = function () { ov.remove(); };
+      if (mode === 'export') {
+        var cp = ov.querySelector('#saveCopy');
+        cp.onclick = function () {
+          ta.select();
+          try { document.execCommand('copy'); } catch (e) {}
+          if (navigator.clipboard) navigator.clipboard.writeText(ta.value).catch(function () {});
+          cp.textContent = '已复制';
+        };
+      } else {
+        ov.querySelector('#saveApply').onclick = function () {
+          try {
+            var v = JSON.parse(ta.value);
+            localStorage.setItem('tj_meta_v2', JSON.stringify(v));
+            location.reload();
+          } catch (e) { ta.value = '格式错误：' + e.message; }
+        };
+      }
+    }
+    var expBtn = document.createElement('button');
+    expBtn.className = 'guide-btn'; expBtn.type = 'button'; expBtn.textContent = '导出存档';
+    expBtn.onclick = function () { saveModal('export'); };
+    toolsRow.appendChild(expBtn);
+    var impBtn = document.createElement('button');
+    impBtn.className = 'guide-btn'; impBtn.type = 'button'; impBtn.textContent = '导入存档';
+    impBtn.onclick = function () { saveModal('import'); };
+    toolsRow.appendChild(impBtn);
     var dbtn = document.createElement('button');
     dbtn.id = 'dailyBtn';
     dbtn.className = 'guide-btn';
@@ -337,6 +399,7 @@
     if (TJ.Audio) {
       TJ.Audio.unlock();
       TJ.Audio.startMusic();
+      TJ.Audio.setMood('battle');
     }
     if (god) {
       g.player.maxHp = 1e9;
@@ -794,6 +857,7 @@
   }
 
   function showOver() {
+    if (TJ.Audio && TJ.Audio.setMood) TJ.Audio.setMood('over');
     if (g && g.daily && TJ.meta && TJ.meta.setDaily) TJ.meta.setDaily(g.dailyDate, g.score);
     if (g && !g.__metaDone && TJ.meta) {
       g.__metaDone = true;
@@ -813,7 +877,13 @@
       }
       $('bestScore').textContent = arenaBest;
       $('overTitle').textContent = g.winner === g.player ? '乱斗冠军！' : '本局第 ' + (list.indexOf(g.player) + 1) + ' 名';
+      const p2 = g.player;
+      const acc = p2.shots ? Math.round((p2.hits || 0) / p2.shots * 100) : 0;
       $('overStats').innerHTML = '<div class="rank-list">' + rank + '</div>' +
+        '<div class="stat"><span>伤害输出</span><b>' + Math.round(p2.dmgDealt || 0) + '</b></div>' +
+        '<div class="stat"><span>承受伤害</span><b>' + Math.round(p2.dmgTaken || 0) + '</b></div>' +
+        '<div class="stat"><span>命中率</span><b>' + acc + '%</b></div>' +
+        '<div class="stat"><span>击杀 / 死亡</span><b>' + p2.kills + ' / ' + p2.deaths + '</b></div>' +
         '<div class="stat wide"><span>结束原因</span><b>' + escapeHtml(g.endReason || '时间到') + '</b></div>';
       $('over').classList.remove('hidden');
       state = 'over';
@@ -843,6 +913,7 @@
   }
 
   function goHome() {
+    if (TJ.Audio && TJ.Audio.setMood) TJ.Audio.setMood('title');
     state = 'title';
     input.setEnabled(false);
     $('hud').classList.add('hidden');
