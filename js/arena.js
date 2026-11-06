@@ -144,6 +144,7 @@
     }
     if (e2) { v.element = e2; v.elemT = 3; }
     if (attacker && attacker.slowHit) v.slowT = Math.max(v.slowT || 0, 1.5);
+    if (v.vulnT > 0) dmg *= 1.1;
     if (v.shield > 0) {
       v.shield--; v.shieldCd = 9; v.hitFlash = 0.1;
       g.effects.push({ kind: 'ring', x: v.x, y: v.y, r: 12, maxR: 70, life: 0.3, max: 0.3, color: '#7FD1FF' });
@@ -587,6 +588,7 @@
     f.farsightT = Math.max(0, (f.farsightT || 0) - dt);
     f.growthT = Math.max(0, (f.growthT || 0) - dt);
     f.shieldT = Math.max(0, (f.shieldT || 0) - dt);
+    f.vulnT = Math.max(0, (f.vulnT || 0) - dt);
     f.stillT = (inp.moveX || inp.moveY) ? 0 : (f.stillT || 0) + dt;
     f.elemT = Math.max(0, (f.elemT || 0) - dt);
     f.reactCd = Math.max(0, (f.reactCd || 0) - dt);

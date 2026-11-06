@@ -167,6 +167,68 @@
   document.addEventListener('keydown', function (e) { if (e.code === 'Escape') closeChar(); });
   document.addEventListener('keydown', function (e) { if (e.code === 'KeyE' && g && g.player && TJ.useItem) TJ.useItem(g, g.player); });
 
+  (function initGuide() {
+    var host = document.querySelector('.title-inner');
+    if (!host) return;
+    var btn = document.createElement('button');
+    btn.id = 'guideBtn';
+    btn.className = 'guide-btn';
+    btn.type = 'button';
+    btn.textContent = '玩法说明';
+    host.appendChild(btn);
+
+    var SECTIONS = [
+      ['基础操作', [
+        'WASD / 方向键 / 左半屏摇杆移动，自动瞄准、自动开火',
+        '空格 或 右下角按钮释放专属技能；E 或道具按钮使用道具',
+        '升级时三选一，选强化、换武器或进化'
+      ]],
+      ['生存模式（无尽）', [
+        '25 秒一波，敌人从四周列队推进；每 4 波出现 Boss',
+        '精英怪带词缀：护盾（减伤）、迅捷（加速）、分裂（死亡分裂）',
+        '经验球会自然刷新，磁铁可一次收集全图经验',
+        '7 级选第 1 个元素，14 级选第 2 个元素，组合触发融合',
+        '试炼盟约可选：怪潮 / 精英翻倍 / 禁血包，提高结算分数'
+      ]],
+      ['乱斗模式', [
+        '6 人混战，4 条命，180 秒或 12 杀获胜',
+        '3 级、6 级各选一把副武器，独立开火',
+        '武器 4 升 5 级时二选一进化，部分进化会改变玩法',
+        '地图上有夹子（定身 2s）、冰块（冰冻 1s）、灰瓶（眩晕 1.5s）',
+        '击杀掉落护盾 / 隐身 / 远视 / 变大 / 随机，任何人可捡'
+      ]],
+      ['元素与融合', [
+        '5 种元素：火、冰、雷、光、暗；命中会给目标挂 3 秒元素',
+        '同元素强化行为：野火（暴击）、极寒（冻结）、雷鸣（连锁）、圣辉（回复）、侵蚀（易伤）',
+        '异元素转化：融化（×1.6）、感电（范围）、净化（吸血）、爆燃（溅射）、霜蚀（减速+易伤）',
+        '双槽额外 +10% 伤害，同一目标 2.5 秒触发一次融合'
+      ]],
+      ['成长系统', [
+        '账号等级：每局按分数和击杀获得经验，提升伤害/移速/经验',
+        '角色熟练度：每使用 3 次升 1 级，每级 +0.5% 伤害',
+        '符文：熟练度换点数，可加伤害/移速/经验/生命，随时免费重置',
+        '徽章：初阵、盟约、Lv5、十人，展示在标题页'
+      ]],
+      ['小提示', [
+        '猫阵营默认近战环绕，鼠阵营多为远程，选角时可看武器类型',
+        '元素卡在 7 / 14 级出现，记得先看自己已有元素再选',
+        '暂停菜单可以查看本局数据，也可以直接结束本局结算'
+      ]]
+    ];
+
+    var ov = document.createElement('div');
+    ov.id = 'guideModal';
+    ov.className = 'guide-modal';
+    ov.innerHTML = '<div class="guide-box"><div class="guide-head">玩法说明<button class="guide-close">×</button></div><div class="guide-body">' +
+      SECTIONS.map(function (s) {
+        return '<h4>' + s[0] + '</h4><ul>' + s[1].map(function (t) { return '<li>' + t + '</li>'; }).join('') + '</ul>';
+      }).join('') + '</div></div>';
+    document.body.appendChild(ov);
+    btn.onclick = function () { ov.classList.add('on'); };
+    ov.querySelector('.guide-close').onclick = function () { ov.classList.remove('on'); };
+    ov.addEventListener('click', function (e) { if (e.target === ov) ov.classList.remove('on'); });
+  })();
+
   function selectChar(id) {
     selected = id;
     const cards = document.querySelectorAll('.char-card');
