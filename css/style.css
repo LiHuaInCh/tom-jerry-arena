@@ -680,3 +680,15 @@ button { font-family: inherit; }
 .cov-list { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
 .cov { border: 2px solid #E3CBA8; background: #FFF8E7; color: #8A6A52; border-radius: 999px; padding: 4px 12px; font-size: 11px; font-weight: 800; cursor: pointer; font-family: inherit; }
 .cov.on { background: #3A2418; color: #FFF6E0; border-color: #3A2418; }
+
+.c-elem {
+  position: absolute; left: 8px; top: 8px; width: 22px; height: 22px;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 900; color: #FFF6E0; border: 2px solid #3A2418;
+  background: #8A6A52; z-index: 2;
+}
+.el-fire { background: #E4572E; }
+.el-ice { background: #4B7DA8; }
+.el-thunder { background: #B06BE0; }
+.el-light { background: #F2C14E; color: #3A2418; }
+.el-dark { background: #4A4A55; }

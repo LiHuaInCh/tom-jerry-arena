@@ -89,6 +89,15 @@
       tick.className = 'pick'; tick.textContent = '✓';
       card.appendChild(tick);
 
+      const en = D.elementNames && D.elementNames[c.element];
+      if (en) {
+        const eb = document.createElement('div');
+        eb.className = 'c-elem el-' + c.element;
+        eb.textContent = en;
+        eb.title = en + '属性';
+        card.appendChild(eb);
+      }
+
       const info = document.createElement('button');
       info.className = 'c-info';
       info.type = 'button';
@@ -111,7 +120,7 @@
     $('cmSub').textContent = c.title + ' · ' + (c.faction === 'cat' ? '猫阵营' : '鼠阵营');
     const tags = $('cmTags');
     tags.innerHTML = '';
-    [c.perk, (w.kind === 'melee' ? '近战' : '远程'), SKILL_LABEL[sk.kind] || '技能'].forEach(function (t) {
+    [(D.elementNames && D.elementNames[c.element] ? D.elementNames[c.element] + '属性' : ''), c.perk, (w.kind === 'melee' ? '近战' : '远程'), SKILL_LABEL[sk.kind] || '技能'].filter(Boolean).forEach(function (t) {
       const s = document.createElement('span'); s.textContent = t; tags.appendChild(s);
     });
     $('cmDesc').textContent = c.desc;
