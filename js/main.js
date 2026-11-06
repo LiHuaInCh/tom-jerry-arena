@@ -198,6 +198,7 @@
       if (g.stats) g.stats.xpMul = (g.stats.xpMul || 1) * (1 + rb.xp);
       g.player.maxHp = Math.round(g.player.maxHp * (1 + rb.hp));
       g.player.hp = g.player.maxHp;
+      if (TJ.meta.runeLv('origin') > 0 && g.player.elemSlots) g.player.elemSlots[0] = TJ.meta.originElement();
     }
     if (mode !== 'arena' && TJ.meta) {
       const lv = TJ.meta.level || 1;
@@ -553,7 +554,15 @@
         return '<div class="rm-row"><div class="rm-info"><b>' + R[k].name + '</b><span>' + R[k].desc + '</span></div>' +
           '<div class="rm-ctl"><button data-r="' + k + '" data-d="-1">−</button><em>' + TJ.meta.runeLv(k) + '</em><button data-r="' + k + '" data-d="1">＋</button></div></div>';
       }).join('') +
+      '<div class="rm-origin">初始元素：<button id="rmOrigin">' + ({ fire: '火', ice: '冰', thunder: '雷', light: '光', dark: '暗' }[TJ.meta.originElement()] || '火') + '</button></div>' +
       '<div class="rm-foot"><button id="rmReset">免费重置</button></div></div>';
+    const ob = ov.querySelector('#rmOrigin');
+    if (ob) ob.onclick = function () {
+      const list = ['fire', 'ice', 'thunder', 'light', 'dark'];
+      const i = list.indexOf(TJ.meta.originElement());
+      TJ.meta.setOriginElement(list[(i + 1) % list.length]);
+      renderRunes(ov);
+    };
     ov.querySelector('.rm-close').onclick = function () { ov.classList.remove('on'); };
     ov.querySelectorAll('.rm-ctl button').forEach(function (b) {
       b.onclick = function () {
