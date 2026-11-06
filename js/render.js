@@ -1158,10 +1158,11 @@
           ctx.beginPath(); ctx.arc(it.e.x, it.e.y, it.e.r * (2.2 - k * 1.2), 0, TAU); ctx.stroke();
           ctx.restore();
         }
-        if (it.kind === 'player') if (it.e.invisT > 0) { ctx.save(); ctx.globalAlpha = 0.35; }
-            drawMouse(ctx, it.e, it.e.char);
-            if (it.e.invisT > 0) ctx.restore();
-        else if (it.e.kind === 'spike') drawDog(ctx, it.e);
+        if (it.kind === 'player') {
+          if (it.e.invisT > 0) { ctx.save(); ctx.globalAlpha = 0.35; }
+          drawMouse(ctx, it.e, it.e.char);
+          if (it.e.invisT > 0) ctx.restore();
+        } else if (it.e.kind === 'spike') drawDog(ctx, it.e);
         else drawCat(ctx, it.e);
       }
 
