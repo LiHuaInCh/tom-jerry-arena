@@ -95,13 +95,29 @@
     if (t === 6) tone('sine', ch[2] * 2, ch[2] * 2, 0.1, 0.022);
     musicStep++;
   }
-  function startMusic() {
+  function startSynth() {
     if (musicTimer || muted) return;
     if (!ensure()) return;
     musicTimer = setInterval(musicTick, 175);
   }
-  function stopMusic() {
+  function stopSynth() {
     if (musicTimer) { clearInterval(musicTimer); musicTimer = null; }
+  }
+  let bgmEl = null;
+  function startMusic() {
+    if (muted) return;
+    if (!bgmEl) {
+      bgmEl = new Audio('assets/audio/bgm.mp3');
+      bgmEl.loop = true;
+      bgmEl.volume = 0.3;
+      bgmEl.addEventListener('error', function () { bgmEl = null; startSynth(); });
+    }
+    const p = bgmEl.play();
+    if (p && p.catch) p.catch(function () { startSynth(); });
+  }
+  function stopMusic() {
+    if (bgmEl) { try { bgmEl.pause(); } catch (e) {} }
+    stopSynth();
   }
 
   /* ---------- 角色语音（系统 TTS） ---------- */
@@ -160,6 +176,7 @@
       muted = !muted;
       try { localStorage.setItem('tj_muted', muted ? '1' : '0'); } catch (e) {}
       if (master) master.gain.value = muted ? 0 : 0.55;
+      if (bgmEl) bgmEl.muted = muted;
       if (muted) stopMusic(); else startMusic();
       return muted;
     },
