@@ -186,6 +186,10 @@
     g.kills++;
     g.score += Math.round((e.def.score + Math.floor(g.wave * 2)) * ((g.cov && g.cov.score) || 1));
     burst(g, e.x, e.y, e.def.fur, 14, 260, 5);
+    g.effects.push({ kind: 'spark', x: e.x, y: e.y, life: 0.3, max: 0.3, color: e.def.fur, n: 10, r1: 40, width: 3, rot: rand(g, 0, 6.28) });
+    g.effects.push({ kind: 'tex', src: 'assets/fx/kenney/flame_03.png', x: e.x, y: e.y, life: 0.32, max: 0.32, s0: 14, s1: 44, rot: rand(g, 0, 6.28), spin: 1.4 });
+    g.effects.push({ kind: 'tex', src: 'assets/fx/kenney/smoke_01.png', x: e.x, y: e.y, life: 0.5, max: 0.5, s0: 18, s1: 58, alpha: 0.55, rot: rand(g, 0, 6.28) });
+    if (e.def.boss) g.effects.push({ kind: 'tex', src: 'assets/fx/kenney/circle_05.png', x: e.x, y: e.y, life: 0.7, max: 0.7, s0: 40, s1: 220, alpha: 0.8 });
     g.effects.push({ kind: 'ring', x: e.x, y: e.y, r: 8, maxR: e.r * 2.4, life: 0.28, max: 0.28, color: '#FFFFFF' });
     const orbCount = e.def.boss ? 22 : (e.def.xp >= 6 ? 3 : 1);
     for (let i = 0; i < orbCount; i++) {
@@ -382,7 +386,7 @@
     const e = {
       id: ++g._eid || (g._eid = 1), kind, def, x, y, vx: 0, vy: 0, r: def.radius,
       hp: Math.round(def.hp * scale), maxHp: Math.round(def.hp * scale),
-      speed: def.speed * (1 + Math.min(0.45, wave * 0.016)), dmg: def.dmg * (1 + wave * 0.045),
+      speed: def.speed * (1 + Math.min(0.45, wave * 0.016)), dmg: def.dmg * 2.5 * (1 + wave * 0.045),
       flash: 0, hitCd: 0, spawnT: 0.35, dead: false, kx: 0, ky: 0,
       state: 'idle', stateT: 0, atkCd: rand(g, 0.6, 1.6), charge: null,
       pending: null, summoned: 0, walk: rand(g, 0, TAU), boss: !!def.boss, recoil: 0

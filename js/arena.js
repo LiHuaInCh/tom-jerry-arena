@@ -137,6 +137,7 @@
         else if (fu.kind === 'dot') { v.vulnT = 3; }
         H.burst(g, v.x, v.y, '#FFE08A', 10, 200, 4);
         H.sfx(g, 'explode');
+        g.effects.push({ kind: 'tex', src: 'assets/fx/kenney/magic_03.png', x: v.x, y: v.y, life: 0.4, max: 0.4, s0: 20, s1: 70, alpha: 0.9, rot: rand(g, 0, 6.28), spin: 2 });
         if (TJ.fx) { TJ.fx.flash(g, '#FFE08A'); TJ.fx.shake(g, 5); }
       }
       if (slots.length > 1) dmg *= 1.1;
@@ -168,6 +169,10 @@
     v.hp = 0;
     v.respawnT = RESPAWN_TIME;
     H.burst(g, v.x, v.y, v.char.fur, 20, 300, 5);
+    g.effects.push({ kind: 'spark', x: v.x, y: v.y, life: 0.35, max: 0.35, color: v.color || v.char.fur, n: 12, r1: 46, width: 3, rot: rand(g, 0, 6.28) });
+    if (TJ.fx) TJ.fx.flash(g, v.color || '#FFF6E0');
+    g.effects.push({ kind: 'tex', src: 'assets/fx/kenney/flame_03.png', x: v.x, y: v.y, life: 0.32, max: 0.32, s0: 14, s1: 46, rot: rand(g, 0, 6.28), spin: 1.4 });
+    g.effects.push({ kind: 'tex', src: 'assets/fx/kenney/smoke_01.png', x: v.x, y: v.y, life: 0.5, max: 0.5, s0: 18, s1: 60, alpha: 0.55 });
     g.effects.push({ kind: 'ring', x: v.x, y: v.y, r: 8, maxR: 90, life: 0.4, max: 0.4, color: v.color });
 
     if (killer && killer !== v) {
