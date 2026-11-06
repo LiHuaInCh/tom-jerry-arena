@@ -120,7 +120,8 @@
     stopSynth();
   }
 
-  /* ---------- 角色语音（系统 TTS） ---------- */
+  /* ---------- 角色语音已移除 ---------- */
+  /*
   const LINES = {
     jerry: ['嘿嘿，抓不到我！', '奶酪是我的！', '再来一次！'],
     tom: ['这次一定抓到你！', '喵——别跑！', '交给我吧。'],
@@ -158,11 +159,12 @@
     } catch (e) {}
   }
 
+  */
+
   TJ.Audio = {
     unlock() { ensure(); },
     startMusic,
     stopMusic,
-    say,
     play(name) {
       if (muted) return;
       const fn = SFX[name];
