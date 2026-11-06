@@ -1038,6 +1038,13 @@
       ctx.strokeStyle = '#FFD34D'; ctx.lineWidth = 3;
       ctx.beginPath(); ctx.arc(0, 0, rr2 * 0.62, -e.arc / 2, e.arc / 2); ctx.stroke();
       ctx.restore();
+    } else if (e.kind === 'flash') {
+      const k = e.life / e.max;
+      ctx.save();
+      ctx.globalAlpha = 0.35 * k;
+      ctx.fillStyle = e.color || '#FFF6E0';
+      ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      ctx.restore();
     } else if (e.kind === 'beam') {
       const k = e.life / e.max;
       ctx.save();

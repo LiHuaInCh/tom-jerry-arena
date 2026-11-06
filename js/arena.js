@@ -39,7 +39,7 @@
     const sp = SPAWNS[spawnIdx % SPAWNS.length];
     const baseHp = Math.round(char.hp * 1.15);
     const f = {
-      id, name, isBot, char, skill: char.skill,
+      id, name, isBot, char, skill: char.skill, elemSlots: [char.element, null],
       weapon: char.weapon, weaponLv: 1, weaponLevels: {},
       stats: H.baseStats(), upgradeCounts: {},
       level: 1, xp: 0, xpNeed: 5, pendingLevels: 0,
@@ -101,32 +101,48 @@
 
   function damageFighter(g, v, dmg, attacker, crit) {
     if (!v.alive || v.invuln > 0) return;
-    const e2 = elemOf(attacker);
-    if (e2 && attacker !== v && v.element && v.element !== e2 && (v.elemT || 0) > 0 && !(v.reactCd > 0)) {
+    const slots = attacker && attacker.elemSlots ? attacker.elemSlots.filter(Boolean) : [];
+    const e2 = slots[0] || elemOf(attacker);
+    if (e2 && attacker !== v && v.element && (v.elemT || 0) > 0 && !(v.reactCd > 0)) {
       const pair = [v.element, e2].sort().join('+');
-      v.reactCd = 2.5;
-      if (pair === 'fire+ice') {
-        dmg *= 1.6;
-        H.addText(g, v.x, v.y - v.r - 26, '融化', '#FF9A3C', 20);
-      } else if (pair === 'ice+thunder') {
-        H.addText(g, v.x, v.y - v.r - 26, '感电', '#9FE7FF', 20);
-        for (const n of g.fighters) {
-          if (n === v || !n.alive || n.invuln > 0) continue;
-          if (Math.hypot(n.x - v.x, n.y - v.y) > 170) continue;
-          n.hp -= 18;
-          n.hitFlash = 0.12;
-          if (n.hp <= 0) killFighter(g, n, attacker);
+      const fu = (TJ.DATA.fusions || {})[pair];
+      if (fu) {
+        v.reactCd = 2.5;
+        H.addText(g, v.x, v.y - v.r - 26, fu.name, '#FFE08A', 20);
+        if (fu.kind === 'burst') dmg *= 1.6;
+        else if (fu.kind === 'freeze') v.freezeT = Math.max(v.freezeT || 0, 0.8);
+        else if (fu.kind === 'crit') { if (g.rng() < 0.3) dmg *= 2; }
+        else if (fu.kind === 'chain' || fu.kind === 'aoe') {
+          const rad = fu.kind === 'aoe' ? 170 : 150;
+          for (const n of g.fighters) {
+            if (n === v || !n.alive || n.invuln > 0) continue;
+            if (Math.hypot(n.x - v.x, n.y - v.y) > rad) continue;
+            n.hp -= fu.kind === 'aoe' ? 18 : 12;
+            n.hitFlash = 0.12;
+            if (n.hp <= 0) killFighter(g, n, attacker);
+          }
         }
-      } else if (pair === 'dark+light') {
-        if (attacker && attacker.alive) {
-          attacker.hp = Math.min(attacker.maxHp, attacker.hp + attacker.maxHp * 0.12);
-          H.addText(g, attacker.x, attacker.y - 36, '净化', '#FFF6E0', 18);
+        else if (fu.kind === 'leech' || fu.kind === 'heal') {
+          if (attacker && attacker.alive) attacker.hp = Math.min(attacker.maxHp, attacker.hp + attacker.maxHp * (fu.kind === 'leech' ? 0.12 : 0.02));
         }
+        else if (fu.kind === 'splash') {
+          for (const n of g.fighters) {
+            if (n === v || !n.alive) continue;
+            if (Math.hypot(n.x - v.x, n.y - v.y) > 90) continue;
+            n.hp -= dmg * 0.3;
+            if (n.hp <= 0) killFighter(g, n, attacker);
+          }
+        }
+        else if (fu.kind === 'debuff') { v.slowT = Math.max(v.slowT || 0, 2.5); dmg *= 1.1; }
+        else if (fu.kind === 'dot') { v.vulnT = 3; }
+        H.burst(g, v.x, v.y, '#FFE08A', 10, 200, 4);
+        H.sfx(g, 'explode');
+        if (TJ.fx) { TJ.fx.flash(g, '#FFE08A'); TJ.fx.shake(g, 5); }
       }
-      H.burst(g, v.x, v.y, '#FFE08A', 10, 200, 4);
-      H.sfx(g, 'explode');
+      if (slots.length > 1) dmg *= 1.1;
     }
     if (e2) { v.element = e2; v.elemT = 3; }
+    if (attacker && attacker.slowHit) v.slowT = Math.max(v.slowT || 0, 1.5);
     if (v.shield > 0) {
       v.shield--; v.shieldCd = 9; v.hitFlash = 0.1;
       g.effects.push({ kind: 'ring', x: v.x, y: v.y, r: 12, maxR: 70, life: 0.3, max: 0.3, color: '#7FD1FF' });
@@ -219,7 +235,9 @@
 
   TJ.getArenaChoices = function (g, f) {
     if (f.weaponLv === 4 && !f.evolved) {
-      const table = (TJ.DATA.evolutions || {})[TJ.DATA.weapons[f.weapon].name];
+      const KIND_EVO = { orbit: '大铁锤', ranged: '咸鱼' };
+      const wk = TJ.DATA.weapons[f.weapon].kind;
+      const table = (TJ.DATA.evolutions || {})[TJ.DATA.weapons[f.weapon].name] || (TJ.DATA.evolutions || {})[KIND_EVO[wk]];
       if (table) {
         return table.map(function (e, i) {
           return { key: 'evo:' + i, kind: 'evo', icon: '进', iconImg: TJ.DATA.weapons[f.weapon].iconImg, name: '进化 · ' + e.name, desc: e.desc, rarity: 'epic', stack: '5 / 5' };
@@ -261,7 +279,7 @@
     const wk = TJ.DATA.weapons[f.weapon].kind;
     const ORBIT_ONLY = { orbitN: 1, orbitR: 1 };
     const RANGED_ONLY = { multishot: 1, pierce: 1, bounce: 1, velocity: 1, explode: 1, homing: 1, crit: 1, critdmg: 1 };
-    const pool = shuffle(g, D.upgrades.filter(u => (f.upgradeCounts[u.id] || 0) < u.max
+    const pool = shuffle(g, D.upgrades.filter(u => u.id !== 'infuse1' && u.id !== 'infuse2' && (f.upgradeCounts[u.id] || 0) < u.max
       && !(ORBIT_ONLY[u.id] && wk !== 'orbit')
       && !(RANGED_ONLY[u.id] && wk !== 'ranged')));
     for (const u of pool.slice(0, 3)) {
@@ -323,7 +341,9 @@
       f.weaponLevels[id] = f.weaponLv;
     } else if (key.indexOf('evo:') === 0) {
       const code = key.slice(4);
-      const table = (TJ.DATA.evolutions || {})[TJ.DATA.weapons[f.weapon].name];
+      const KIND_EVO2 = { orbit: '大铁锤', ranged: '咸鱼' };
+      const wk2 = TJ.DATA.weapons[f.weapon].kind;
+      const table = (TJ.DATA.evolutions || {})[TJ.DATA.weapons[f.weapon].name] || (TJ.DATA.evolutions || {})[KIND_EVO2[wk2]];
       if (table && table[Number(code)]) {
         const e = table[Number(code)].effect || {};
         f.evoDmg = e.dmg || 1;
@@ -331,6 +351,14 @@
         f.evoSplash = e.splash || 0;
         f.evoPierce = e.pierce || 0;
         f.evoBounce = e.bounce || 0;
+        if (e.turret) f.turret = 1;
+        if (e.heavy) f.heavy = 1;
+        if (e.slowHit) f.slowHit = 1;
+        if (e.beamSplit) f.beamSplit = 1;
+        if (e.chainPlus) f.chainPlus = e.chainPlus;
+        if (e.chainDecay) f.chainDecay = e.chainDecay;
+        if (e.orbitMul) f.orbitMul = e.orbitMul;
+        if (e.hitCdAdd) f.orbitCdAdd = e.hitCdAdd;
         if (e.orbitN) f.orbitBonus = (f.orbitBonus || 0) + e.orbitN;
         if (e.orbitR) f.orbitRBonus = (f.orbitRBonus || 0) + e.orbitR;
         f.evolved = 'evo' + code;
@@ -384,7 +412,9 @@
     f.aim = ang;
     f.facing = ang;
 
-    const dmgMul = (1 + 0.15 * (lv - 1)) * 1.2 * (f.isBot ? 0.65 : 1) * (f.evoDmg || 1) * (f.growthT > 0 ? 1.25 : 1) * (f.farsightT > 0 ? 1.15 : 1);
+    let heavyMul = 1;
+    if (f.heavy) { f.hitCount = (f.hitCount || 0) + 1; if (f.hitCount % 3 === 0) heavyMul = 2.2; }
+    const dmgMul = (1 + 0.15 * (lv - 1)) * 1.2 * (f.isBot ? 0.65 : 1) * (f.evoDmg || 1) * (f.growthT > 0 ? 1.25 : 1) * (f.farsightT > 0 ? 1.15 : 1) * heavyMul;
 
     if (w.kind === 'melee') {
       const range = w.range + s.range * 0.25 + (lv >= 3 ? 24 : 0) + (lv >= 5 ? 18 : 0) + (f.farsightT > 0 ? 60 : 0);
@@ -423,6 +453,20 @@
         if (t < 0 || t > len) continue;
         if (Math.hypot(ex - dx * t, ey - dy * t) <= half + e.r) damageFighter(g, e, w.dmg * s.damage * dmgMul, f, false);
       }
+      if (f.beamSplit) {
+        for (const off of [-Math.PI / 4, Math.PI / 4]) {
+          const a2 = ang + off, dx2 = Math.cos(a2), dy2 = Math.sin(a2);
+          const len2 = len * 0.6;
+          for (const e of g.fighters) {
+            if (e === f || !e.alive) continue;
+            const ex = e.x - f.x, ey = e.y - f.y;
+            const t = ex * dx2 + ey * dy2;
+            if (t < 0 || t > len2) continue;
+            if (Math.hypot(ex - dx2 * t, ey - dy2 * t) <= half + e.r) damageFighter(g, e, w.dmg * s.damage * dmgMul * 0.6, f, false);
+          }
+          g.effects.push({ kind: 'beam', x: f.x, y: f.y, ang: a2, len: len2, life: 0.18, max: 0.18, color: w.color });
+        }
+      }
       g.effects.push({ kind: 'beam', x: f.x, y: f.y, ang: ang, len: len, life: 0.18, max: 0.18, color: w.color });
       H.sfx(g, 'shoot');
       f.fireCd = w.cd / s.fireRate;
@@ -431,11 +475,12 @@
     if (w.kind === 'chain') {
       let cur = target, dmg = w.dmg * s.damage * dmgMul;
       const hit = {}, pts = [{ x: f.x, y: f.y }];
-      for (let i = 0; i < (w.jumps || 3) && cur; i++) {
+      const jumpsN = (w.jumps || 3) + (f.chainPlus || 0);
+      for (let i = 0; i < jumpsN && cur; i++) {
         hit[cur.id] = 1;
         pts.push({ x: cur.x, y: cur.y });
         damageFighter(g, cur, dmg, f, false);
-        dmg *= 0.82;
+        dmg *= (f.chainDecay || 0.82);
         let nxt = null, nd = 300;
         for (const e of g.fighters) {
           if (e === f || !e.alive || hit[e.id]) continue;
@@ -466,7 +511,7 @@
       splash += f.evoSplash || 0;
       pierce += f.evoPierce || 0;
       bounce += f.evoBounce || 0;
-      let speed = w.speed * s.projSpeed * (w.proj === 'arrow' && lv >= 5 ? 1.2 : 1);
+      let speed = w.speed * s.projSpeed * (w.proj === 'arrow' && lv >= 5 ? 1.2 : 1) * (f.turret ? 0.7 : 1);
       g.projectiles.push({
         x: f.x + Math.cos(a) * (f.r + 8), y: f.y + Math.sin(a) * (f.r + 8),
         vx: Math.cos(a) * speed, vy: Math.sin(a) * speed,
@@ -537,6 +582,7 @@
     f.farsightT = Math.max(0, (f.farsightT || 0) - dt);
     f.growthT = Math.max(0, (f.growthT || 0) - dt);
     f.shieldT = Math.max(0, (f.shieldT || 0) - dt);
+    f.stillT = (inp.moveX || inp.moveY) ? 0 : (f.stillT || 0) + dt;
     f.elemT = Math.max(0, (f.elemT || 0) - dt);
     f.reactCd = Math.max(0, (f.reactCd || 0) - dt);
     f.rootT = Math.max(0, (f.rootT || 0) - dt);
@@ -549,7 +595,7 @@
       f.orbitA = (f.orbitA || 0) + dt * 3.4;
       f.orbitBonus = f.stats.orbitBonus || 0; f.orbitRBonus = f.stats.orbitRBonus || 0;
       const on = (ow.orbitN || 2) + (f.orbitBonus || 0);
-      const orad = (ow.orbitR || 78) + (f.orbitRBonus || 0);
+      const orad = ((ow.orbitR || 78) + (f.orbitRBonus || 0)) * (f.orbitMul || 1);
       for (const e of g.fighters) {
         if (e === f || !e.alive) continue;
         e.orbitCd = Math.max(0, (e.orbitCd || 0) - dt);
@@ -561,7 +607,7 @@
           if (Math.hypot(e.x - ox, e.y - oy) < e.r + 16) {
             damageFighter(g, e, ow.dmg * f.stats.damage * (f.stats.orbitDmgMul || 1), f, false);
             if (g.rng() < 0.4) H.sfx(g, 'hit');
-            e.orbitCd = (ow.hitCd || 0.45) / (f.stats.fireRate || 1);
+            e.orbitCd = ((ow.hitCd || 0.45) + (f.orbitCdAdd || 0)) / (f.stats.fireRate || 1);
             g.effects.push({ kind: 'ring', x: ox, y: oy, r: 6, maxR: 24, life: 0.18, max: 0.18, color: '#FFE08A' });
             break;
           }
@@ -637,7 +683,12 @@
       }
     }
     if (f.isBot && f.item && (f.hp < f.maxHp * 0.6 || g.rng() < 0.004)) TJ.useItem(g, f);
-    if (!((f.freezeT || 0) > 0 || (f.stunT || 0) > 0) && f.fireCd <= 0) { fireAt(g, f, target); if (f.evoCd) f.fireCd *= f.evoCd; }
+    if (!((f.freezeT || 0) > 0 || (f.stunT || 0) > 0) && f.fireCd <= 0) {
+      fireAt(g, f, target);
+      if (f.evoCd) f.fireCd *= f.evoCd;
+      if (f.turret && f.stillT > 0.8) f.fireCd *= 0.5;
+      if (f.heavy) f.fireCd *= 1.15;
+    }
     } else if (f.moving) {
       f.aim = Math.atan2(my, mx);
     }
