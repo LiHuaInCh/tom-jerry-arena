@@ -11,6 +11,8 @@
     [600, 600], [1200, 600], [900, 380],
     [900, 1020], [430, 860], [1360, 790]
   ];
+  const SPAWN_SCALE = D.W / 1800;
+  SPAWNS.forEach(function (s) { s[0] = Math.round(s[0] * SPAWN_SCALE); s[1] = Math.round(s[1] * SPAWN_SCALE); });
   const BOT_NAMES = ['奶酪猎人', '屋顶飞贼', '厨房老六', '弹簧尾巴', '夜行侠'];
   const COLORS = ['#E4572E', '#4B7DA8', '#4E7F52', '#B06BE0', '#F2A03D', '#2F8F83'];
   const TIME_LIMIT = 180;
@@ -52,7 +54,8 @@
       shield: 0, shieldCd: 0,
       alive: true, lives: LIVES, kills: 0, deaths: 0,
       respawnT: 0, eliminated: false,
-      color: COLORS[id % COLORS.length], target: null
+      color: COLORS[id % COLORS.length], target: null,
+      persona: ['aggr', 'collect', 'trap'][id % 3]
     };
     f.weaponLevels[f.weapon] = 1;
     const tal = char.talent;
@@ -76,13 +79,13 @@
       W: D.W, H: D.H, t: 0, elapsed: 0, over: false, matchOver: false,
       fighters: [], projectiles: [], pickups: [], traps: [], trapTimer: 8, xpSpawnT: 6, particles: [], texts: [], effects: [],
       obstacles: D.obstacles.map(function (o) { return Object.assign({}, o); }).concat([
-      { kind: 'table', type: 'rect', x: 760, y: 430, w: 240, h: 120 },
-      { kind: 'chair', type: 'rect', x: 400, y: 760, w: 100, h: 100 },
-      { kind: 'bookshelf', type: 'rect', x: 1420, y: 700, w: 90, h: 260 },
-      { kind: 'table', type: 'rect', x: 980, y: 980, w: 260, h: 110 },
-      { kind: 'chair', type: 'rect', x: 160, y: 260, w: 110, h: 110 },
-      { kind: 'table', type: 'rect', x: 1180, y: 380, w: 180, h: 90 },
-      { kind: 'chair', type: 'rect', x: 700, y: 1080, w: 100, h: 100 }
+      { kind: 'table', type: 'rect', x: Math.round(760 * SPAWN_SCALE), y: Math.round(430 * SPAWN_SCALE), w: Math.round(240 * SPAWN_SCALE), h: Math.round(120 * SPAWN_SCALE) },
+      { kind: 'chair', type: 'rect', x: Math.round(400 * SPAWN_SCALE), y: Math.round(760 * SPAWN_SCALE), w: Math.round(100 * SPAWN_SCALE), h: Math.round(100 * SPAWN_SCALE) },
+      { kind: 'bookshelf', type: 'rect', x: Math.round(1420 * SPAWN_SCALE), y: Math.round(700 * SPAWN_SCALE), w: Math.round(90 * SPAWN_SCALE), h: Math.round(260 * SPAWN_SCALE) },
+      { kind: 'table', type: 'rect', x: Math.round(980 * SPAWN_SCALE), y: Math.round(980 * SPAWN_SCALE), w: Math.round(260 * SPAWN_SCALE), h: Math.round(110 * SPAWN_SCALE) },
+      { kind: 'chair', type: 'rect', x: Math.round(160 * SPAWN_SCALE), y: Math.round(260 * SPAWN_SCALE), w: Math.round(110 * SPAWN_SCALE), h: Math.round(110 * SPAWN_SCALE) },
+      { kind: 'table', type: 'rect', x: Math.round(1180 * SPAWN_SCALE), y: Math.round(380 * SPAWN_SCALE), w: Math.round(180 * SPAWN_SCALE), h: Math.round(90 * SPAWN_SCALE) },
+      { kind: 'chair', type: 'rect', x: Math.round(700 * SPAWN_SCALE), y: Math.round(1080 * SPAWN_SCALE), w: Math.round(100 * SPAWN_SCALE), h: Math.round(100 * SPAWN_SCALE) }
     ]),
       cam: { x: D.W / 2, y: D.H / 2 }, shake: 0,
       events: [], timeLimit: TIME_LIMIT, killsToWin: KILLS_TO_WIN,
@@ -179,6 +182,7 @@
     v.lives--;
     v.hp = 0;
     v.respawnT = RESPAWN_TIME;
+    g.hitStop = 0.05;
     if (killer && killer.char && killer.char.talent && killer.char.talent.healKill) {
       killer.hp = Math.min(killer.maxHp, killer.hp + killer.maxHp * killer.char.talent.healKill);
     }
@@ -571,14 +575,9 @@
     return best;
   }
 
+  TJ.botInput = botInput;
+
   function updateFighter(g, f, dt, inp) {
-    if (!f.talentApplied && f.char.talent) {
-      f.talentApplied = true;
-      const t = f.char.talent;
-      if (t.stat === 'maxHp') { f.maxHp += t.value; f.hp += t.value; }
-      else if (t.stat === 'magnet') f.stats.magnet += t.value;
-      else f.stats[t.stat] = (f.stats[t.stat] || 0) + t.value;
-    }
     f.invuln = Math.max(0, f.invuln - dt);
     f.hitFlash = Math.max(0, f.hitFlash - dt);
     f.fireCd -= dt;
@@ -616,7 +615,7 @@
       f.orbitA = (f.orbitA || 0) + dt * 3.4;
       f.orbitBonus = f.stats.orbitBonus || 0; f.orbitRBonus = f.stats.orbitRBonus || 0;
       const on = (ow.orbitN || 2) + (f.orbitBonus || 0);
-      const orad = ((ow.orbitR || 78) + (f.orbitRBonus || 0)) * (f.orbitMul || 1);
+      const orad = ((ow.orbitR || 78) + 8 + (f.orbitRBonus || 0)) * (f.orbitMul || 1);
       for (const e of g.fighters) {
         if (e === f || !e.alive) continue;
         e.orbitCd = Math.max(0, (e.orbitCd || 0) - dt);
@@ -626,7 +625,8 @@
           const ox = f.x + Math.cos(a) * orad;
           const oy = f.y + Math.sin(a) * orad;
           if (Math.hypot(e.x - ox, e.y - oy) < e.r + 16) {
-            damageFighter(g, e, ow.dmg * f.stats.damage * (f.stats.orbitDmgMul || 1), f, false);
+            damageFighter(g, e, ow.dmg * 1.2 * f.stats.damage * (f.stats.orbitDmgMul || 1), f, false);
+            f.hp = Math.min(f.maxHp, f.hp + f.maxHp * 0.008);
             if (g.rng() < 0.4) H.sfx(g, 'hit');
             e.orbitCd = ((ow.hitCd || 0.45) + (f.orbitCdAdd || 0)) / (f.stats.fireRate || 1);
             g.effects.push({ kind: 'ring', x: ox, y: oy, r: 6, maxR: 24, life: 0.18, max: 0.18, color: '#FFE08A' });
@@ -717,17 +717,24 @@
   }
 
   function botInput(g, f) {
+    // 供无头模拟复用
     const target = nearestFighter(g, f, 2000);
     let x = 0, y = 0, dash = false;
     if (target) {
       const dx = target.x - f.x, dy = target.y - f.y;
       const d = Math.max(0.001, Math.hypot(dx, dy));
       const ux = dx / d, uy = dy / d;
-      const ideal = f.weapon === 'sword' ? 90 : 330;
+      const wk = TJ.DATA.weapons[f.weapon] ? TJ.DATA.weapons[f.weapon].kind : 'ranged';
+      let ideal = (wk === 'orbit' || wk === 'melee') ? 70 : (wk === 'beam' ? 260 : 330);
+      if (f.persona === 'aggr') ideal -= 45;
+      else if (f.persona === 'collect') ideal += 45;
+      else ideal += 15;
+      if (ideal < 55) ideal = 55;
       if (d < ideal - 60) { x = -ux; y = -uy; }
       else if (d > ideal + 90) { x = ux; y = uy; }
       else { x = -uy * 0.9 + ux * 0.2; y = ux * 0.9 + uy * 0.2; }
-      if (f.hp < f.maxHp * 0.3 && f.dashCd <= 0 && d < 260 && g.rng() < 0.05) dash = true;
+      const dashChance = f.persona === 'aggr' ? 0.12 : 0.04;
+      if (f.hp < f.maxHp * 0.3 && f.dashCd <= 0 && d < 260 && g.rng() < dashChance) dash = true;
     } else {
       let bx = 0, by = 0, bd = 1e9;
       for (const q of g.pickups) {
@@ -757,16 +764,6 @@
     f.x = best[0] + rand(g, -24, 24);
     f.y = best[1] + rand(g, -24, 24);
     H.resolveObstacles(g, f, f.r);
-    if (f.isBot) {
-      for (const tr of g.traps) {
-        const dd = Math.hypot(f.x - tr.x, f.y - tr.y);
-        if (dd < 80 && dd > 1) {
-          f.x += (f.x - tr.x) / dd * 90 * dt;
-          f.y += (f.y - tr.y) / dd * 90 * dt;
-        }
-      }
-      H.resolveObstacles(g, f, f.r);
-    }
     f.hp = f.maxHp;
     f.alive = true;
     f.invuln = 2.4;

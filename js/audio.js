@@ -80,8 +80,73 @@
     click() { tone('sine', 620, 720, 0.05, 0.05); }
   };
 
+  /* ---------- 背景音乐（程序化循环） ---------- */
+  let musicTimer = null, musicStep = 0;
+  const CHORDS = [
+    [220.0, 261.6, 329.6], [196.0, 246.9, 293.7],
+    [174.6, 220.0, 261.6], [196.0, 246.9, 329.6]
+  ];
+  function musicTick() {
+    if (muted) return;
+    const ch = CHORDS[Math.floor(musicStep / 8) % 4];
+    const t = musicStep % 8;
+    tone('triangle', ch[t % 3] * 2, ch[t % 3] * 2, 0.16, 0.03);
+    if (t % 4 === 0) tone('sine', ch[0] / 2, ch[0] / 2, 0.34, 0.045);
+    if (t === 6) tone('sine', ch[2] * 2, ch[2] * 2, 0.1, 0.022);
+    musicStep++;
+  }
+  function startMusic() {
+    if (musicTimer || muted) return;
+    if (!ensure()) return;
+    musicTimer = setInterval(musicTick, 175);
+  }
+  function stopMusic() {
+    if (musicTimer) { clearInterval(musicTimer); musicTimer = null; }
+  }
+
+  /* ---------- 角色语音（系统 TTS） ---------- */
+  const LINES = {
+    jerry: ['嘿嘿，抓不到我！', '奶酪是我的！', '再来一次！'],
+    tom: ['这次一定抓到你！', '喵——别跑！', '交给我吧。'],
+    tuffy: ['泰菲来啦！', '冲呀！', '看我的！'],
+    swordsman: ['剑客，出鞘。', '承让。', '再来。'],
+    robin: ['看我的箭！', '林中见。', '跟上。'],
+    detective: ['真相只有一个。', '有线索了。', '找到了。'],
+    butch: ['别挡路。', '哼，小老鼠。', '来啊。'],
+    knightcat: ['以骑士之名。', '冲锋！', '为了荣誉。'],
+    toots: ['优雅地解决。', '别着急。', '让我来。'],
+    lightning: ['快如闪电！', '追不上我吧？', '噼啪！']
+  };
+  const GENERIC = {
+    mouse: ['冲呀！', '交给我吧！', '小心点。'],
+    cat: ['别想逃！', '抓到你了。', '哼。']
+  };
+  let lastSay = 0;
+  function say(charId, mood) {
+    if (muted) return;
+    const now = performance.now();
+    if (now - lastSay < 1600) return;
+    lastSay = now;
+    if (!('speechSynthesis' in window)) { tone('sine', 520, 720, 0.09, 0.035); return; }
+    const isCat = String(charId || '').charAt(0) === 'c';
+    const pool = LINES[charId] || (isCat ? GENERIC.cat : GENERIC.mouse);
+    const text = pool[Math.floor(Math.random() * pool.length)];
+    try {
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'zh-CN';
+      u.pitch = isCat ? 0.7 : 1.5;
+      u.rate = 1.05;
+      u.volume = 0.9;
+      speechSynthesis.cancel();
+      speechSynthesis.speak(u);
+    } catch (e) {}
+  }
+
   TJ.Audio = {
     unlock() { ensure(); },
+    startMusic,
+    stopMusic,
+    say,
     play(name) {
       if (muted) return;
       const fn = SFX[name];
@@ -95,6 +160,7 @@
       muted = !muted;
       try { localStorage.setItem('tj_muted', muted ? '1' : '0'); } catch (e) {}
       if (master) master.gain.value = muted ? 0 : 0.55;
+      if (muted) stopMusic(); else startMusic();
       return muted;
     },
     isMuted() { return muted; }

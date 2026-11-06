@@ -25,9 +25,11 @@
 
   /* ---------------- 静态背景 ---------------- */
   function buildBackground() {
+    const BG_SCALE = D.W > 3000 ? 0.5 : 1;
     const c = document.createElement('canvas');
-    c.width = D.W; c.height = D.H;
+    c.width = Math.round(D.W * BG_SCALE); c.height = Math.round(D.H * BG_SCALE);
     const x = c.getContext('2d');
+    x.scale(BG_SCALE, BG_SCALE);
     let seed = 20240501;
     const rnd = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
 
@@ -1139,7 +1141,25 @@
   /* ---------------- 主渲染器 ---------------- */
   TJ.Renderer = function (canvas) {
     const ctx = canvas.getContext('2d');
-    const bg = buildBackground();
+    const largeMap = D.W > 3000;
+    const bg = largeMap ? null : buildBackground();
+    let floorPattern = null;
+    function makeFloorTile() {
+      const t = document.createElement('canvas');
+      t.width = 512; t.height = 512;
+      const c = t.getContext('2d');
+      c.fillStyle = '#E9D3B0'; c.fillRect(0, 0, 512, 512);
+      for (let y = 0; y < 512; y += 64) {
+        c.fillStyle = (y / 64) % 2 ? '#E5CDA7' : '#EAD5B3';
+        c.fillRect(0, y, 512, 64);
+        c.strokeStyle = 'rgba(122,85,50,0.20)'; c.lineWidth = 2;
+        c.beginPath(); c.moveTo(0, y); c.lineTo(512, y); c.stroke();
+        for (let px = ((y / 64) % 3) * 80; px < 512; px += 160) {
+          c.beginPath(); c.moveTo(px, y); c.lineTo(px, y + 64); c.stroke();
+        }
+      }
+      return t;
+    }
     let cw = 0, ch = 0, dpr = 1;
 
     function resize(w, h, d) {
@@ -1151,8 +1171,37 @@
       canvas.style.height = h + 'px';
     }
 
+    function drawZones(ctx, g) {
+      const zones = [
+        { name: '厨房', x: 0, y: 0, w: 0.5, h: 0.5, color: '#E8A85C' },
+        { name: '客厅', x: 0.5, y: 0, w: 0.5, h: 0.5, color: '#6FA8D8' },
+        { name: '花园', x: 0, y: 0.5, w: 0.5, h: 0.5, color: '#7FC08A' },
+        { name: '地窖', x: 0.5, y: 0.5, w: 0.5, h: 0.5, color: '#8A6BB0' }
+      ];
+      ctx.save();
+      ctx.globalAlpha = 0.10;
+      for (const z of zones) {
+        ctx.fillStyle = z.color;
+        ctx.fillRect(z.x * g.W, z.y * g.H, z.w * g.W, z.h * g.H);
+      }
+      ctx.globalAlpha = 0.30;
+      ctx.font = '900 54px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      for (const z of zones) {
+        ctx.fillStyle = z.color;
+        ctx.fillText(z.name, (z.x + z.w / 2) * g.W, (z.y + z.h / 2) * g.H);
+      }
+      ctx.globalAlpha = 0.18;
+      ctx.lineWidth = 6;
+      ctx.strokeStyle = '#3A2418';
+      ctx.strokeRect(g.W * 0.5 - 3, 0, 6, g.H);
+      ctx.strokeRect(0, g.H * 0.5 - 3, g.W, 6);
+      ctx.restore();
+    }
+
     function draw(g, t) {
-      const zoom = clamp(Math.min(cw, ch) / 500, 0.74, 1.2);
+      const zoom = clamp(Math.min(cw, ch) / 560, 0.56, 1.15);
       const vw = cw / zoom, vh = ch / zoom;
       let camX = g.cam.x, camY = g.cam.y;
       camX = vw >= D.W ? D.W / 2 : clamp(camX, vw / 2, D.W - vw / 2);
@@ -1171,7 +1220,23 @@
       ctx.scale(zoom, zoom);
       ctx.translate(-camX, -camY);
 
-      ctx.drawImage(bg, 0, 0);
+      if (largeMap) {
+        if (!floorPattern) floorPattern = ctx.createPattern(makeFloorTile(), 'repeat');
+        ctx.fillStyle = floorPattern;
+        ctx.fillRect(camX - vw / 2 - 80, camY - vh / 2 - 80, vw + 160, vh + 160);
+      } else {
+        ctx.drawImage(bg, 0, 0, D.W, D.H);
+      }
+      drawZones(ctx, g);
+      if (g.holes) {
+        for (const h of g.holes) {
+          ctx.save();
+          ctx.fillStyle = '#2B1B12';
+          ctx.beginPath(); ctx.ellipse(h.x, h.y, 34, 26, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = '#8A6A52'; ctx.lineWidth = 5; ctx.stroke();
+          ctx.restore();
+        }
+      }
       drawObstacles(ctx, g);
 
       for (const pk of g.pickups) drawPickup(ctx, pk, t);

@@ -2,7 +2,8 @@
 (function () {
   const TJ = (window.TJ = window.TJ || {});
 
-  const W = 1800, H = 1350;
+  const BIG_MAP = (function () { try { return localStorage.getItem('tj_mapsize') === 'large'; } catch (e) { return false; } })();
+  const W = BIG_MAP ? 7200 : 2600, H = BIG_MAP ? 5400 : 1950;
 
   const characters = [
     {
@@ -407,7 +408,7 @@
   ];
 
   const weapons = {
-    w_detective: { name: '烟雾弹', icon: '烟', kind: 'ranged', dmg: 15, cd: 1.4, speed: 215, range: 760, proj: 'bubble', splash: 50, homing: 1, iconImg: 'assets/weapon-icons/w_detective.png', color: '#7FD1FF' },
+    w_detective: { name: '烟雾弹', icon: '烟', kind: 'ranged', dmg: 20, cd: 0.8, speed: 320, range: 760, proj: 'bubble', splash: 50, homing: 1, iconImg: 'assets/weapon-icons/w_detective.png', color: '#7FD1FF' },
     w_jerry: { name: '大铁锤', icon: '大', kind: 'orbit', dmg: 40, cd: 0.52, orbitR: 78, orbitN: 2, hitCd: 0.45, iconImg: 'assets/weapon-icons/w_jerry.png', color: '#C0392B' },
     w_m01: { name: '仙女棒', icon: '仙', kind: 'orbit', dmg: 40, cd: 0.52, orbitR: 78, orbitN: 2, hitCd: 0.45, iconImg: 'assets/weapon-icons/w_m01.png', color: '#C0392B' },
     w_m02: { name: '最佳表演', icon: '最', kind: 'ranged', dmg: 20, cd: 1.7, speed: 215, range: 720, proj: 'orb', splash: 105, iconImg: 'assets/weapon-icons/w_m02.png', color: '#E4572E' },
@@ -440,7 +441,7 @@
     w_m29: { name: '沙包拳头', icon: '沙', kind: 'orbit', dmg: 40, cd: 0.52, orbitR: 78, orbitN: 2, hitCd: 0.45, iconImg: 'assets/weapon-icons/w_m29.png', color: '#C0392B' },
     w_m30: { name: '兔子大表哥', icon: '兔', kind: 'ranged', dmg: 17, cd: 0.84, speed: 460, range: 860, proj: 'orb', iconImg: 'assets/weapon-icons/w_m30.png', color: '#7FD1FF' },
     w_m31: { name: '羊角锤', icon: '羊', kind: 'orbit', dmg: 40, cd: 0.52, orbitR: 78, orbitN: 2, hitCd: 0.45, iconImg: 'assets/weapon-icons/w_m31.png', color: '#C0392B' },
-    w_robin: { name: '降落伞', icon: '降', kind: 'orbit', dmg: 40, cd: 0.52, orbitR: 78, orbitN: 2, hitCd: 0.45, iconImg: 'assets/weapon-icons/w_robin.png', color: '#C0392B' },
+    w_robin: { name: '降落伞', icon: '降', kind: 'orbit', dmg: 44, cd: 0.52, orbitR: 78, orbitN: 2, hitCd: 0.45, iconImg: 'assets/weapon-icons/w_robin.png', color: '#C0392B' },
     w_swordsman: { name: '格挡之剑', icon: '格', kind: 'orbit', dmg: 40, cd: 0.52, orbitR: 78, orbitN: 2, hitCd: 0.45, iconImg: 'assets/weapon-icons/w_swordsman.png', color: '#C0392B' },
     w_tuffy: { name: '隐形感应雷', icon: '隐', kind: 'chain', dmg: 22, cd: 0.95, range: 600, jumps: 3, iconImg: 'assets/weapon-icons/w_tuffy.png', color: '#FFE08A' },
     w_butch: { name: '旋转桶盖', icon: '旋', kind: 'ranged', dmg: 14, cd: 0.92, speed: 390, range: 800, proj: 'plate', bounce: 2, iconImg: 'assets/weapon-icons/w_butch.png', color: '#E4572E' },
@@ -455,13 +456,13 @@
     w_c09: { name: '白日梦', icon: '白', kind: 'ranged', dmg: 15, cd: 1.4, speed: 215, range: 760, proj: 'bubble', splash: 50, homing: 1, iconImg: 'assets/weapon-icons/w_c09.png', color: '#7FD1FF' },
     w_c10: { name: '迷乱列车', icon: '迷', kind: 'ranged', dmg: 17, cd: 0.84, speed: 460, range: 860, proj: 'orb', iconImg: 'assets/weapon-icons/w_c10.png', color: '#7FD1FF' },
     w_c11: { name: '捕虫网', icon: '捕', kind: 'ranged', dmg: 17, cd: 0.84, speed: 460, range: 860, proj: 'orb', iconImg: 'assets/weapon-icons/w_c11.png', color: '#B06BE0' },
-    w_c12: { name: '爪刀', icon: '爪', kind: 'orbit', dmg: 40, cd: 0.52, orbitR: 78, orbitN: 2, hitCd: 0.45, iconImg: 'assets/weapon-icons/w_c12.png', color: '#C0392B' },
+    w_c12: { name: '爪刀', icon: '爪', kind: 'orbit', dmg: 46, cd: 0.52, orbitR: 78, orbitN: 2, hitCd: 0.45, iconImg: 'assets/weapon-icons/w_c12.png', color: '#C0392B' },
     w_c13: { name: '仙人掌弹弓', icon: '仙', kind: 'ranged', dmg: 14, cd: 0.92, speed: 390, range: 800, proj: 'plate', bounce: 2, iconImg: 'assets/weapon-icons/w_c13.png', color: '#E4572E' },
     w_c14: { name: '胡椒粉罐头', icon: '胡', kind: 'ranged', dmg: 27, cd: 1.8, speed: 280, range: 850, proj: 'rocket', splash: 95, iconImg: 'assets/weapon-icons/w_c14.png', color: '#F2A03D' },
     w_c15: { name: '瑜伽球', icon: '瑜', kind: 'ranged', dmg: 14, cd: 0.92, speed: 390, range: 800, proj: 'plate', bounce: 2, iconImg: 'assets/weapon-icons/w_c15.png', color: '#E4572E' },
     w_c16: { name: '追风双翼', icon: '追', kind: 'ranged', dmg: 20, cd: 1.7, speed: 215, range: 720, proj: 'orb', splash: 105, iconImg: 'assets/weapon-icons/w_c16.png', color: '#B06BE0' },
     w_knightcat: { name: '旋刃剑舞', icon: '旋', kind: 'ranged', dmg: 20, cd: 1.7, speed: 215, range: 720, proj: 'orb', splash: 105, iconImg: 'assets/weapon-icons/w_knightcat.png', color: '#E4572E' },
-    w_lightning: { name: '咸鱼', icon: '咸', kind: 'ranged', dmg: 17, cd: 0.84, speed: 460, range: 860, proj: 'orb', iconImg: 'assets/weapon-icons/w_lightning.png', color: '#3F7A46' },
+    w_lightning: { name: '咸鱼', icon: '咸', kind: 'ranged', dmg: 22, cd: 0.70, speed: 460, range: 860, proj: 'orb', iconImg: 'assets/weapon-icons/w_lightning.png', color: '#3F7A46' },
     w_tom: { name: '平底锅', icon: '平', kind: 'orbit', dmg: 40, cd: 0.52, orbitR: 78, orbitN: 2, hitCd: 0.45, iconImg: 'assets/weapon-icons/w_tom.png', color: '#C0392B' },
     w_toots: { name: '汽水罐', icon: '汽', kind: 'ranged', dmg: 27, cd: 1.8, speed: 280, range: 850, proj: 'rocket', splash: 95, iconImg: 'assets/weapon-icons/w_toots.png', color: '#F2A03D' }
   };
@@ -650,6 +651,9 @@
 
 
   const enemies = {
+    bomber:  { name: '自爆鼠', hp: 90, speed: 168, radius: 18, dmg: 0, xp: 4, score: 14, fur: '#E2453C', furDark: '#A82B24', belly: '#FFD8D2', eye: '#2B1B12' },
+    bigboss: { name: '鼠王', hp: 4200, speed: 62, radius: 52, dmg: 26, xp: 60, score: 400, fur: '#8E2F2F', furDark: '#5E1D1D', belly: '#E8B4A8', eye: '#FFD34D', boss: true },
+    hunter:  { name: '破障猫', hp: 240, speed: 118, radius: 22, dmg: 16, xp: 6, score: 22, fur: '#8E5BD0', furDark: '#6B3FA8', belly: '#E6D9F5', eye: '#2B1B12' },
     kitten:  { name: '流浪猫', hp: 42,  speed: 120, radius: 16, dmg: 8,  xp: 3, score: 10, fur: '#8C9AAD', furDark: '#66738A', belly: '#E7EDF5', eye: '#2B1B12' },
     bruiser: { name: '肥猫',   hp: 110, speed: 78,  radius: 25, dmg: 16, xp: 6, score: 25, fur: '#C98A4B', furDark: '#9A5F2C', belly: '#F1D9B4', eye: '#2B1B12' },
     spitter: { name: '鱼骨猫', hp: 58,  speed: 96,  radius: 18, dmg: 7,  xp: 5, score: 20, fur: '#A98CC4', furDark: '#7B6197', belly: '#EDE2F7', eye: '#2B1B12' },
@@ -663,12 +667,12 @@
     { id: 'pierce',    name: '穿透',   desc: '弹丸额外穿透 1 个敌人',       icon: '穿', rarity: 'common', max: 4, apply(s) { s.pierce += 1; } },
     { id: 'bounce',    name: '弹射',   desc: '弹丸命中后额外弹射 1 次',     icon: '弹', rarity: 'rare', max: 3, apply(s) { s.bounce += 1; } },
     { id: 'haste',     name: '疾风',   desc: '攻击速度 +18%',                icon: '速', rarity: 'common', max: 6, apply(s) { s.fireRate *= 1.18; } },
+    { id: 'regen',    name: '回春',   desc: '每秒回复 0.3% 最大生命',       icon: '春', rarity: 'rare', max: 4, apply(s) { s.regen = (s.regen || 0) + 0.003; } },
     { id: 'power',     name: '力量',   desc: '攻击伤害 +25%',                icon: '力', rarity: 'common', max: 6, apply(s) { s.damage *= 1.25; } },
     { id: 'swift',     name: '轻功',   desc: '移动速度 +10%',                icon: '走', rarity: 'common', max: 5, apply(s) { s.speed *= 1.10; } },
     { id: 'crit',      name: '暴击',   desc: '暴击率 +10%',                  icon: '暴', rarity: 'rare', max: 5, apply(s) { s.crit += 0.10; } },
     { id: 'critdmg',   name: '致命',   desc: '暴击伤害 +45%',                icon: '伤', rarity: 'rare', max: 4, apply(s) { s.critMul += 0.45; } },
     { id: 'vitality',  name: '强健',   desc: '生命上限 +22 并回复等量生命',   icon: '血', rarity: 'common', max: 5, apply(s) { s.maxHp += 22; } },
-    { id: 'leech',     name: '吸血',   desc: '造成伤害的 2.5% 转化为生命',    icon: '吸', rarity: 'rare', max: 4, apply(s) { s.lifesteal += 0.025; } },
     { id: 'magnet',    name: '磁铁',   desc: '经验拾取范围 +70',              icon: '磁', rarity: 'common', max: 3, apply(s) { s.magnet += 70; } },
     { id: 'shield',    name: '护盾',   desc: '获得 1 层可再生护盾',           icon: '盾', rarity: 'epic', max: 3, apply(s) { s.shieldMax += 1; } },
     { id: 'explode',   name: '爆炸弹', desc: '弹丸命中时产生小范围爆炸',      icon: '爆', rarity: 'epic', max: 1, apply(s) { s.explode += 1; } },
@@ -695,6 +699,13 @@
     { kind: 'ball',      type: 'circle', x: 1560, y: 1180, r: 36 }
   ];
 
+  const MSCALE = W / 1800;
+  obstacles.forEach(function (o) {
+    o.x = Math.round(o.x * MSCALE); o.y = Math.round(o.y * MSCALE);
+    if (o.w) o.w = Math.round(o.w * MSCALE);
+    if (o.h) o.h = Math.round(o.h * MSCALE);
+    if (o.r) o.r = Math.round(o.r * MSCALE);
+  });
   TJ.DATA = { W, H, characters, weapons, enemies, upgrades, obstacles };
 
   TJ.DATA.evolutions = {
@@ -788,10 +799,72 @@
     regen: { name: '回春', desc: '每秒回复 0.5% 生命', regen: 0.005 },
     elemental: { name: '元素亲和', desc: '融合伤害 +20%', fusion: 0.2 }
   };
-  const SIG_TALENT = { jerry: 'scavenger', tuffy: 'barrage', swordsman: 'heavy', robin: 'swift', detective: 'crit', tom: 'bulwark', butch: 'execution', knightcat: 'heavy', toots: 'elemental', lightning: 'swift' };
-  const FALLBACK_TALENTS = ['bulwark', 'heavy', 'barrage', 'execution', 'crit', 'elemental', 'regen'];
-  characters.forEach(function (c, i) {
-    var key = SIG_TALENT[c.id] || FALLBACK_TALENTS[i % FALLBACK_TALENTS.length];
-    c.talent = Object.assign({ key: key }, TALENTS_V2[key]);
+  const CHAR_TALENT = {
+    detective: ['crit', { crit: 0.07, critMul: 0.18 }],
+    jerry: ['scavenger', { magnet: 60 }],
+    m01: ['crit', { crit: 0.07, critMul: 0.18 }],
+    m02: ['swift', { speed: 1.11, hp: -0.04 }],
+    m03: ['regen', { regen: 0.004 }],
+    m04: ['execution', { healKill: 0.05 }],
+    m05: ['swift', { speed: 1.08, hp: -0.04 }],
+    m06: ['bulwark', { hp: 0.17, speed: 0.96 }],
+    m07: ['regen', { regen: 0.004 }],
+    m08: ['bulwark', { hp: 0.17, speed: 0.96 }],
+    m09: ['execution', { healKill: 0.04 }],
+    m10: ['regen', { regen: 0.006 }],
+    m11: ['elemental', { fusion: 0.18 }],
+    m12: ['swift', { speed: 1.11, hp: -0.04 }],
+    m13: ['heavy', { damage: 1.16, fireRate: 0.93 }],
+    m14: ['execution', { healKill: 0.03 }],
+    m15: ['swift', { speed: 1.08, hp: -0.04 }],
+    m16: ['bulwark', { hp: 0.17, speed: 0.96 }],
+    m17: ['regen', { regen: 0.004 }],
+    m18: ['bulwark', { hp: 0.17, speed: 0.96 }],
+    m19: ['elemental', { fusion: 0.18 }],
+    m20: ['heavy', { damage: 1.20, fireRate: 0.93 }],
+    m21: ['heavy', { damage: 1.16, fireRate: 0.93 }],
+    m22: ['execution', { healKill: 0.05 }],
+    m23: ['bulwark', { hp: 0.13, speed: 0.96 }],
+    m24: ['regen', { regen: 0.006 }],
+    m25: ['swift', { speed: 1.08, hp: -0.04 }],
+    m26: ['regen', { regen: 0.006 }],
+    m27: ['heavy', { damage: 1.16, fireRate: 0.93 }],
+    m28: ['swift', { speed: 1.11, hp: -0.04 }],
+    m29: ['execution', { healKill: 0.03 }],
+    m30: ['bulwark', { hp: 0.17, speed: 0.96 }],
+    m31: ['regen', { regen: 0.004 }],
+    robin: ['swift', { speed: 1.11, hp: -0.04 }],
+    swordsman: ['heavy', { damage: 1.16, fireRate: 0.93 }],
+    tuffy: ['barrage', { fireRate: 1.14, damage: 0.96 }],
+    butch: ['execution', { healKill: 0.03 }],
+    c01: ['swift', { speed: 1.11, hp: -0.04 }],
+    c02: ['bulwark', { hp: 0.13, speed: 0.96 }],
+    c03: ['regen', { regen: 0.006 }],
+    c04: ['heavy', { damage: 1.16, fireRate: 0.93 }],
+    c05: ['elemental', { fusion: 0.22 }],
+    c06: ['heavy', { damage: 1.16, fireRate: 0.93 }],
+    c07: ['execution', { healKill: 0.04 }],
+    c08: ['swift', { speed: 1.08, hp: -0.04 }],
+    c09: ['bulwark', { hp: 0.17, speed: 0.96 }],
+    c10: ['swift', { speed: 1.08, hp: -0.04 }],
+    c11: ['elemental', { fusion: 0.22 }],
+    c12: ['swift', { speed: 1.08, hp: -0.04 }],
+    c13: ['heavy', { damage: 1.20, fireRate: 0.93 }],
+    c14: ['execution', { healKill: 0.05 }],
+    c15: ['swift', { speed: 1.11, hp: -0.04 }],
+    c16: ['bulwark', { hp: 0.13, speed: 0.96 }],
+    knightcat: ['heavy', { damage: 1.20, fireRate: 0.93 }],
+    lightning: ['swift', { speed: 1.08, hp: -0.04 }],
+    tom: ['bulwark', { hp: 0.17, speed: 0.96 }],
+    toots: ['elemental', { fusion: 0.18 }]
+  };
+  characters.forEach(function (c) {
+    var row = CHAR_TALENT[c.id] || ['scholar', {}];
+    c.talent = Object.assign({ key: row[0] }, TALENTS_V2[row[0]], row[1] || {});
   });
+  const TALENT_PATCH = { '塔拉': { damage: 1.08 }, '天使杰瑞': { regen: 0.003 } };
+  characters.forEach(function (c) { var p = TALENT_PATCH[c.name]; if (p) Object.assign(c.talent, p); });
+
+  const WEAK_BOOST = ['米可','魔术师','剑客莉莉','蒙金奇','巴特','兔八哥','天使泰菲','雪梨','梦游杰瑞','恶魔泰菲'];
+  characters.forEach(function (c) { if (WEAK_BOOST.indexOf(c.name) >= 0) { c.hp = Math.round(c.hp * 1.15); c.weakBoost = 1; } });
 })();

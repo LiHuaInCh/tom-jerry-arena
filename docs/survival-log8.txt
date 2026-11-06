@@ -1,0 +1,23 @@
+chars 57 avgDeathRate 0.75 reach5 0.53 reach10 0.25 reach15 0.25 avgTime 170
+TOP10
+恶魔杰瑞 reach10 1 wave 0 kills 2046 lvl 28
+航海士杰瑞 reach10 1 wave 0 kills 1939 lvl 27
+马索尔 reach10 1 wave 0 kills 1912 lvl 27
+拿坡里鼠 reach10 1 wave 0 kills 1899 lvl 27
+侦探泰菲 reach10 1 wave 0 kills 1862 lvl 26
+米特 reach10 1 wave 0 kills 1793 lvl 27
+塔拉 reach10 1 wave 0 kills 1777 lvl 26
+剑客泰菲 reach10 1 wave 0 kills 1603 lvl 26
+图多盖洛 reach10 1 wave 0 kills 1574 lvl 27
+剑客莉莉 reach10 1 wave 0 kills 1511 lvl 25
+BOTTOM10
+表演者•杰瑞 reach10 0 wave 4 kills 56 lvl 6
+恶魔汤姆 reach10 0 wave 4 kills 55 lvl 9
+雪梨 reach10 0 wave 4 kills 52 lvl 8
+兔八哥 reach10 0 wave 4 kills 48 lvl 6
+梦游杰瑞 reach10 0 wave 3 kills 45 lvl 7
+米可 reach10 0 wave 3 kills 43 lvl 6
+恶魔泰菲 reach10 0 wave 3 kills 41 lvl 9
+蒙金奇 reach10 0 wave 3 kills 41 lvl 7
+魔术师 reach10 0 wave 3 kills 41 lvl 7
+天使泰菲 reach10 0 wave 3 kills 39 lvl 5

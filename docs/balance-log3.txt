@@ -1,0 +1,23 @@
+TOP10
+朵朵     win 1 kills 9.8 place 1 talent 疾行
+塔拉     win 0.75 kills 7.5 place 1.75 talent 重击
+兔八哥    win 0.75 kills 6.5 place 1.25 talent 回春
+玛丽     win 0.75 kills 5.8 place 2 talent 铁壁
+侍卫汤姆   win 0.75 kills 5 place 1.75 talent 疾行
+恶魔杰瑞   win 0.5 kills 8 place 1.75 talent 元素亲和
+泰菲     win 0.5 kills 7.3 place 2.5 talent 弹幕
+仙女鼠    win 0.5 kills 6.5 place 2 talent 暴击
+侦探汤姆   win 0.5 kills 6.5 place 1.5 talent 铁壁
+图多盖洛   win 0.5 kills 6.5 place 2.25 talent 元素亲和
+BOTTOM10
+表演者•杰瑞 win 0 kills 1 place 3.75 talent 疾行
+罗宾汉杰瑞  win 0 kills 1 place 5.5 talent 疾行
+苏蕊     win 0 kills 1 place 4.5 talent 疾行
+剑客莉莉   win 0 kills 0.8 place 5.75 talent 疾行
+米雪儿    win 0 kills 0.8 place 3.25 talent 重击
+库博     win 0 kills 0.8 place 3.5 talent 铁壁
+佩克斯    win 0 kills 0.5 place 5.75 talent 疾行
+恶魔汤姆   win 0 kills 0.5 place 5.75 talent 疾行
+托普斯    win 0 kills 0.3 place 6 talent 元素亲和
+斯飞     win 0 kills 0.3 place 6 talent 疾行
+AVG win 0.202 chars 57
