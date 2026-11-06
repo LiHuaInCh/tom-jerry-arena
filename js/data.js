@@ -776,4 +776,22 @@
     'dark+ice': { name: '霜蚀', kind: 'debuff' }
   };
 
+  const TALENTS_V2 = {
+    execution: { name: '处决', desc: '击杀回复 4% 生命', healKill: 0.04 },
+    barrage: { name: '弹幕', desc: '攻速 +12%，伤害 -5%', fireRate: 1.12, damage: 0.95 },
+    heavy: { name: '重击', desc: '伤害 +18%，攻速 -8%', damage: 1.18, fireRate: 0.92 },
+    bulwark: { name: '铁壁', desc: '生命 +15%，移速 -5%', hp: 0.15, speed: 0.95 },
+    swift: { name: '疾行', desc: '移速 +10%，生命 -5%', speed: 1.10, hp: -0.05 },
+    scholar: { name: '学者', desc: '经验 +20%', xp: 1.2 },
+    scavenger: { name: '拾取', desc: '拾取范围 +60', magnet: 60 },
+    crit: { name: '暴击', desc: '暴击率 +8%，暴击伤害 +20%', crit: 0.08, critMul: 0.2 },
+    regen: { name: '回春', desc: '每秒回复 0.5% 生命', regen: 0.005 },
+    elemental: { name: '元素亲和', desc: '融合伤害 +20%', fusion: 0.2 }
+  };
+  const SIG_TALENT = { jerry: 'scavenger', tuffy: 'barrage', swordsman: 'heavy', robin: 'swift', detective: 'crit', tom: 'bulwark', butch: 'execution', knightcat: 'heavy', toots: 'elemental', lightning: 'swift' };
+  const FALLBACK_TALENTS = ['bulwark', 'heavy', 'barrage', 'execution', 'crit', 'elemental', 'regen'];
+  characters.forEach(function (c, i) {
+    var key = SIG_TALENT[c.id] || FALLBACK_TALENTS[i % FALLBACK_TALENTS.length];
+    c.talent = Object.assign({ key: key }, TALENTS_V2[key]);
+  });
 })();

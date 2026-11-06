@@ -166,6 +166,9 @@
   $('charModal').addEventListener('click', function (e) { if (e.target === $('charModal')) closeChar(); });
   document.addEventListener('keydown', function (e) { if (e.code === 'Escape') closeChar(); });
   document.addEventListener('keydown', function (e) { if (e.code === 'KeyE' && g && g.player && TJ.useItem) TJ.useItem(g, g.player); });
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden && state === 'playing' && g && !g.over) pauseGame();
+  });
 
   (function initGuide() {
     var host = document.querySelector('.title-inner');
@@ -212,6 +215,7 @@
       ['小提示', [
         '猫阵营默认近战环绕，鼠阵营多为远程，选角时可看武器类型',
         '元素卡在 7 / 14 级出现，记得先看自己已有元素再选',
+        '远视只增加射程与伤害，不能看见隐身中的目标（隐身对 AI 与远视都有效）',
         '暂停菜单可以查看本局数据，也可以直接结束本局结算'
       ]]
     ];
@@ -260,6 +264,17 @@
       if (g.stats) g.stats.xpMul = (g.stats.xpMul || 1) * (1 + rb.xp);
       g.player.maxHp = Math.round(g.player.maxHp * (1 + rb.hp));
       g.player.hp = g.player.maxHp;
+      const tt = g.player.char.talent;
+      if (tt) {
+        if (tt.damage) st.damage *= tt.damage;
+        if (tt.fireRate) st.fireRate *= tt.fireRate;
+        if (tt.speed) st.speed *= tt.speed;
+        if (tt.crit) st.crit += tt.crit;
+        if (tt.critMul) st.critMul += tt.critMul;
+        if (tt.magnet) st.magnet += tt.magnet;
+        if (tt.xp) { if (g.stats) g.stats.xpMul = (g.stats.xpMul || 1) * tt.xp; else st.xpMul = (st.xpMul || 1) * tt.xp; }
+        if (tt.hp) { g.player.maxHp = Math.round(g.player.maxHp * (1 + tt.hp)); g.player.hp = g.player.maxHp; }
+      }
     }
     if (mode !== 'arena' && TJ.meta) {
       const lv = TJ.meta.level || 1;
@@ -849,6 +864,13 @@
     window.__tjState = state;
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
+    window.__fpsAcc = (window.__fpsAcc || 0) + dt;
+    window.__fpsN = (window.__fpsN || 0) + 1;
+    if (window.__fpsAcc > 1.5) {
+      const fps = window.__fpsN / window.__fpsAcc;
+      TJ.lowFx = fps < 45;
+      window.__fpsAcc = 0; window.__fpsN = 0;
+    }
 
     if (state === 'playing' && g) {
       if (!g.over) {

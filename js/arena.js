@@ -14,7 +14,7 @@
   const BOT_NAMES = ['奶酪猎人', '屋顶飞贼', '厨房老六', '弹簧尾巴', '夜行侠'];
   const COLORS = ['#E4572E', '#4B7DA8', '#4E7F52', '#B06BE0', '#F2A03D', '#2F8F83'];
   const TIME_LIMIT = 180;
-  const KILLS_TO_WIN = 12;
+  const KILLS_TO_WIN = 10;
   const LIVES = 4;
   const RESPAWN_TIME = 2.9;
 
@@ -55,6 +55,16 @@
       color: COLORS[id % COLORS.length], target: null
     };
     f.weaponLevels[f.weapon] = 1;
+    const tal = char.talent;
+    if (tal) {
+      if (tal.damage) f.stats.damage *= tal.damage;
+      if (tal.fireRate) f.stats.fireRate *= tal.fireRate;
+      if (tal.speed) f.stats.speed *= tal.speed;
+      if (tal.crit) f.stats.crit += tal.crit;
+      if (tal.critMul) f.stats.critMul += tal.critMul;
+      if (tal.magnet) f.stats.magnet += tal.magnet;
+      if (tal.hp) { f.maxHp = Math.round(f.maxHp * (1 + tal.hp)); f.hp = f.maxHp; f.baseHp = f.maxHp; }
+    }
     return f;
   }
 
@@ -169,6 +179,9 @@
     v.lives--;
     v.hp = 0;
     v.respawnT = RESPAWN_TIME;
+    if (killer && killer.char && killer.char.talent && killer.char.talent.healKill) {
+      killer.hp = Math.min(killer.maxHp, killer.hp + killer.maxHp * killer.char.talent.healKill);
+    }
     H.burst(g, v.x, v.y, v.char.fur, 20, 300, 5);
     g.effects.push({ kind: 'spark', x: v.x, y: v.y, life: 0.35, max: 0.35, color: v.color || v.char.fur, n: 12, r1: 46, width: 3, rot: rand(g, 0, 6.28) });
     if (TJ.fx) TJ.fx.flash(g, v.color || '#FFF6E0');
@@ -589,6 +602,7 @@
     f.growthT = Math.max(0, (f.growthT || 0) - dt);
     f.shieldT = Math.max(0, (f.shieldT || 0) - dt);
     f.vulnT = Math.max(0, (f.vulnT || 0) - dt);
+    if (f.char.talent && f.char.talent.regen && f.alive) f.hp = Math.min(f.maxHp, f.hp + f.maxHp * f.char.talent.regen * dt);
     f.stillT = (inp.moveX || inp.moveY) ? 0 : (f.stillT || 0) + dt;
     f.elemT = Math.max(0, (f.elemT || 0) - dt);
     f.reactCd = Math.max(0, (f.reactCd || 0) - dt);
