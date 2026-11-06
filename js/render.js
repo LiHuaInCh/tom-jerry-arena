@@ -1024,6 +1024,7 @@
   }
 
   function drawEffect(ctx, e) {
+    if (TJ.lowFx && (e.kind === 'tex' || e.kind === 'spark')) return;
     const k = e.life / e.max;
     if (e.kind === 'ring') {
       ctx.save();

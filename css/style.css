@@ -743,3 +743,9 @@ button { font-family: inherit; }
 .guide-body li { font-size: 12px; line-height: 1.7; color: #6B4A33; }
 
 .up-desc { white-space: pre-line; line-height: 1.5; }
+
+/* 移动端安全区 */
+#hud { padding-top: env(safe-area-inset-top); padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
+#pauseBtn { top: calc(12px + env(safe-area-inset-top)); }
+#dashBtn { bottom: calc(24px + env(safe-area-inset-bottom)); }
+#itemBtn { bottom: calc(176px + env(safe-area-inset-bottom)); }

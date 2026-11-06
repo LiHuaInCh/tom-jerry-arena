@@ -136,6 +136,20 @@
         if (fu.kind === 'burst') dmg *= 1.6;
         else if (fu.kind === 'crit' && g.rng() < 0.3) dmg *= 2;
         else if (fu.kind === 'debuff' || fu.kind === 'dot') dmg *= 1.1;
+        else if (fu.kind === 'freeze') e.freezeT = Math.max(e.freezeT || 0, 0.8);
+        else if (fu.kind === 'chain' || fu.kind === 'aoe') {
+          const rad = fu.kind === 'aoe' ? 170 : 150;
+          for (const n of g.enemies) {
+            if (n === e || n.dead) continue;
+            if (Math.hypot(n.x - e.x, n.y - e.y) > rad) continue;
+            n.hp -= fu.kind === 'aoe' ? 18 : 12;
+            if (n.hp <= 0) killEnemy(g, n);
+          }
+        }
+        else if (fu.kind === 'heal' || fu.kind === 'leech') {
+          const pct = fu.kind === 'leech' ? 0.12 : 0.02;
+          g.player.hp = Math.min(g.player.maxHp, g.player.hp + g.player.maxHp * pct);
+        }
         else if (fu.kind === 'splash') {
           for (const n of g.enemies) {
             if (n === e || n.dead) continue;
@@ -185,6 +199,8 @@
     }
     g.kills++;
     g.score += Math.round((e.def.score + Math.floor(g.wave * 2)) * ((g.cov && g.cov.score) || 1));
+    const tk = g.player.char.talent;
+    if (tk && tk.healKill) g.player.hp = Math.min(g.player.maxHp, g.player.hp + g.player.maxHp * tk.healKill);
     burst(g, e.x, e.y, e.def.fur, 14, 260, 5);
     g.effects.push({ kind: 'spark', x: e.x, y: e.y, life: 0.3, max: 0.3, color: e.def.fur, n: 10, r1: 40, width: 3, rot: rand(g, 0, 6.28) });
     g.effects.push({ kind: 'tex', src: 'assets/fx/kenney/flame_03.png', x: e.x, y: e.y, life: 0.32, max: 0.32, s0: 14, s1: 44, rot: rand(g, 0, 6.28), spin: 1.4 });
@@ -441,6 +457,7 @@
     p.moving = ml > 0.05;
 
     p.skillCd = Math.max(0, p.skillCd - dt);
+    if (p.char.talent && p.char.talent.regen) p.hp = Math.min(p.maxHp, p.hp + p.maxHp * p.char.talent.regen * dt);
     p.hasteT = Math.max(0, p.hasteT - dt);
     p.stealthT = Math.max(0, (p.stealthT || 0) - dt);
     p.slowT = Math.max(0, (p.slowT || 0) - dt);
@@ -579,6 +596,7 @@
       const ux = dx / d, uy = dy / d;
 
       if (e.spawnT > 0.2) continue;
+      if (e.freezeT > 0) { e.freezeT -= dt; continue; }
 
       if (e.pending) {
         e.pending.t -= dt;
@@ -956,10 +974,14 @@
       }
     }
     g.spawnTimer -= dt * (g.boss ? 0.55 : 1);
-    if (g.spawnTimer <= 0 && g.enemies.filter(e => !e.dead).length < 110) {
+    for (const e of g.enemies) {
+      if (!e.dead && Math.hypot(e.x - g.player.x, e.y - g.player.y) > 1400) e.dead = true;
+    }
+    if (g.spawnTimer <= 0 && g.enemies.filter(e => !e.dead).length < 130) {
       const waveNow = Math.max(1, g.wave);
       const pMul = g.pressure > 75 ? 0.7 : (g.pressure > 40 ? 0.85 : 1);
-      g.spawnTimer = Math.max(0.28, 1.35 - waveNow * 0.10) * ((g.cov && g.cov.spawn) || 1) * pMul;
+      const base = Math.max(0.28, 1.35 - waveNow * 0.10);
+      g.spawnTimer = Math.max(0.28, Math.min(1.4, base * ((g.cov && g.cov.spawn) || 1) * pMul));
       let n = waveNow <= 2 ? 1 : (1 + (g.rng() < Math.min(0.9, 0.25 + waveNow * 0.07) ? 1 : 0));
       if (waveNow >= 8 && g.rng() < 0.45) n += 1;
       const pool = ['kitten', 'kitten', 'kitten'];
