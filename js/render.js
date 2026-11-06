@@ -887,6 +887,14 @@
     ctx.restore();
   }
 
+  const fxImgs = {};
+  function fxImg(src) {
+    if (!src) return null;
+    if (!fxImgs[src]) { const im = new Image(); im.src = src; fxImgs[src] = im; }
+    const im = fxImgs[src];
+    return im.complete && im.naturalWidth ? im : null;
+  }
+
   const itemImgs = {};
   function itemIconImg(src) {
     if (!src) return null;
@@ -1037,6 +1045,37 @@
       ctx.globalAlpha = k * 0.5;
       ctx.strokeStyle = '#FFD34D'; ctx.lineWidth = 3;
       ctx.beginPath(); ctx.arc(0, 0, rr2 * 0.62, -e.arc / 2, e.arc / 2); ctx.stroke();
+      ctx.restore();
+    } else if (e.kind === 'tex') {
+      const im = fxImg(e.src);
+      if (im) {
+        const k = Math.max(0, e.life / e.max);
+        ctx.save();
+        ctx.globalAlpha = (e.alpha != null ? e.alpha : 1) * k;
+        ctx.translate(e.x, e.y);
+        if (e.rot) ctx.rotate(e.rot + (1 - k) * (e.spin || 0));
+        const s = (e.s0 || 12) + ((e.s1 || 40) - (e.s0 || 12)) * (1 - k);
+        ctx.drawImage(im, -s / 2, -s / 2, s, s);
+        ctx.restore();
+      }
+    } else if (e.kind === 'spark') {
+      const k = e.life / e.max;
+      const n = e.n || 8;
+      ctx.save();
+      ctx.translate(e.x, e.y);
+      ctx.globalAlpha = k;
+      ctx.strokeStyle = e.color || '#FFE08A';
+      ctx.lineWidth = e.width || 3;
+      ctx.lineCap = 'round';
+      for (let i = 0; i < n; i++) {
+        const a = (i / n) * Math.PI * 2 + (e.rot || 0);
+        const r0 = e.r0 || 6;
+        const r1 = (e.r1 || 34) * (0.4 + 0.6 * (1 - k));
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(a) * r0, Math.sin(a) * r0);
+        ctx.lineTo(Math.cos(a) * r1, Math.sin(a) * r1);
+        ctx.stroke();
+      }
       ctx.restore();
     } else if (e.kind === 'flash') {
       const k = e.life / e.max;

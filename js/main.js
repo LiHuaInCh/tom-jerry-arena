@@ -345,6 +345,7 @@
       wrap.appendChild(el);
     });
     $('levelup').classList.remove('hidden');
+    if (g && g.effects) g.effects.push({ kind: 'tex', src: 'assets/fx/kenney/star_04.png', x: g.player.x, y: g.player.y - 10, life: 0.6, max: 0.6, s0: 20, s1: 90, alpha: 0.9, spin: 1 });
   }
 
   function choose(key) {
@@ -504,9 +505,13 @@
     if (state !== 'playing' || !g) return;
     state = 'paused';
     input.setEnabled(false);
-    $('pauseStats').textContent = g.mode === 'arena'
-      ? '乱斗 · ' + g.player.kills + ' 杀 · 等级 ' + g.player.level + ' · 剩余 ' + Math.max(0, g.timeLimit - g.elapsed | 0) + ' 秒'
-      : '第 ' + g.wave + ' 波 · 击倒 ' + g.kills + ' 只猫 · 得分 ' + g.score;
+    var mins = Math.floor(g.elapsed / 60), secs = Math.floor(g.elapsed % 60);
+    var tstr = mins + ':' + (secs < 10 ? '0' : '') + secs;
+    if (g.mode === 'arena') {
+      $('pauseStats').textContent = '乱斗 · ' + tstr + ' · ' + g.player.kills + ' 杀 · 等级 ' + g.player.level + ' · 剩余 ' + Math.max(0, (g.timeLimit - g.elapsed) | 0) + ' 秒';
+    } else {
+      $('pauseStats').textContent = '无尽 · ' + tstr + ' · 第 ' + g.wave + ' 波 · 击倒 ' + g.kills + ' · 分数 ' + g.score + ' · 等级 ' + g.player.level + ' · 伤害 ' + Math.round(g.stats.damage * 100) + '% · 移速 ' + Math.round(g.stats.speed * 100) + '%';
+    }
     $('pause').classList.remove('hidden');
   }
 
@@ -640,6 +645,14 @@
       '<div class="stat"><span>角色等级</span><b>' + g.level + '</b></div>';
     $('over').classList.remove('hidden');
     state = 'over';
+  }
+
+  function endRun() {
+    if (!g || state === 'over') { goHome(); return; }
+    $('pause').classList.add('hidden');
+    g.over = true;
+    state = 'playing';
+    input.setEnabled(false);
   }
 
   function goHome() {
@@ -860,7 +873,7 @@
   $('startBtn').addEventListener('click', startRun);
   $('retryBtn').addEventListener('click', startRun);
   $('homeBtn').addEventListener('click', goHome);
-  $('quitBtn').addEventListener('click', goHome);
+  $('quitBtn').addEventListener('click', endRun);
   $('resumeBtn').addEventListener('click', resumeGame);
   $('pauseBtn').addEventListener('click', pauseGame);
   $('muteBtn').addEventListener('click', function () {
