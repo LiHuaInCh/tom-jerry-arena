@@ -47,7 +47,7 @@
   function makePlayer(g, charId) {
     const c = D.characters.find(x => x.id === charId) || D.characters[0];
     return {
-      char: c, charId: c.id, skill: c.skill, weapon: c.weapon, elemSlots: [c.element, null], x: D.W / 2, y: D.H / 2, vx: 0, vy: 0,
+      char: c, charId: c.id, skill: c.skill, weapon: c.weapon, elemSlots: [null, null], x: D.W / 2, y: D.H / 2, vx: 0, vy: 0,
       r: c.radius, hp: c.hp, maxHp: c.hp, speed: c.speed,
       facing: -Math.PI / 2, aim: -Math.PI / 2,
       fireCd: 0.12, dashCd: 0, dashT: 0, dashX: 1, dashY: 0, dashHits: null, skillCd: 0, hasteT: 0,
@@ -1030,8 +1030,20 @@
   const RARITY_W = { common: 62, rare: 30, epic: 8 };
   TJ.RARITY = { common: '普通', rare: '稀有', epic: '史诗' };
 
+  function elemChoices(g, slot) {
+    const names = { fire: '火', ice: '冰', thunder: '雷', light: '光', dark: '暗' };
+    const all = Object.keys(names).filter(function (e) { return slot === 0 || e !== g.player.elemSlots[0]; });
+    const two = [];
+    while (two.length < 2 && all.length) two.push(all.splice(Math.floor(g.rng() * all.length), 1)[0]);
+    return two.map(function (e) {
+      return { id: 'elem' + slot + '_' + e, name: '元素 · ' + names[e], desc: slot === 0 ? '填充武器第 1 槽' : '填充第 2 槽，形成融合', icon: names[e], rarity: 'epic' };
+    });
+  }
+
   TJ.getUpgradeChoices = function (g) {
     const p = g.player;
+    if (p.level >= 7 && !p.elemSlots[0]) return elemChoices(g, 0);
+    if (p.level >= 14 && p.elemSlots[0] && !p.elemSlots[1]) return elemChoices(g, 1);
     if ((p.level === 3 || p.level === 6) && !p.subWeapon) {
       const wids = Object.keys(D.weapons).filter(function (k) {
         return k !== p.char.weapon && (D.weapons[k].kind === 'ranged' || D.weapons[k].kind === 'orbit');
@@ -1071,6 +1083,15 @@
   };
 
   TJ.applyUpgrade = function (g, id) {
+    if (id.indexOf('elem') === 0) {
+      const m = id.match(/^elem(\d)_(\w+)$/);
+      if (m) {
+        g.player.elemSlots[Number(m[1])] = m[2];
+        if (g.pendingLevels > 0) g.pendingLevels--;
+        g.events.push({ type: 'upgrade', id: id });
+        return { name: '元素', desc: '' };
+      }
+    }
     if (id.indexOf('sub_') === 0) {
       const w = D.weapons[id.slice(4)];
       if (!w) return null;

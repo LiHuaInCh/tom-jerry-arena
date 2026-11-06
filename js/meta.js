@@ -18,8 +18,7 @@
     sharp: { name: '锐利', desc: '伤害 +2%/级' },
     swift: { name: '疾行', desc: '移速 +1.5%/级' },
     learn: { name: '求知', desc: '经验 +3%/级' },
-    tough: { name: '坚韧', desc: '生命 +2%/级' },
-    origin: { name: '初始元素', desc: '开局第 1 槽使用指定元素（1 级解锁）' }
+    tough: { name: '坚韧', desc: '生命 +2%/级' }
   };
   function save() { try { localStorage.setItem(KEY, JSON.stringify(m)); } catch (e) {} }
   function levelFor(xp) { let lv = 1, need = 100, left = xp; while (left >= need) { left -= need; lv++; need = 100 + (lv - 1) * 60; } return { level: lv, into: left, need: need }; }
