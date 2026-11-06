@@ -47,7 +47,7 @@
   function makePlayer(g, charId) {
     const c = D.characters.find(x => x.id === charId) || D.characters[0];
     return {
-      char: c, charId: c.id, skill: c.skill, weapon: c.weapon, x: D.W / 2, y: D.H / 2, vx: 0, vy: 0,
+      char: c, charId: c.id, skill: c.skill, weapon: c.weapon, elemSlots: [c.element, null], x: D.W / 2, y: D.H / 2, vx: 0, vy: 0,
       r: c.radius, hp: c.hp, maxHp: c.hp, speed: c.speed,
       facing: -Math.PI / 2, aim: -Math.PI / 2,
       fireCd: 0.12, dashCd: 0, dashT: 0, dashX: 1, dashY: 0, dashHits: null, skillCd: 0, hasteT: 0,
@@ -126,6 +126,28 @@
   function damageEnemy(g, e, dmg, crit) {
     if (e.dead) return;
     if (e.armor) dmg *= (1 - e.armor);
+    const pslots = g.player && g.player.elemSlots ? g.player.elemSlots.filter(Boolean) : [];
+    const pel = pslots[0];
+    if (pel && e.element && g.t >= (e.reactAt || 0)) {
+      const fu = (TJ.DATA.fusions || {})[[e.element, pel].sort().join('+')];
+      if (fu) {
+        e.reactAt = g.t + 2.5;
+        addText(g, e.x, e.y - e.r - 26, fu.name, '#FFE08A', 18);
+        if (fu.kind === 'burst') dmg *= 1.6;
+        else if (fu.kind === 'crit' && g.rng() < 0.3) dmg *= 2;
+        else if (fu.kind === 'debuff' || fu.kind === 'dot') dmg *= 1.1;
+        else if (fu.kind === 'splash') {
+          for (const n of g.enemies) {
+            if (n === e || n.dead) continue;
+            if (Math.hypot(n.x - e.x, n.y - e.y) > 90) continue;
+            n.hp -= dmg * 0.3;
+            if (n.hp <= 0) killEnemy(g, n);
+          }
+        }
+        if (pslots.length > 1) dmg *= 1.1;
+      }
+    }
+    g.pressure = Math.min(100, (g.pressure || 0) + dmg * 0.004);
     e.hp -= dmg;
     e.flash = 0.09;
     addText(g, e.x + rand(g, -8, 8), e.y - e.r - 6, Math.round(dmg), crit ? '#FFD34D' : '#FFFFFF', crit ? 24 : 17);
@@ -374,6 +396,7 @@
       if (e.mod === 'swift') e.speed *= 1.45;
       if (e.mod === 'shield') e.armor = 0.35;
     }
+    e.element = { kitten: 'light', spitter: 'ice', bruiser: 'fire', dasher: 'thunder', tom: 'dark', spike: 'light' }[kind] || null;
     g.enemies.push(e);
     if (def.boss) {
       g.boss = e; sfx(g, 'boss'); g.shake = 14;
@@ -917,6 +940,8 @@
 
   function director(g, dt) {
     g.elapsed += dt;
+    g.pressure = Math.max(0, (g.pressure || 0) - dt * 0.5);
+    g.pressure = Math.min(100, g.pressure);
     const wave = Math.floor(g.elapsed / 25) + 1;
     if (wave !== g.wave) {
       g.wave = wave;
@@ -929,7 +954,8 @@
     g.spawnTimer -= dt * (g.boss ? 0.55 : 1);
     if (g.spawnTimer <= 0 && g.enemies.filter(e => !e.dead).length < 110) {
       const waveNow = Math.max(1, g.wave);
-      g.spawnTimer = Math.max(0.28, 1.35 - waveNow * 0.10) * ((g.cov && g.cov.spawn) || 1);
+      const pMul = g.pressure > 75 ? 0.7 : (g.pressure > 40 ? 0.85 : 1);
+      g.spawnTimer = Math.max(0.28, 1.35 - waveNow * 0.10) * ((g.cov && g.cov.spawn) || 1) * pMul;
       let n = waveNow <= 2 ? 1 : (1 + (g.rng() < Math.min(0.9, 0.25 + waveNow * 0.07) ? 1 : 0));
       if (waveNow >= 8 && g.rng() < 0.45) n += 1;
       const pool = ['kitten', 'kitten', 'kitten'];

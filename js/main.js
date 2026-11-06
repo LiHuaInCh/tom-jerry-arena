@@ -70,6 +70,13 @@
       const nm = document.createElement('div');
       nm.className = 'c-name'; nm.textContent = c.name;
       body.appendChild(nm);
+      const clv = TJ.meta ? TJ.meta.charLv(c.id) : 1;
+      if (clv > 1) {
+        const lvEl = document.createElement('span');
+        lvEl.className = 'c-lv';
+        lvEl.textContent = 'Lv.' + clv;
+        card.appendChild(lvEl);
+      }
 
       const tt = document.createElement('div');
       tt.className = 'c-title'; tt.textContent = c.title;
@@ -179,6 +186,25 @@
       if (covenants.has('elite')) { g.cov.elite = 2; g.cov.score *= 1.2; g.cov.list.push('精英'); }
       if (covenants.has('noheal')) { g.cov.noHeal = 1; g.cov.score *= 1.3; g.cov.list.push('禁疗'); }
     }
+    if (TJ.meta) {
+      const plv = TJ.meta.charLv(selected) || 1;
+      g.player.stats ? (g.player.stats.damage *= 1 + 0.005 * (plv - 1)) : (g.stats.damage *= 1 + 0.005 * (plv - 1));
+    }
+    if (TJ.meta) {
+      const rb = TJ.meta.bonuses();
+      const st = g.player.stats || g.stats;
+      st.damage *= 1 + rb.dmg;
+      st.speed *= 1 + rb.speed;
+      if (g.stats) g.stats.xpMul = (g.stats.xpMul || 1) * (1 + rb.xp);
+      g.player.maxHp = Math.round(g.player.maxHp * (1 + rb.hp));
+      g.player.hp = g.player.maxHp;
+    }
+    if (mode !== 'arena' && TJ.meta) {
+      const lv = TJ.meta.level || 1;
+      g.stats.damage *= 1 + 0.01 * (lv - 1);
+      g.stats.speed *= 1 + 0.005 * (lv - 1);
+      g.stats.xpMul = (g.stats.xpMul || 1) * (1 + 0.01 * (lv - 1));
+    }
     g.mode = g.mode || 'survival';
     window.__tjG = g;
     if (god) {
@@ -197,6 +223,7 @@
     $('feed').innerHTML = '';
     $('respawn').classList.add('hidden');
     input.setEnabled(true);
+    if (TJ.meta) { TJ.meta.addUse(selected); refreshProfile(); }
     $('pName').textContent = g.player.char.name;
     $('avatar').src = portraitSrc(g.player.char.id);
   const sk = g.player.skill;
@@ -329,6 +356,7 @@
     last = performance.now(); acc = 0;
     renderBuffs();
     updateHud();
+    if (key === 'infuse1' || key === 'infuse2') setTimeout(function () { showElementPicker(key === 'infuse1' ? 0 : 1); }, 220);
     if (pendingCount() > 0) setTimeout(showLevelUp, 200);
   }
 
@@ -489,7 +517,88 @@
     last = performance.now(); acc = 0;
   }
 
+  const BADGES = [
+    ['first', '初阵', function (m) { return Object.keys(m.chars || {}).length > 0; }],
+    ['lv5', 'Lv5', function (m) { return m.level >= 5; }],
+    ['collector', '十人', function (m) { return Object.keys(m.chars || {}).length >= 10; }],
+    ['covenant', '盟约', function (m) { return (m.covWins || 0) > 0; }]
+  ];
+
+  function showElementPicker(slot) {
+    let ov = document.getElementById('elemPick');
+    if (!ov) {
+      ov = document.createElement('div');
+      ov.id = 'elemPick';
+      ov.className = 'elem-pick';
+      document.body.appendChild(ov);
+    }
+    const NAMES = { fire: '火', ice: '冰', thunder: '雷', light: '光', dark: '暗' };
+    ov.innerHTML = '<div class="ep-box"><div class="ep-title">选择注入元素</div><div class="ep-list">' +
+      Object.keys(NAMES).map(function (k) { return '<button class="ep-btn" data-el="' + k + '">' + NAMES[k] + '</button>'; }).join('') +
+      '</div></div>';
+    ov.classList.add('on');
+    ov.querySelectorAll('.ep-btn').forEach(function (b) {
+      b.addEventListener('click', function () {
+        if (g && g.player && g.player.elemSlots) g.player.elemSlots[slot] = b.dataset.el;
+        ov.classList.remove('on');
+      });
+    });
+  }
+
+  function renderRunes(ov) {
+    const p = TJ.meta.points();
+    const R = TJ.meta.RUNES;
+    ov.innerHTML = '<div class="rm-box"><div class="rm-head">符文 <span>可用 ' + (p.total - p.spent) + ' / 已用 ' + p.spent + '</span><button class="rm-close">×</button></div>' +
+      Object.keys(R).map(function (k) {
+        return '<div class="rm-row"><div class="rm-info"><b>' + R[k].name + '</b><span>' + R[k].desc + '</span></div>' +
+          '<div class="rm-ctl"><button data-r="' + k + '" data-d="-1">−</button><em>' + TJ.meta.runeLv(k) + '</em><button data-r="' + k + '" data-d="1">＋</button></div></div>';
+      }).join('') +
+      '<div class="rm-foot"><button id="rmReset">免费重置</button></div></div>';
+    ov.querySelector('.rm-close').onclick = function () { ov.classList.remove('on'); };
+    ov.querySelectorAll('.rm-ctl button').forEach(function (b) {
+      b.onclick = function () {
+        if (b.dataset.d === '1') TJ.meta.spend(b.dataset.r); else TJ.meta.refund(b.dataset.r);
+        renderRunes(ov);
+      };
+    });
+    ov.querySelector('#rmReset').onclick = function () { TJ.meta.resetRunes(); renderRunes(ov); };
+  }
+
+  function openRunes() {
+    let ov = document.getElementById('runeModal');
+    if (!ov) { ov = document.createElement('div'); ov.id = 'runeModal'; ov.className = 'rune-modal'; document.body.appendChild(ov); }
+    renderRunes(ov);
+    ov.classList.add('on');
+  }
+
+  function refreshProfile() {
+    if (!TJ.meta) return;
+    let el = document.getElementById('profile');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'profile';
+      el.className = 'profile';
+      const host = document.querySelector('.title-inner') || document.body;
+      host.appendChild(el);
+    }
+    const m = TJ.meta.data;
+    BADGES.forEach(function (b) { if (b[2](m)) TJ.meta.award(b[0]); });
+    const lv = TJ.meta.levelInfo();
+    const promo = lv.level - 1;
+    el.innerHTML = '<span>账号 Lv.' + lv.level + '</span><span>经验 ' + lv.into + '/' + lv.need + '</span>' +
+      (promo > 0 ? '<span>晋升 +' + promo + '% 伤害</span>' : '') +
+      BADGES.filter(function (b) { return m.badges[b[0]]; }).map(function (b) { return '<span class="pb" title="' + b[1] + '">' + b[1].slice(0, 1) + '</span>'; }).join('') +
+      '<button class="rune-btn" id="runeBtn">符文</button>';
+    const rb = document.getElementById('runeBtn');
+    if (rb) rb.onclick = openRunes;
+  }
+
   function showOver() {
+    if (g && !g.__metaDone && TJ.meta) {
+      g.__metaDone = true;
+      TJ.meta.addRun({ id: g.player.char.id, score: g.score || 0, kills: g.kills || 0, win: mode === 'arena' ? g.winner === g.player : false, cov: !!(g.cov && g.cov.list.length) });
+      refreshProfile();
+    }
     if (!g) return;
     overShown = true;
     if (g.mode === 'arena') {

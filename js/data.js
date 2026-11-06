@@ -673,6 +673,8 @@
     { id: 'shield',    name: '护盾',   desc: '获得 1 层可再生护盾',           icon: '盾', rarity: 'epic', max: 3, apply(s) { s.shieldMax += 1; } },
     { id: 'explode',   name: '爆炸弹', desc: '弹丸命中时产生小范围爆炸',      icon: '爆', rarity: 'epic', max: 1, apply(s) { s.explode += 1; } },
     { id: 'homing',    name: '追踪',   desc: '弹丸会追踪附近的猫',            icon: '追', rarity: 'epic', max: 1, apply(s) { s.homing += 1; } },
+    { id: 'infuse1',   name: '元素注入', desc: '为武器第 1 槽注入随机元素', icon: '元', rarity: 'rare', max: 3, apply() {} },
+    { id: 'infuse2',   name: '第二元素', desc: '解锁武器第 2 槽（随机元素）', icon: '双', rarity: 'epic', max: 1, apply() {} },
     { id: 'exp',       name: '学识',     desc: '经验获取 +30%',                icon: '学', rarity: 'common', max: 4, apply(s) { s.xpMul = (s.xpMul || 1) * 1.3; } },
     { id: 'orbitN',    name: '环绕刀刃', desc: '环绕武器额外 +1 把刀刃',        icon: '刃', rarity: 'epic', max: 2, apply(s) { s.orbitBonus = (s.orbitBonus || 0) + 1; } },
     { id: 'orbitR',    name: '巨刃',     desc: '环绕伤害 +35%，环绕半径 +20',   icon: '巨', rarity: 'rare', max: 3, apply(s) { s.orbitDmgMul = (s.orbitDmgMul || 1) * 1.35; s.orbitRBonus = (s.orbitRBonus || 0) + 20; } },
@@ -698,24 +700,32 @@
   TJ.DATA = { W, H, characters, weapons, enemies, upgrades, obstacles };
 
   TJ.DATA.evolutions = {
+    '侦探放大镜': [
+      { name: '贯穿分裂', desc: '命中后分裂 2 道 45° 短束，单道伤害 -40%', effect: { beamSplit: 1 } },
+      { name: '聚焦', desc: '伤害 +35%', effect: { dmg: 1.35 } }
+    ],
+    '电流球': [
+      { name: '传染过载', desc: '跳数 +2，衰减 82%→60%', effect: { chainPlus: 2, chainDecay: 0.6 } },
+      { name: '高压', desc: '伤害 +30%', effect: { dmg: 1.3 } }
+    ],
     '平底锅': [
       { name: '震荡巨锅', desc: '爆炸范围 +60，冷却略增', effect: { splash: 60, cd: 1.1 } },
-      { name: '不粘连击', desc: '冷却 -25%，伤害 +10%', effect: { cd: 0.75, dmg: 1.1 } }
+      { name: '轨道扩张', desc: '环绕半径 ×1.6，命中间隔 +0.2s', effect: { orbitMul: 1.6, hitCdAdd: 0.2 } }
     ],
     '大铁锤': [
       { name: '震荡巨锤', desc: '爆炸范围 +70', effect: { splash: 70 }, },
-      { name: '磁力战锤', desc: '伤害 +35%，环绕半径 +10', effect: { dmg: 1.35, orbitR: 10 } }
+      { name: '蓄力重击', desc: '每第 3 次命中 2.2× 伤害，攻速 -15%', effect: { heavy: 1 } }
     ],
     '弓箭': [
       { name: '贯穿之矢', desc: '穿透 +2', effect: { pierce: 2 } },
-      { name: '三连射', desc: '弹射 +2，伤害 +10%', effect: { bounce: 2, dmg: 1.1 } }
+      { name: '定点炮台', desc: '静止 0.8s 后射速 ×2，弹速 -30%', effect: { turret: 1 } }
     ],
     '叉子': [
       { name: '千叉', desc: '穿透 +2', effect: { pierce: 2 } },
       { name: '毒叉', desc: '伤害 +30%', effect: { dmg: 1.3 } }
     ],
     '骑士剑': [
-      { name: '圣剑', desc: '伤害 +35%', effect: { dmg: 1.35 } },
+      { name: '蓄力重击', desc: '每第 3 次命中 2.2× 伤害，攻速 -15%', effect: { heavy: 1 } },
       { name: '旋风剑', desc: '环绕刀刃 +1', effect: { orbitN: 1 } }
     ],
     '泡泡棒': [
@@ -727,8 +737,8 @@
       { name: '燃烧弹', desc: '伤害 +30%', effect: { dmg: 1.3 } }
     ],
     '咸鱼': [
-      { name: '咸鱼风暴', desc: '弹射 +2', effect: { bounce: 2 } },
-      { name: '臭鱼', desc: '穿透 +2，伤害 +10%', effect: { pierce: 2, dmg: 1.1 } }
+      { name: '定点炮台', desc: '静止 0.8s 后射速 ×2，弹速 -30%', effect: { turret: 1 } },
+      { name: '迟滞泡沫', desc: '命中减速 1.5s，伤害 -10%', effect: { slowHit: 1, dmg: 0.9 } }
     ]
   };
 
@@ -754,5 +764,18 @@
     c.element = el;
   });
   TJ.DATA.elementNames = { fire: '火', ice: '冰', thunder: '雷', light: '光', dark: '暗' };
+
+  TJ.DATA.fusions = {
+    'fire+fire': { name: '野火', kind: 'crit' },
+    'ice+ice': { name: '极寒', kind: 'freeze' },
+    'thunder+thunder': { name: '雷鸣', kind: 'chain' },
+    'light+light': { name: '圣辉', kind: 'heal' },
+    'dark+dark': { name: '侵蚀', kind: 'dot' },
+    'fire+ice': { name: '融化', kind: 'burst' },
+    'ice+thunder': { name: '感电', kind: 'aoe' },
+    'dark+light': { name: '净化', kind: 'leech' },
+    'fire+thunder': { name: '爆燃', kind: 'splash' },
+    'dark+ice': { name: '霜蚀', kind: 'debuff' }
+  };
 
 })();
