@@ -853,3 +853,18 @@ html, body { overflow: hidden !important; overscroll-behavior: none; }
 @media (max-height: 480px) {
   #title .title-inner { zoom: 0.42 !important; }
 }
+
+@media (max-height: 560px) {
+  #title .hero { height: 15vh !important; min-height: 78px !important; }
+  #title .brand { margin-top: -14px !important; }
+  #title .title-inner { zoom: 0.52 !important; }
+  #title .char-grid { max-height: 272px !important; }
+  #title .char-card .portrait { width: 48px !important; height: 48px !important; }
+  #title .char-card .c-title { display: block !important; font-size: 10px !important; }
+}
+
+@media (max-height: 560px) {
+  #title .hero { height: 12vh !important; min-height: 64px !important; }
+  #title .title-inner { zoom: 0.5 !important; }
+  #title .char-grid { max-height: 300px !important; }
+}
