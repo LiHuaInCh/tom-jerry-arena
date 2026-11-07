@@ -786,3 +786,22 @@ button { font-family: inherit; }
 @media (orientation: landscape) and (max-height: 400px) {
   #title .title-inner { zoom: 0.42; }
 }
+
+@media (orientation: landscape) and (max-height: 560px) {
+  #title { overflow: hidden !important; align-items: stretch; }
+  #title .title-inner { display: flex; flex-direction: column; height: calc(100vh - 8px); max-height: calc(100vh - 8px); margin: 0; padding: 4px 10px 6px; gap: 4px; transform: none !important; zoom: 1 !important; width: 100% !important; box-sizing: border-box; }
+  #title .title-inner > * { flex: 0 0 auto; }
+  #title .char-grid { flex: 1 1 auto; min-height: 52px; max-height: none !important; overflow-y: auto; }
+}
+
+@media (orientation: landscape) and (max-height: 560px) {
+  #title { justify-content: flex-start !important; align-items: stretch !important; }
+  #title .title-inner { margin: 0 !important; }
+  #title .logo, #title .logo-en { display: none !important; }
+  #title .char-grid { min-height: 96px; }
+}
+
+@media (orientation: landscape) and (max-height: 560px) {
+  #title .title-inner { justify-content: flex-start !important; align-content: flex-start !important; }
+  #title .brand { flex: 0 0 auto; }
+}

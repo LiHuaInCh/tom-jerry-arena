@@ -924,21 +924,36 @@
     input.setEnabled(false);
   }
 
-  const BUILD_TAG = '2026-11-07a';
+  const BUILD_TAG = '2026-11-07b';
   function fitTitle() {
     const t = document.getElementById('title');
+    if (window.innerHeight <= 560) { if (t) { const inn = t.querySelector('.title-inner'); if (inn) { inn.style.transform = ''; inn.style.width = ''; inn.style.zoom = '1'; inn.scrollTop = 0; } t.style.overflow = 'hidden'; t.scrollTop = 0; } return; }
     if (!t || t.classList.contains('hidden')) return;
     const inner = t.querySelector('.title-inner');
     if (!inner) return;
     inner.style.zoom = '1';
-    const avail = t.clientHeight - 8;
-    const h = inner.scrollHeight;
-    if (h > avail && avail > 0) inner.style.zoom = String(Math.max(0.34, avail / h));
+    inner.style.transform = '';
+    inner.style.width = '';
+    const availH = t.clientHeight - 8;
+    const availW = t.clientWidth - 8;
+    const h = inner.scrollHeight, w = inner.scrollWidth;
+    if (!h || !w || availH <= 0) return;
+    const k = Math.min(1, availH / h, availW / w);
+    if (k < 0.999) {
+      inner.style.transformOrigin = 'top center';
+      inner.style.transform = 'scale(' + k.toFixed(4) + ')';
+      inner.style.width = (100 / k).toFixed(2) + '%';
+      t.style.overflow = 'hidden';
+    } else {
+      t.style.overflow = '';
+    }
     t.scrollTop = 0;
   }
   window.addEventListener('resize', function () { setTimeout(fitTitle, 50); });
-  setTimeout(fitTitle, 80);
-  setTimeout(fitTitle, 500);
+  setTimeout(fitTitle, 60);
+  setTimeout(fitTitle, 300);
+  setTimeout(fitTitle, 900);
+  setTimeout(fitTitle, 1600);
   (function markBuild() {
     var host = document.querySelector('.title-inner');
     if (!host) return;
