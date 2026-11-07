@@ -22,26 +22,24 @@
   };
   function save() { try { localStorage.setItem(KEY, JSON.stringify(m)); } catch (e) {} }
   function levelFor(xp) { let lv = 1, need = 100, left = xp; while (left >= need && lv < 50) { left -= need; lv++; need = 100 + (lv - 1) * 60; } return { level: Math.min(50, lv), into: left, need: need }; }
-  function totalPoints() { let p = 0; for (const k in m.chars) p += Math.floor((m.chars[k].lv || 1) / 2); return Math.min(30, p); }
+  function totalPoints() { return Math.min(30, Math.floor(levelFor(m.xp).level / 2)); }
   function spentPoints() { let s = 0; for (const k in m.runes) s += m.runes[k] || 0; return s; }
   TJ.meta = {
     get level() { return m.level; },
     get data() { return m; },
     RUNES: RUNES,
-    addUse(id) { const c = m.chars[id] || (m.chars[id] = { xp: 0, uses: 0 }); c.uses = (c.uses || 0) + 1; c.lv = Math.min(10, 1 + Math.floor(c.uses / 3)); save(); },
+    addUse(id) { return; },
     addRun(o) {
       const gain = Math.max(0, Math.round((o.score || 0) / 10) + (o.kills || 0) * 2);
       m.xp += gain; m.level = levelFor(m.xp).level;
     const earned = Math.floor(m.level / 5);
     if (!m.attrEarned) m.attrEarned = 0;
     if (earned > m.attrEarned) { m.attr = (m.attr || 0) + (earned - m.attrEarned); m.attrEarned = earned; }
-      const c = m.chars[o.id] || (m.chars[o.id] = { xp: 0, uses: 0 });
-      c.xp = (c.xp || 0) + gain; c.lv = Math.min(10, 1 + Math.floor((c.uses || 0) / 3));
       if (o.win) m.wins++;
       if (o.cov) m.covWins++;
       save(); return gain;
     },
-    charLv(id) { return (m.chars[id] && m.chars[id].lv) || 1; },
+    charLv(id) { return 1; },
     award(id) { if (!m.badges[id]) { m.badges[id] = 1; save(); return true; } return false; },
     levelInfo() { return levelFor(m.xp); },
     attrPoints() { return m.attr || 0; },

@@ -945,7 +945,7 @@
     input.setEnabled(false);
   }
 
-  const BUILD_TAG = '2026-11-07p';
+  const BUILD_TAG = '2026-11-07q';
   function titleLockScroll() {
     const t = document.getElementById('title');
     if (t) {
@@ -957,6 +957,7 @@
   setTimeout(titleLockScroll, 100);
 
   function fitTitle() {
+    if (window.matchMedia && window.matchMedia('(pointer: fine)').matches) return;
     const t = document.getElementById('title');
     if (!t || t.classList.contains('hidden')) return;
     const inn = t.querySelector('.title-inner');
