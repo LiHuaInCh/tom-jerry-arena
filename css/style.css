@@ -815,3 +815,7 @@ button { font-family: inherit; }
 
 @media (max-height: 780px) { #title .brand { display: none !important; } }
 @media (max-height: 640px) { #title .foot, #title .tips { display: none !important; } }
+
+html, body { overflow: hidden !important; overscroll-behavior: none; }
+#title { overflow: hidden !important; position: fixed !important; inset: 0 !important; touch-action: none; }
+#title .char-grid { touch-action: pan-y; }

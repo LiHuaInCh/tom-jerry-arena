@@ -924,7 +924,17 @@
     input.setEnabled(false);
   }
 
-  const BUILD_TAG = '2026-11-07c';
+  const BUILD_TAG = '2026-11-07d';
+  function titleLockScroll() {
+    const t = document.getElementById('title');
+    if (t) {
+      t.addEventListener('scroll', function () { t.scrollTop = 0; }, { passive: true });
+      t.scrollTop = 0;
+    }
+    window.addEventListener('scroll', function () { window.scrollTo(0, 0); }, { passive: true });
+  }
+  setTimeout(titleLockScroll, 100);
+
   function fitTitle() {
     const t = document.getElementById('title');
     if (!t || t.classList.contains('hidden')) return;
