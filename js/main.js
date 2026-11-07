@@ -924,7 +924,7 @@
     input.setEnabled(false);
   }
 
-  const BUILD_TAG = '2026-11-07d';
+  const BUILD_TAG = '2026-11-07e';
   function titleLockScroll() {
     const t = document.getElementById('title');
     if (t) {
@@ -969,7 +969,7 @@
     var host = document.querySelector('.title-inner');
     if (!host) return;
     var t = document.createElement('div');
-    t.style.cssText = 'font-size:10px;opacity:.5;margin-top:4px;text-align:center;color:#6B4A32';
+    t.style.cssText = 'font-size:12px;font-weight:700;opacity:.85;margin-top:4px;text-align:center;color:#B5482A';
     t.textContent = '版本 ' + BUILD_TAG;
     host.appendChild(t);
   })();
