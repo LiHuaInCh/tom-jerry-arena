@@ -877,3 +877,6 @@ html, body { overflow: hidden !important; overscroll-behavior: none; }
 }
 
 @media (max-height: 560px) { #title .brand { margin-top: -150px !important; } }
+
+.c-info { position: static !important; margin-top: 4px !important; width: 100% !important; padding: 3px 0 !important; text-align: center; opacity: 1 !important; }
+.c-lv { position: static !important; margin-top: 2px !important; }
