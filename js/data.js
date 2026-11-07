@@ -368,4 +368,11 @@
 
   const WEAK_BOOST = ['米可','魔术师','剑客莉莉','蒙金奇','巴特','兔八哥','天使泰菲','雪梨','梦游杰瑞','恶魔泰菲'];
   characters.forEach(function (c) { if (WEAK_BOOST.indexOf(c.name) >= 0) { c.hp = Math.round(c.hp * 1.15); c.weakBoost = 1; } });
+  const BOTTOM_BUFF = ['库博','斯飞','剑客莉莉','马索尔','追风汤姆','图茨','杰瑞','牛仔杰瑞','佩克斯','恶魔汤姆'];
+  characters.forEach(function (c) {
+    if (BOTTOM_BUFF.indexOf(c.name) < 0) return;
+    c.hp = Math.round(c.hp * 1.08);
+    const w = TJ.DATA.weapons[c.weapon];
+    if (w) w.dmg = Math.round(w.dmg * 1.08);
+  });
 })();

@@ -1,3 +1,4 @@
 id,name,faction,matches,deathRate,avgDeathWave,reach5,reach10,reach15,avgTime,kills,level
-detective,侦探杰瑞,mouse,1,1,4,0,0,0,93,73,6
-jerry,杰瑞,mouse,1,1,11,1,1,0,270,686,21
+detective,侦探杰瑞,mouse,1,1,6,1,0,0,133,145,12
+jerry,杰瑞,mouse,1,1,8,1,0,0,187,257,15
+m01,仙女鼠,mouse,1,1,6,1,0,0,129,141,13
