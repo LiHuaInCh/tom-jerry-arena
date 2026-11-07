@@ -15,6 +15,7 @@
   const hurtPlayer = function () { return TJ.Combat.hurtPlayer.apply(null, arguments); };
   const nearestEnemy = function () { return TJ.Combat.nearestEnemy.apply(null, arguments); };
   const healPlayer = function () { return TJ.Combat.healPlayer.apply(null, arguments); };
+  const explodeAt = function () { return TJ.Combat.explodeAt.apply(null, arguments); };
   const addXp = function () { return TJ.Pickups.addXp.apply(null, arguments); };
   const updatePickups = function () { return TJ.Pickups.update.apply(null, arguments); };
   const zoneOf = function () { return TJ.Missions.zoneOf.apply(null, arguments); };
@@ -908,5 +909,5 @@
 
   TJ.Core = TJ.Core || {};
   TJ.Core.spawnEnemy = spawnEnemy;
-  TJ.Systems = { fire: fire, updatePlayer: updatePlayer, updateEnemies: updateEnemies, updateProjectiles: updateProjectiles, updateEffects: updateEffects, director: director, spawnEnemy: spawnEnemy, explode: explode };
+  TJ.Systems = { ELEM_TAG: ELEM_TAG, FUSE_TXT: FUSE_TXT, fire: fire, updatePlayer: updatePlayer, updateEnemies: updateEnemies, updateProjectiles: updateProjectiles, updateEffects: updateEffects, director: director, spawnEnemy: spawnEnemy, explode: explode };
 })();

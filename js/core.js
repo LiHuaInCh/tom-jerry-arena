@@ -21,6 +21,8 @@
   const updatePickups = TJ.Pickups.update;
   const { damageEnemy, killEnemy, healPlayer, explodeAt, hurtPlayer, nearestEnemy } = TJ.Combat;
   const RARITY_W = { common: 62, rare: 30, epic: 8 };
+  const ELEM_TAG = TJ.Systems.ELEM_TAG;
+  const FUSE_TXT = TJ.Systems.FUSE_TXT;
   const { fire, updatePlayer, updateEnemies, updateProjectiles, updateEffects, director, spawnEnemy } = TJ.Systems;
   const addXp = TJ.Pickups.addXp;
 
