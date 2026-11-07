@@ -819,3 +819,18 @@ button { font-family: inherit; }
 html, body { overflow: hidden !important; overscroll-behavior: none; }
 #title { overflow: hidden !important; position: fixed !important; inset: 0 !important; touch-action: none; }
 #title .char-grid { touch-action: pan-y; }
+
+/* 主页：上下标签缩小，中间选角区放大，卡片变小且整体居中 */
+#title .title-inner { justify-content: center !important; }
+#title .char-grid { grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)) !important; gap: 8px !important; flex: 1 1 auto !important; max-height: 54vh !important; }
+#title .char-card { padding: 6px 4px !important; border-radius: 12px !important; }
+#title .char-card .portrait { width: 52px !important; height: 52px !important; }
+#title .char-card .c-name { font-size: 12px !important; }
+#title .char-card .c-title { font-size: 10px !important; }
+#title .char-card .c-perk { font-size: 9px !important; }
+#title .mode-tab { padding: 5px 12px !important; }
+#title .mode-tab b { font-size: 12px !important; }
+#title .mode-tab span { font-size: 9px !important; }
+#title .guide-btn { font-size: 10px !important; padding: 2px 8px !important; }
+#startBtn { font-size: 17px !important; padding: 8px 34px !important; }
+#title .cov-list { transform: scale(.9); transform-origin: center; }
