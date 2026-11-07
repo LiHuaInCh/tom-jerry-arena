@@ -218,18 +218,6 @@
       var m = TJ.Audio.toggle();
       mbtn.textContent = m ? '音效：关' : '音效：开';
     };
-    var mapBtn = document.createElement('button');
-    mapBtn.id = 'mapBtn';
-    mapBtn.className = 'guide-btn';
-    mapBtn.type = 'button';
-    var isLarge = false;
-    try { isLarge = localStorage.getItem('tj_mapsize') === 'large'; } catch (e) {}
-    mapBtn.textContent = isLarge ? '地图：大型' : '地图：标准';
-    toolsRow.appendChild(mapBtn);
-    mapBtn.onclick = function () {
-      try { localStorage.setItem('tj_mapsize', isLarge ? 'standard' : 'large'); } catch (e) {}
-      location.reload();
-    };
     function saveModal(mode) {
       var raw = '';
       try { raw = localStorage.getItem('tj_meta_v2') || ''; } catch (e) {}
@@ -282,13 +270,6 @@
       zmBtn.textContent = zmLabel(zmVal);
     };
     toolsRow.appendChild(zmBtn);
-    var dbtn = document.createElement('button');
-    dbtn.id = 'dailyBtn';
-    dbtn.className = 'guide-btn';
-    dbtn.type = 'button';
-    var dbest = TJ.meta && TJ.meta.dailyBest ? TJ.meta.dailyBest(String(dailySeed())) : 0;
-    dbtn.textContent = dbest ? ('每日挑战 · 最佳 ' + dbest) : '每日挑战';
-    toolsRow.appendChild(dbtn);
     if (zmBtn && zmBtn.parentNode) zmBtn.parentNode.removeChild(zmBtn);
 
     var setBtn = document.createElement('button');
@@ -301,7 +282,7 @@
       ov.innerHTML = '<div class="guide-box"><div class="guide-head">设置<button class="guide-close">×</button></div><div class="guide-body" id="setBody"></div></div>';
       document.body.appendChild(ov);
       var body = ov.querySelector('#setBody');
-      [btn, mbtn, mapBtn, expBtn, impBtn, dbtn].forEach(function (b) {
+      [btn, mbtn, expBtn, impBtn].forEach(function (b) {
         var row = document.createElement('button');
         row.className = 'set-row';
         row.textContent = b.textContent;
@@ -310,7 +291,6 @@
       });
       ov.querySelector('.guide-close').onclick = function () { ov.remove(); };
     };
-    dbtn.onclick = function () { mode = 'survival'; document.querySelectorAll('.mode-tab').forEach(function (n) { n.classList.toggle('sel', n.dataset.mode === 'survival'); }); startRun(true); };
 
     var SECTIONS = [
       ['基础操作', [
@@ -342,7 +322,7 @@
         '账号等级：每局按分数和击杀获得经验，提升伤害/移速/经验',
         '角色熟练度：每使用 3 次升 1 级，每级 +0.5% 伤害',
         '符文：熟练度换点数，可加伤害/移速/经验/生命，随时免费重置',
-        '徽章：初阵、盟约、Lv5、十人，展示在标题页'
+        '符文：局外成长，提供伤害/移速/经验/生命加成'
       ]],
       ['小提示', [
         '猫阵营默认近战环绕，鼠阵营多为远程，选角时可看武器类型',
@@ -375,15 +355,9 @@
   }
 
   /* ---------- 开局 ---------- */
-  function dailySeed() {
-    const d = new Date();
-    return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
-  }
-
-  function startRun(daily) {
+  function startRun() {
     TJ.Audio.unlock();
-    g = mode === 'arena' ? TJ.createArenaGame({ charId: selected }) : TJ.createGame({ charId: selected, seed: daily ? dailySeed() : undefined });
-    if (daily) { g.daily = true; g.dailyDate = String(dailySeed()); }
+    g = mode === 'arena' ? TJ.createArenaGame({ charId: selected }) : TJ.createGame({ charId: selected });
     g.cov = { spawn: 1, elite: 1, noHeal: 0, score: 1, list: [] };
     if (mode !== 'arena') {
       if (covenants.has('horde')) { g.cov.spawn = 0.8; g.cov.score *= 1.2; g.cov.list.push('怪潮'); }
@@ -401,8 +375,7 @@
       st.speed *= 1 + rb.speed;
       if (g.stats) g.stats.xpMul = (g.stats.xpMul || 1) * (1 + rb.xp);
       g.player.maxHp = Math.round(g.player.maxHp * (1 + rb.hp));
-      g.player.hp = g.player.maxHp;
-      if (TJ.meta.attrBonus) { const ab = TJ.meta.attrBonus(); if (ab.dmg) st.damage *= 1 + ab.dmg; if (ab.speed) st.speed *= 1 + ab.speed; if (ab.hp) { g.player.maxHp = Math.round(g.player.maxHp * (1 + ab.hp)); g.player.hp = g.player.maxHp; } if (ab.xp) g.stats.xpMul = (g.stats.xpMul || 1) * (1 + ab.xp); }
+      g.player.hp = g.player.maxHp;
       const tt = g.player.char.talent;
       if (tt) {
         if (tt.damage) st.damage *= tt.damage;
@@ -414,12 +387,6 @@
         if (tt.xp) { if (g.stats) g.stats.xpMul = (g.stats.xpMul || 1) * tt.xp; else st.xpMul = (st.xpMul || 1) * tt.xp; }
         if (tt.hp) { g.player.maxHp = Math.round(g.player.maxHp * (1 + tt.hp)); g.player.hp = g.player.maxHp; }
       }
-    }
-    if (mode !== 'arena' && TJ.meta) {
-      const lv = TJ.meta.level || 1;
-      g.stats.damage *= 1 + 0.01 * (lv - 1);
-      g.stats.speed *= 1 + 0.005 * (lv - 1);
-      g.stats.xpMul = (g.stats.xpMul || 1) * (1 + 0.01 * (lv - 1));
     }
     g.mode = g.mode || 'survival';
     window.__tjG = g;
@@ -584,7 +551,7 @@
 
       const rar = document.createElement('span');
       rar.className = 'up-rarity';
-      rar.textContent = u.kind === 'weapon_up' ? '武器进化' : u.kind === 'switch' ? '切换武器' : TJ.RARITY[u.rarity] + ' · 强化';
+      rar.textContent = u.kind === 'evo_main' ? '主武器进化' : u.kind === 'evo_sub' ? '副武器进化' : u.kind === 'weapon_up' ? '武器进化' : u.kind === 'switch' ? '切换武器' : TJ.RARITY[u.rarity] + ' · 强化';
       el.appendChild(rar);
 
       const nm = document.createElement('span');
@@ -597,7 +564,7 @@
 
       const st = document.createElement('span');
       st.className = 'up-stack';
-      st.textContent = u.stack ? u.stack : '已拥有 ' + ((g.upgradeCounts || {})[u.id] || 0) + ' / ' + u.max;
+      st.textContent = (u.kind === 'evo_main' || u.kind === 'evo_sub') ? '仅此一次' : (u.stack ? u.stack : '已拥有 ' + ((g.upgradeCounts || {})[u.id] || 0) + ' / ' + u.max);
       el.appendChild(st);
 
       el.addEventListener('click', function () { choose(u.key || u.id); });
@@ -614,7 +581,7 @@
       TJ.Audio.play('click');
       showLevelUp();
     };
-    wrap.appendChild(rf);
+    if (!(choices.length && (choices[0].kind === 'evo_main' || choices[0].kind === 'evo_sub'))) wrap.appendChild(rf);
     $('levelup').classList.remove('hidden');
     if (g && g.effects) g.effects.push({ kind: 'tex', src: 'assets/fx/kenney/star_04.png', x: g.player.x, y: g.player.y - 10, life: 0.6, max: 0.6, s0: 20, s1: 90, alpha: 0.9, spin: 1 });
   }
@@ -805,13 +772,6 @@
     last = performance.now(); acc = 0;
   }
 
-  const BADGES = [
-    ['first', '初阵', function (m) { return Object.keys(m.chars || {}).length > 0; }],
-    ['lv5', 'Lv5', function (m) { return m.level >= 5; }],
-    ['collector', '十人', function (m) { return Object.keys(m.chars || {}).length >= 10; }],
-    ['covenant', '盟约', function (m) { return (m.covWins || 0) > 0; }]
-  ];
-
   function showElementPicker(slot) {
     let ov = document.getElementById('elemPick');
     if (!ov) {
@@ -841,15 +801,8 @@
         return '<div class="rm-row"><div class="rm-info"><b>' + R[k].name + '</b><span>' + R[k].desc + '</span></div>' +
           '<div class="rm-ctl"><button data-r="' + k + '" data-d="-1">−</button><em>' + TJ.meta.runeLv(k) + '</em><button data-r="' + k + '" data-d="1">＋</button></div></div>';
       }).join('') +
-      '<div class="rm-attr"><b>属性点 ' + TJ.meta.attrPoints() + '</b>' +
-        [['dmg', '伤害+2%'], ['spd', '移速+1.5%'], ['hp', '生命+3%'], ['xp', '经验+2%']].map(function (a) {
-          const alloc = (TJ.meta.attrAlloc ? TJ.meta.attrAlloc()[a[0]] : 0) || 0;
-          return '<button data-a="' + a[0] + '">' + a[1] + (alloc ? ' (' + alloc + ')' : '') + '</button>';
-        }).join('') + '</div>' +
-      '<div class="rm-foot"><button id="rmReset">免费重置</button></div></div>';
-    ov.querySelectorAll('[data-a]').forEach(function (b) {
-      b.onclick = function () { if (TJ.meta.spendAttr(b.dataset.a)) renderRunes(ov); };
-    });
+
+      '<div class="rm-foot"><button id="rmReset">免费重置</button></div></div>';
     ov.querySelector('.rm-close').onclick = function () { ov.classList.remove('on'); };
     ov.querySelectorAll('.rm-ctl button').forEach(function (b) {
       b.onclick = function () {
@@ -877,13 +830,9 @@
       const host = document.querySelector('.title-inner') || document.body;
       host.appendChild(el);
     }
-    const m = TJ.meta.data;
-    BADGES.forEach(function (b) { if (b[2](m)) TJ.meta.award(b[0]); });
+    const m = TJ.meta.data;
     const lv = TJ.meta.levelInfo();
-    const promo = lv.level - 1;
-    el.innerHTML = '<span>账号 Lv.' + lv.level + '</span><span>经验 ' + lv.into + '/' + lv.need + '</span>' +
-      (promo > 0 ? '<span>晋升 +' + promo + '% 伤害</span>' : '') +
-      BADGES.filter(function (b) { return m.badges[b[0]]; }).map(function (b) { return '<span class="pb" title="' + b[1] + '">' + b[1].slice(0, 1) + '</span>'; }).join('') +
+    el.innerHTML = '<span>账号 Lv.' + lv.level + '</span><span>经验 ' + lv.into + '/' + lv.need + '</span>' +
       '<button class="rune-btn" id="runeBtn">符文</button>';
     const rb = document.getElementById('runeBtn');
     if (rb) rb.onclick = openRunes;
@@ -891,7 +840,6 @@
 
   function showOver() {
     if (TJ.Audio && TJ.Audio.setMood) TJ.Audio.setMood('over');
-    if (g && g.daily && TJ.meta && TJ.meta.setDaily) TJ.meta.setDaily(g.dailyDate, g.score);
     if (g && !g.__metaDone && TJ.meta) {
       g.__metaDone = true;
       TJ.meta.addRun({ id: g.player.char.id, score: g.score || 0, kills: g.kills || 0, win: mode === 'arena' ? g.winner === g.player : false, cov: !!(g.cov && g.cov.list.length) });
@@ -945,7 +893,7 @@
     input.setEnabled(false);
   }
 
-  const BUILD_TAG = '2026-11-07t';
+  const BUILD_TAG = '2026-11-07j';
   function titleLockScroll() {
     const t = document.getElementById('title');
     if (t) {
@@ -963,24 +911,19 @@
     if (!inn) return;
     inn.style.position = '';
     inn.style.left = '';
+    inn.style.marginLeft = '';
     inn.style.transform = '';
+    inn.style.height = '';
+    inn.style.maxHeight = '';
     const availH = t.clientHeight - 6, availW = t.clientWidth - 6;
-    if (availH <= 0) return;
-    let h = 0, w = 0;
-    for (const c of inn.children) {
-      const st = getComputedStyle(c);
-      if (st.display === 'none') continue;
-      const r = c.getBoundingClientRect();
-      h += r.height + (parseFloat(st.marginTop) || 0) + (parseFloat(st.marginBottom) || 0);
-      w = Math.max(w, r.width);
-    }
-    h += (parseFloat(getComputedStyle(inn).rowGap) || 0) * Math.max(0, inn.children.length - 1);
-    if (!h || !w) return;
+    const h = inn.scrollHeight, w = inn.scrollWidth;
+    if (!h || !w || availH <= 0) return;
     const k = Math.min(1, availH / h, availW / w);
     if (k < 0.995) {
       inn.style.position = 'absolute';
-      inn.style.top = '2px';
+      inn.style.top = Math.max(3, (availH - h * k) / 2 + 2) + 'px';
       inn.style.left = Math.max(0, (t.clientWidth - w * k) / 2) + 'px';
+      inn.style.marginLeft = '0px';
       inn.style.transformOrigin = 'top left';
       inn.style.transform = 'scale(' + k.toFixed(4) + ')';
     }
@@ -1238,7 +1181,41 @@
   refreshModeUI();
   refreshFactionUI();
 
-  $('startBtn').addEventListener('click', startRun);
+  $('startBtn').addEventListener('click', openMapPicker);
+
+  (function resumePendingRun() {
+    try {
+      if (localStorage.getItem('tj_pending') !== '1') return;
+      localStorage.removeItem('tj_pending');
+      var c = localStorage.getItem('tj_last_char');
+      if (c) selected = c;
+      var md = localStorage.getItem('tj_last_mode');
+      if (md) mode = md;
+      setTimeout(function () { startRun(); }, 60);
+    } catch (e) {}
+  })();
+
+  function openMapPicker() {
+    var ov = document.getElementById('mapPicker');
+    if (!ov) { ov = document.createElement('div'); ov.id = 'mapPicker'; ov.className = 'map-modal'; document.body.appendChild(ov); }
+    ov.innerHTML = '<div class="map-box"><div class="map-head">选择地图</div><div class="map-list">' +
+      '<button class="map-card" data-map="standard"><b>标准地图</b><span>2600 × 1950 · 节奏紧凑</span></button>' +
+      '<button class="map-card" data-map="large"><b>大型地图</b><span>7200 × 5400 · 开阔、资源多</span></button>' +
+      '</div><button class="map-cancel">取消</button></div>';
+    ov.classList.add('on');
+    ov.querySelectorAll('.map-card').forEach(function (b) {
+      b.onclick = function () {
+        try {
+          localStorage.setItem('tj_mapsize', b.dataset.map);
+          localStorage.setItem('tj_last_char', selected);
+          localStorage.setItem('tj_last_mode', mode);
+          localStorage.setItem('tj_pending', '1');
+        } catch (e) {}
+        location.reload();
+      };
+    });
+    ov.querySelector('.map-cancel').onclick = function () { ov.classList.remove('on'); };
+  }
   $('retryBtn').addEventListener('click', startRun);
   $('homeBtn').addEventListener('click', goHome);
   $('quitBtn').addEventListener('click', endRun);
@@ -1273,4 +1250,6 @@
   requestAnimationFrame(frame);
 
   if (params.get('play') === '1') startRun();
+  setTimeout(function () { try { refreshProfile(); } catch (e) {} }, 0);
+  setTimeout(function () { try { refreshProfile(); } catch (e) {} }, 600);
 })();

@@ -21,7 +21,7 @@
     tough: { name: '坚韧', desc: '生命 +2%/级' }
   };
   function save() { try { localStorage.setItem(KEY, JSON.stringify(m)); } catch (e) {} }
-  function levelFor(xp) { let lv = 1, need = 100, left = xp; while (left >= need && lv < 50) { left -= need; lv++; need = 100 + (lv - 1) * 60; } return { level: Math.min(50, lv), into: left, need: need }; }
+  function levelFor(xp) { let lv = 1, need = 100, left = xp; while (left >= need && lv < 60) { left -= need; lv++; need = 100 + (lv - 1) * 60; } return { level: Math.min(60, lv), into: left, need: need }; }
   function totalPoints() { return Math.min(30, Math.floor(levelFor(m.xp).level / 2)); }
   function spentPoints() { let s = 0; for (const k in m.runes) s += m.runes[k] || 0; return s; }
   TJ.meta = {
@@ -32,9 +32,6 @@
     addRun(o) {
       const gain = Math.max(0, Math.round((o.score || 0) / 10) + (o.kills || 0) * 2);
       m.xp += gain; m.level = levelFor(m.xp).level;
-    const earned = Math.floor(m.level / 5);
-    if (!m.attrEarned) m.attrEarned = 0;
-    if (earned > m.attrEarned) { m.attr = (m.attr || 0) + (earned - m.attrEarned); m.attrEarned = earned; }
       if (o.win) m.wins++;
       if (o.cov) m.covWins++;
       save(); return gain;
@@ -42,31 +39,11 @@
     charLv(id) { return 1; },
     award(id) { if (!m.badges[id]) { m.badges[id] = 1; save(); return true; } return false; },
     levelInfo() { return levelFor(m.xp); },
-    attrPoints() { return m.attr || 0; },
-    attrAlloc() { return m.attrAlloc || {}; },
-    attrBonus() {
-      const a = m.attrAlloc || {};
-      return { dmg: (a.dmg || 0) * 0.02, speed: (a.spd || 0) * 0.015, hp: (a.hp || 0) * 0.03, xp: (a.xp || 0) * 0.02 };
-    },
-    spendAttr(kind) {
-      if ((m.attr || 0) <= 0) return false;
-      m.attrAlloc = m.attrAlloc || {};
-      m.attrAlloc[kind] = (m.attrAlloc[kind] || 0) + 1;
-      m.attr--;
-      save();
-      return true;
-    },
     points() { return { total: totalPoints(), spent: spentPoints() }; },
     runeLv(id) { return m.runes[id] || 0; },
     spend(id) { if (spentPoints() >= totalPoints() || (m.runes[id] || 0) >= 5) return false; m.runes[id] = (m.runes[id] || 0) + 1; save(); return true; },
     refund(id) { if ((m.runes[id] || 0) <= 0) return false; m.runes[id]--; save(); return true; },
     resetRunes() { m.runes = {}; save(); },
-    setDaily(date, score) {
-      if (!m.daily) m.daily = {};
-      m.daily[date] = Math.max(m.daily[date] || 0, Math.round(score || 0));
-      save();
-    },
-    dailyBest(date) { return (m.daily && m.daily[date]) || 0; },
     bonuses() { return { dmg: 0.02 * (m.runes.sharp || 0), speed: 0.015 * (m.runes.swift || 0), xp: 0.03 * (m.runes.learn || 0), hp: 0.02 * (m.runes.tough || 0) }; }
   };
 })();

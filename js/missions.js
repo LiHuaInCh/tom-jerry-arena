@@ -33,7 +33,16 @@
       if (m.cur >= m.need) {
         m.done = true; m.active = false;
         g.missionPicks = (g.missionPicks || 0) + 1;
-        if (g.missions[g.missionIdx + 1]) { g.missionIdx++; g.missions[g.missionIdx].active = true; addText(g, g.player.x, g.player.y - 90, '新任务：' + g.missions[g.missionIdx].text, '#FFE08A', 20); if (g.missions[g.missionIdx].id === 'timed') g.missionTimer = 60; }
+        if (!g.missions[g.missionIdx + 1]) {
+          const tpl = MISSION_DEFS[Math.floor(g.rng() * MISSION_DEFS.length)];
+          const nm = { id: tpl.id, text: tpl.text, need: tpl.need, cur: 0, done: false, active: false };
+          if (tpl.id === 'zone') { const z2 = ZONES[Math.floor(g.rng() * ZONES.length)]; nm.zoneId = z2.id; nm.text = '在' + z2.name + '击倒 15 只'; }
+          g.missions.push(nm);
+        }
+        g.missionIdx++;
+        g.missions[g.missionIdx].active = true;
+        addText(g, g.player.x, g.player.y - 90, '新任务：' + g.missions[g.missionIdx].text, '#FFE08A', 20);
+        if (g.missions[g.missionIdx].id === 'timed') g.missionTimer = 60;
         addText(g, g.player.x, g.player.y - 70, '任务完成！选择奖励', '#FFD34D', 22);
         if (g.missions.every(function (mm) { return mm.done; }) && !g.ultGiven) { g.ultGiven = true; g.missionPicks++; addText(g, g.player.x, g.player.y - 100, '全部完成：终极强化！', '#FFB44D', 26); }
         g.events.push({ type: 'mission', id: m.id });

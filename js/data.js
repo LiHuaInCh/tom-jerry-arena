@@ -275,16 +275,13 @@
     [/光|镜|圣|天使|净化/, 'light'],
     [/暗|恶魔|影|梦/, 'dark']
   ];
-  characters.forEach(function (c, i) {
-    const w = weapons[c.weapon];
-    let el = null;
-    for (let k = 0; k < ELEM_RULES.length; k++) {
-      if (ELEM_RULES[k][0].test(w.name)) { el = ELEM_RULES[k][1]; break; }
-    }
-    if (!el) el = ['fire', 'ice', 'thunder', 'light', 'dark'][i % 5];
-    c.element = el;
-  });
   TJ.DATA.elementNames = { fire: '火', ice: '冰', thunder: '雷', light: '光', dark: '暗' };
+  weapons.w_aura_yu = { name: '舞花枪', icon: '花', kind: 'aura', dmg: 26, cd: 0.5, orbitR: 94, color: '#F2C14E' };
+  weapons.w_aura_king = { name: '光盾', icon: '盾', kind: 'aura', dmg: 22, cd: 0.5, orbitR: 86, color: '#9CD8FF' };
+  characters.forEach(function (c) {
+    if (c.name === '如玉') c.weapon = 'w_aura_yu';
+    if (c.name === '国王杰瑞') c.weapon = 'w_aura_king';
+  });
 
   TJ.DATA.fusions = (TJ.DATA_PARTS && TJ.DATA_PARTS.fusions) || {};;
 

@@ -98,8 +98,49 @@
     });
   }
 
+  function evoChoices(g) {
+    const p = g.player;
+    const kind = D.weapons[p.char.weapon].kind;
+    const MAP = {
+      orbit: [
+        { id: 'evo_main_dmg', name: '巨力环绕', desc: '环绕伤害 +40%', icon: '力', rarity: 'epic', kind: 'evo_main' },
+        { id: 'evo_main_n', name: '刀刃增殖', desc: '环绕刀刃 +1', icon: '刃', rarity: 'epic', kind: 'evo_main' }
+      ],
+      ranged: [
+        { id: 'evo_main_pierce', name: '贯穿弹', desc: '穿透 +2', icon: '穿', rarity: 'epic', kind: 'evo_main' },
+        { id: 'evo_main_boom', name: '爆裂弹', desc: '爆炸 +1', icon: '爆', rarity: 'epic', kind: 'evo_main' }
+      ],
+      beam: [
+        { id: 'evo_main_focus', name: '聚焦光束', desc: '伤害 +40%', icon: '聚', rarity: 'epic', kind: 'evo_main' },
+        { id: 'evo_main_split', name: '分裂光束', desc: '多重射击 +1', icon: '裂', rarity: 'epic', kind: 'evo_main' }
+      ],
+      aura: [
+        { id: 'evo_aura_dmg', name: '光环灼烧', desc: '光环伤害 +40%', icon: '灼', rarity: 'epic', kind: 'evo_main' },
+        { id: 'evo_aura_r', name: '光环扩张', desc: '光环半径 +30', icon: '扩', rarity: 'epic', kind: 'evo_main' }
+      ],
+      chain: [
+        { id: 'evo_main_chain', name: '连锁过载', desc: '伤害 +30%', icon: '链', rarity: 'epic', kind: 'evo_main' },
+        { id: 'evo_main_wide', name: '扩散电弧', desc: '多重射击 +1', icon: '弧', rarity: 'epic', kind: 'evo_main' }
+      ]
+    };
+    return MAP[kind] || MAP.ranged;
+  }
+  function subEvoChoices() {
+    return [
+      { id: 'evo_sub_dmg', name: '副武器 · 重击', desc: '副武器伤害 +50%', icon: '副', rarity: 'epic', kind: 'evo_sub' },
+      { id: 'evo_sub_cd', name: '副武器 · 连发', desc: '副武器冷却 -30%', icon: '连', rarity: 'epic', kind: 'evo_sub' }
+    ];
+  }
+
   TJ.getUpgradeChoices = function (g) {
     const p = g.player;
+    if (p.level % 5 === 0) {
+      const pool = evoChoices(g).slice();
+      if (p.subWeapon) pool.push.apply(pool, subEvoChoices());
+      else pool.push({ id: 'evo_generic_dmg', name: '武器专精', desc: '武器伤害 +25%', icon: '专', rarity: 'epic', kind: 'evo_main' });
+      for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(g.rng() * (i + 1)); const t = pool[i]; pool[i] = pool[j]; pool[j] = t; }
+      return pool.slice(0, 3);
+    }
     if (p.level >= 7 && !p.elemSlots[0]) return elemChoices(g, 0);
     if (p.level >= 14 && p.elemSlots[0] && !p.elemSlots[1]) return elemChoices(g, 1);
     if ((p.level === 3 || p.level === 6) && !p.subWeapon) {
@@ -151,6 +192,24 @@
   };
 
   TJ.applyUpgrade = function (g, id) {
+    if (id.indexOf('evo_') === 0) {
+      if (id === 'evo_main_dmg') g.stats.damage *= 1.4;
+      else if (id === 'evo_main_n') g.stats.orbitBonus = (g.stats.orbitBonus || 0) + 1;
+      else if (id === 'evo_main_pierce') g.stats.pierce += 2;
+      else if (id === 'evo_main_boom') g.stats.explode += 1;
+      else if (id === 'evo_main_focus') g.stats.damage *= 1.4;
+      else if (id === 'evo_main_split') g.stats.multishot += 1;
+      else if (id === 'evo_main_chain') g.stats.damage *= 1.3;
+      else if (id === 'evo_main_wide') g.stats.multishot += 1;
+      else if (id === 'evo_sub_dmg') g.stats.subDmgMul = (g.stats.subDmgMul || 1) * 1.5;
+      else if (id === 'evo_sub_cd') g.stats.subCdMul = (g.stats.subCdMul || 1) * 0.7;
+      else if (id === 'evo_aura_dmg') g.stats.damage *= 1.4;
+      else if (id === 'evo_aura_r') g.stats.orbitRBonus = (g.stats.orbitRBonus || 0) + 30;
+      else if (id === 'evo_generic_dmg') g.stats.damage *= 1.25;
+      if (g.pendingLevels > 0) g.pendingLevels--;
+      g.events.push({ type: 'upgrade', id: id });
+      return { name: '武器进化' };
+    }
     if (id === 'sub_swap') {
       const p = g.player;
       const pool = Object.keys(D.weapons).filter(function (k) {
