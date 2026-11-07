@@ -924,7 +924,23 @@
     input.setEnabled(false);
   }
 
+  function fitTitle() {
+    const t = document.getElementById('title');
+    if (!t || t.classList.contains('hidden')) return;
+    const inner = t.querySelector('.title-inner');
+    if (!inner) return;
+    inner.style.zoom = '1';
+    const avail = t.clientHeight - 8;
+    const h = inner.scrollHeight;
+    if (h > avail && avail > 0) inner.style.zoom = String(Math.max(0.34, avail / h));
+    t.scrollTop = 0;
+  }
+  window.addEventListener('resize', function () { setTimeout(fitTitle, 50); });
+  setTimeout(fitTitle, 80);
+  setTimeout(fitTitle, 500);
+
   function goHome() {
+    setTimeout(fitTitle, 60);
     if (TJ.Audio && TJ.Audio.setMood) TJ.Audio.setMood('title');
     state = 'title';
     input.setEnabled(false);
