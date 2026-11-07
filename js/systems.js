@@ -141,17 +141,17 @@
       ok = dd > 380 && !inObstacle(g, x, y, def.radius + 10);
     }
     if (!ok) return;
-    const late = wave > 10 ? Math.pow(1.05, wave - 10) : 1;
+    const late = wave > 10 ? Math.pow(1.04, wave - 10) : 1;
     const dyn = Math.max(0.85, Math.min(2.0, Math.sqrt((g.dps || 80) / 100)));
-    let scale = (def.boss ? (1 + Math.max(0, wave - 1) * 0.10) : (1 + Math.max(0, wave - 1) * 0.24)) * late * dyn;
-    if (!def.boss && wave >= 8 && rand(g, 0, 1) < 0.08) scale *= 1.5;
+    let scale = (def.boss ? (1 + Math.max(0, wave - 1) * 0.07) : (1 + Math.max(0, wave - 1) * 0.21)) * late * dyn;
+    if (!def.boss && wave >= 8 && rand(g, 0, 1) < 0.05) scale *= 1.35;
     const e = {
       id: ++g._eid || (g._eid = 1), kind, def, x, y, vx: 0, vy: 0, r: def.radius,
       hp: Math.round(def.hp * scale), maxHp: Math.round(def.hp * scale),
-      speed: def.speed * (1 + Math.min(0.45, wave * 0.016)), dmg: def.dmg * Math.min(2.5, 2.0 + Math.max(0, wave - 5) * 0.05) * (1 + wave * 0.045),
+      speed: def.speed * (1 + Math.min(0.45, wave * 0.016)) * (wave >= 6 && wave <= 9 ? 1.08 : 1), dmg: def.dmg * Math.min(2.2, 1.85 + Math.max(0, wave - 5) * 0.04) * (1 + wave * 0.032),
       flash: 0, hitCd: 0, spawnT: 0.35, dead: false, kx: 0, ky: 0,
       armor: (!def.boss && wave >= 8 && rand(g, 0, 1) < 0.12) ? 0.3 : 0,
-      state: 'idle', stateT: 0, atkCd: rand(g, 0.6, 1.6), charge: null,
+      state: 'idle', stateT: 0, atkCd: rand(g, 0.6, 1.6) * (wave <= 3 ? 1.2 : 1), charge: null,
       pending: null, summoned: 0, walk: rand(g, 0, TAU), boss: !!def.boss, recoil: 0
     };
     const eliteMul = TJ.Missions.zoneOf(g, g.player.x, g.player.y) === 'cellar' ? 1.6 : 1;
@@ -273,6 +273,83 @@
       g.effects.push({ kind: 'ring', x: p.x, y: p.y, r: rad, maxR: rad, life: 0.2, max: 0.2, color: aw.color || '#FFE08A' });
     }
     }
+    if (ow.kind === 'deploy') {
+      g.traps = g.traps || [];
+      p.depCd = (p.depCd || 0) - dt;
+      if (p.depCd <= 0) {
+        p.depCd = ow.cd || 1.2;
+        const tgt = nearestEnemy(g, p.x, p.y, 900);
+        let dx = tgt ? tgt.x - p.x : Math.cos(p.facing || 0) * 200;
+        let dy = tgt ? tgt.y - p.y : Math.sin(p.facing || 0) * 200;
+        const len = Math.hypot(dx, dy) || 1;
+        dx /= len; dy /= len;
+        if (g.traps.length >= (ow.maxActive || 4)) g.traps.shift();
+        g.traps.push({ x: p.x + dx * 200, y: p.y + dy * 200, r: ow.triggerR || 46, arm: ow.armTime || 1, life: ow.duration || 12, dmg: (ow.dmg || 10) * st.damage * 2.2, boomR: ow.boomR || 90, icon: ow.iconImg, chase: ow.sub === 'mine' ? { spd: 78, moved: 0, max: 150, range: 190 } : null });
+      }
+      for (let i = g.traps.length - 1; i >= 0; i--) {
+        const tr = g.traps[i];
+        tr.arm -= dt; tr.life -= dt;
+        if (tr.chase && tr.arm <= 0 && tr.chase.moved < tr.chase.max) {
+          const ct = nearestEnemy(g, tr.x, tr.y, tr.chase.range);
+          if (ct) {
+            const cd2 = Math.hypot(ct.x - tr.x, ct.y - tr.y) || 1;
+            const step = Math.min(tr.chase.spd * dt, tr.chase.max - tr.chase.moved, cd2);
+            tr.x += (ct.x - tr.x) / cd2 * step; tr.y += (ct.y - tr.y) / cd2 * step;
+            tr.chase.moved += step;
+          }
+        }
+        let boom = tr.life <= 0;
+        if (tr.arm <= 0) {
+          for (const e2 of g.enemies) {
+            if (!e2.dead && Math.hypot(e2.x - tr.x, e2.y - tr.y) < tr.r + e2.r) { boom = true; break; }
+          }
+        }
+        if (boom) {
+          for (const e2 of g.enemies) {
+            if (!e2.dead && Math.hypot(e2.x - tr.x, e2.y - tr.y) < tr.boomR + e2.r) damageEnemy(g, e2, tr.dmg, false);
+          }
+          g.effects.push({ kind: 'ring', x: tr.x, y: tr.y, r: 8, maxR: tr.boomR, life: 0.25, max: 0.25, color: ow.color || '#FFB44D' });
+          g.traps.splice(i, 1);
+        }
+      }
+    }
+    if (ow.kind === 'summon') {
+      g.summons = g.summons || [];
+      p.sumCd = (p.sumCd || 0) - dt;
+      if (g.summons.length === 0 && p.sumCd <= 0) {
+        p.sumCd = ow.cd || 12;
+        g.summons.push({ x: p.x + 34, y: p.y, life: ow.duration || 8, atkCd: 0, dmg: (ow.dmg || 14) * st.damage, r: 15, spd: 150, icon: ow.iconImg, stationary: !!ow.stationary, range: ow.range || 0, size: ow.stationary ? 56 : 76, range: 96 });
+        g.effects.push({ kind: 'ring', x: p.x + 34, y: p.y, r: 4, maxR: 60, life: 0.3, max: 0.3, color: '#FFD36A' });
+      }
+      for (let i = g.summons.length - 1; i >= 0; i--) {
+        const su = g.summons[i];
+        su.life -= dt;
+        if (su.life <= 0) { g.summons.splice(i, 1); continue; }
+        const tg = nearestEnemy(g, su.x, su.y, su.range || 96);
+        if (tg) {
+          const dd = Math.hypot(tg.x - su.x, tg.y - su.y) || 1;
+          if (!su.stationary && dd > 42) { su.x += (tg.x - su.x) / dd * su.spd * dt; su.y += (tg.y - su.y) / dd * su.spd * dt; }
+          else {
+            su.atkCd -= dt;
+            if (su.atkCd <= 0) { su.atkCd = 0.8; damageEnemy(g, tg, su.dmg, false); if (su.stationary) g.effects.push({ kind: 'beam', x: su.x, y: su.y, ang: Math.atan2(tg.y - su.y, tg.x - su.x), len: Math.hypot(tg.x - su.x, tg.y - su.y), life: 0.12, max: 0.12, color: '#9FE7FF' }); else g.effects.push({ kind: 'ring', x: tg.x, y: tg.y, r: 4, maxR: 22, life: 0.16, max: 0.16, color: '#FFD36A' }); }
+          }
+        } else {
+          const pd = Math.hypot(p.x - su.x, p.y - su.y) || 1;
+          if (!su.stationary && pd > 90) { su.x += (p.x - su.x) / pd * 120 * dt; su.y += (p.y - su.y) / pd * 120 * dt; }
+        }
+      }
+    }
+    if (ow.kind === 'tether') {
+      p.tetT = (p.tetT || 0) - dt;
+      if (p.tetT <= 0) {
+        p.tetT = 0.35;
+        const tt = nearestEnemy(g, p.x, p.y, 280);
+        if (tt) {
+          damageEnemy(g, tt, (ow.dmg || 10) * st.damage * 0.55, false);
+          g.effects.push({ kind: 'ring', x: tt.x, y: tt.y, r: 6, maxR: 30, life: 0.16, max: 0.16, color: '#9CD8FF' });
+        }
+      }
+    }
     if (ow.kind === 'orbit') {
       p.orbitA = (p.orbitA || 0) + dt * 3.4;
     p.orbitBonus = st.orbitBonus || 0; p.orbitRBonus = st.orbitRBonus || 0;
@@ -291,7 +368,7 @@
             healPlayer(g, p.maxHp * 0.008);
             if (g.rng() < 0.4) sfx(g, 'hit');
             e.orbitCd = (ow.hitCd || 0.45) / (st.fireRate || 1);
-            g.effects.push({ kind: 'ring', x: ox, y: oy, r: 6, maxR: 24, life: 0.18, max: 0.18, color: '#FFE08A' });
+            g.effects.push({ kind: 'ring', x: ox, y: oy, r: 6, maxR: 24, life: 0.18, max: 0.18, color: ow.color || '#FFE08A' });
             break;
           }
         }
@@ -310,7 +387,7 @@
             x: p.x, y: p.y, vx: Math.cos(sa) * (sw.speed || 500), vy: Math.sin(sa) * (sw.speed || 500),
             r: 8, dmg: sw.dmg * st.damage * 0.55 * (st.subDmgMul || 1), from: 'player', kind: sw.proj || 'orb',
             life: 2, hit: {}, color: sw.color || '#BFE9FF',
-            splash: sw.splash || 0, explodeOnDeath: !!sw.splash, pierce: sw.pierce || 0
+            splash: sw.splash || 0, explodeOnDeath: !!sw.splash, pierce: sw.pierce || 0, _sub: sw.sub, _icon: sw.iconImg
           });
           p.subCd = (sw.cd || 1) * 0.7 * (st.subCdMul || 1);
           sfx(g, 'shoot');
@@ -374,6 +451,15 @@
 
       if (e.spawnT > 0.2) continue;
       if (e.freezeT > 0) { e.freezeT -= dt; continue; }
+      if (e.stunT > 0) { e.stunT -= dt; continue; }
+      if (e.slowT > 0) { e.slowT -= dt; if (e.slowT <= 0) e.slowMul = 1; }
+      if (e.dotT > 0) {
+        e.dotT -= dt; e.dotTick = (e.dotTick || 0) + dt;
+        if (e.dotTick >= 0.5) {
+          e.dotTick -= 0.5; e.hp -= e.dotDps * 0.5;
+          if (e.hp <= 0) { killEnemy(g, e); continue; }
+        }
+      }
 
       if (e.pending) {
         e.pending.t -= dt;
@@ -400,8 +486,8 @@
         case 'spitter': {
           const want = 300;
           const dir = d > want + 40 ? 1 : (d < want - 40 ? -1 : 0);
-          e.x += ux * dir * e.def.speed * dt;
-          e.y += uy * dir * e.def.speed * dt;
+          e.x += ux * dir * (e.def.speed * (e.slowMul || 1)) * dt;
+          e.y += uy * dir * (e.def.speed * (e.slowMul || 1)) * dt;
           e.x += -uy * 40 * dt; e.y += ux * 40 * dt;
           e.atkCd -= dt;
           if (e.atkCd <= 0 && d < 700) {
@@ -423,7 +509,7 @@
             e.fuseT = (e.fuseT == null ? 2 : e.fuseT) - dt;
             if (e.fuseT <= 0) { e.exploded = true; explodeAt(g, e.x, e.y, 150, 40 + g.wave * 4, e); e.dead = true; continue; }
           } else if (e.fuseT != null) e.fuseT = 2;
-          e.x += ux * e.def.speed * dt; e.y += uy * e.def.speed * dt;
+          e.x += ux * (e.def.speed * (e.slowMul || 1)) * dt; e.y += uy * (e.def.speed * (e.slowMul || 1)) * dt;
           break;
         }
         case 'hunter': {
@@ -439,8 +525,8 @@
             sfx(g, 'eshoot');
           }
           const keep = 260;
-          if (d > keep) { e.x += ux * e.def.speed * dt; e.y += uy * e.def.speed * dt; }
-          else { e.x -= ux * e.def.speed * 0.4 * dt; e.y -= uy * e.def.speed * 0.4 * dt; }
+          if (d > keep) { e.x += ux * (e.def.speed * (e.slowMul || 1)) * dt; e.y += uy * (e.def.speed * (e.slowMul || 1)) * dt; }
+          else { e.x -= ux * (e.def.speed * (e.slowMul || 1)) * 0.4 * dt; e.y -= uy * (e.def.speed * (e.slowMul || 1)) * 0.4 * dt; }
           break;
         }
         case 'dasher': {
@@ -449,8 +535,8 @@
             e.pending = { kind: 'wind', t: 0.5, ang: Math.atan2(dy, dx) };
             e.atkCd = 2.2;
           } else {
-            e.x += ux * e.def.speed * 0.55 * dt;
-            e.y += uy * e.def.speed * 0.55 * dt;
+            e.x += ux * (e.def.speed * (e.slowMul || 1)) * 0.55 * dt;
+            e.y += uy * (e.def.speed * (e.slowMul || 1)) * 0.55 * dt;
           }
           break;
         }
@@ -463,8 +549,8 @@
           if (e.recoil > 0) {
             e.x -= ux * 150 * dt; e.y -= uy * 150 * dt;
           } else {
-            e.x += ux * e.def.speed * dt;
-            e.y += uy * e.def.speed * dt;
+            e.x += ux * (e.def.speed * (e.slowMul || 1)) * dt;
+            e.y += uy * (e.def.speed * (e.slowMul || 1)) * dt;
           }
           if (d < e.r + p.r + 2 && e.hitCd <= 0) {
             hurtPlayer(g, e.dmg, e.x, e.y);
@@ -611,6 +697,7 @@
     const p = g.player;
     for (const pr of g.projectiles) {
       if (pr.dead) continue;
+      if (pr.from === 'player' && !pr._sub) { const w0 = D.weapons[p.char.weapon] || {}; pr._sub = w0.sub; pr._icon = w0.iconImg; }
       if (pr.from === 'enemy' && !pr.scaled) {
         pr.scaled = true;
         const k = (0.5 + Math.min(0.35, (g.wave || 1) * 0.025)) * rand(g, 0.88, 1.12);
@@ -619,6 +706,19 @@
       }
       pr.life -= dt;
       if (pr.life <= 0) { pr.dead = true; if (pr.explodeOnDeath && pr.from === 'player') explode(g, pr.x, pr.y, pr.splash || 80, pr.dmg * 0.8); continue; }
+      // melee cancel: orbit weapons destroy incoming bullets near the player
+      if (pr.from === 'enemy' && pr.kind !== 'ring') {
+        const mw = D.weapons[p.char.weapon];
+        if (mw && mw.kind === 'orbit') {
+          const mr = (mw.orbitR || 78) + 10 + (p.orbitRBonus || 0);
+          if (Math.hypot(pr.x - p.x, pr.y - p.y) < mr + 22) {
+            pr.dead = true;
+            g.effects.push({ kind: 'ring', x: pr.x, y: pr.y, r: 3, maxR: 26, life: 0.16, max: 0.16, color: '#FFE08A' });
+            if (g.rng() < 0.3) sfx(g, 'hit');
+            continue;
+          }
+        }
+      }
 
       if (pr.kind === 'ring') {
         pr.r += (pr.grow || 500) * dt;
@@ -771,7 +871,7 @@
       const waveNow = Math.max(1, g.wave);
       const pMul = g.pressure > 75 ? 0.7 : (g.pressure > 40 ? 0.85 : 1);
       const base = Math.max(0.28, 1.35 - waveNow * 0.10);
-      g.spawnTimer = Math.max(0.28, Math.min(1.4, base * ((g.cov && g.cov.spawn) || 1) * pMul));
+      g.spawnTimer = Math.max(0.28, Math.min(1.4, base * ((g.cov && g.cov.spawn) || 1) * pMul * (waveNow >= 3 && waveNow <= 5 ? 0.92 : 1)));
       let n = waveNow <= 2 ? 1 : (1 + (g.rng() < Math.min(0.9, 0.25 + waveNow * 0.07) ? 1 : 0));
       if (waveNow >= 8 && g.rng() < 0.45) n += 1;
       const pool = ['kitten', 'kitten', 'kitten'];

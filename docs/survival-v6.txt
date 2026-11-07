@@ -1,0 +1,23 @@
+chars 57 avgDeathRate 0.93 reach5 0.81 reach10 0.30 reach15 0.09 avgTime 177
+TOP10
+图多盖洛 reach10 1 wave 0 kills 1703 lvl 22
+仙女鼠 reach10 1 wave 0 kills 1125 lvl 22
+米特 reach10 1 wave 0 kills 1118 lvl 21
+表演者•杰瑞 reach10 1 wave 12 kills 909 lvl 19
+佩克斯 reach10 1 wave 13 kills 794 lvl 20
+布奇 reach10 1 wave 15 kills 759 lvl 19
+马索尔 reach10 1 wave 12 kills 710 lvl 18
+剑客杰瑞 reach10 1 wave 11 kills 702 lvl 19
+牛仔杰瑞 reach10 1 wave 0 kills 691 lvl 21
+剑客莉莉 reach10 1 wave 11 kills 641 lvl 18
+BOTTOM10
+牛仔汤姆 reach10 0 wave 4 kills 77 lvl 9
+图茨 reach10 0 wave 4 kills 76 lvl 6
+雪梨 reach10 0 wave 4 kills 75 lvl 9
+朵朵 reach10 0 wave 4 kills 74 lvl 5
+凯特 reach10 0 wave 4 kills 72 lvl 8
+音乐家杰瑞 reach10 0 wave 4 kills 53 lvl 7
+米雪儿 reach10 0 wave 3 kills 51 lvl 4
+尼宝 reach10 0 wave 4 kills 42 lvl 6
+米可 reach10 0 wave 3 kills 40 lvl 7
+魔术师 reach10 0 wave 3 kills 13 lvl 2

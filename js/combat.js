@@ -13,6 +13,9 @@
   function damageEnemy(g, e, dmg, crit) {
     if (e.dead) return;
     if (e.armor) dmg *= (1 - e.armor);
+    if (g.stats.stunChance && !e.boss && g.rng() < g.stats.stunChance) e.stunT = 0.35;
+    if (g.stats.slowOnHit && !e.boss) { e.slowT = 1.2; e.slowMul = 1 - g.stats.slowOnHit; }
+    if (g.stats.dotDps && !e.boss) { e.dotT = 2.4; e.dotDps = g.stats.dotDps; e.dotTick = e.dotTick || 0; }
     const pslots = g.player && g.player.elemSlots ? g.player.elemSlots.filter(Boolean) : [];
     const pel = pslots[0];
     if (pel && e.element && g.t >= (e.reactAt || 0)) {
@@ -160,6 +163,7 @@
     if (g.wave >= 10) p.noHealT = Math.max(p.noHealT || 0, 2);
     if (g.wave >= 14) { p.shield = 0; p.shieldCd = Math.max(p.shieldCd, 6); }
     p.hp -= dmg * (1 - g.stats.armor);
+    if (g.missions && TJ.Missions.fail) TJ.Missions.fail(g, 'nohit');
     p.invuln = 0.65; p.hitFlash = 0.3; p.hurtT = 0; g.shake = Math.max(g.shake, 8);
     sfx(g, 'hurt');
     if (sx != null) {

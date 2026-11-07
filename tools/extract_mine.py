@@ -1,0 +1,12 @@
+from PIL import Image, ImageDraw, ImageFilter
+src=Image.open(r'C:/Users/26370/.dsh/attachments/v1/objects/f9/f97e2e1d310e30483a05d8a9ae09134683a6b913487f17b32e9519e98e68ec03').convert('RGBA')
+im=src.crop((148,136,250,198)).resize((408,248),Image.LANCZOS)
+mask=Image.new('L',(408,248),0); d=ImageDraw.Draw(mask)
+d.ellipse([0,0,407,247],fill=255)
+mask=mask.filter(ImageFilter.GaussianBlur(4))
+im.putalpha(mask)
+canvas=Image.new('RGBA',(240,240),(0,0,0,0))
+im.thumbnail((232,232),Image.LANCZOS)
+canvas.alpha_composite(im,((240-im.width)//2,(240-im.height)//2))
+canvas.save('assets/weapon-icons/w_tuffy.png')
+print('ok', im.size)

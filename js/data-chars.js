@@ -439,7 +439,7 @@ TJ.DATA_PARTS.weapons = {
     w_m31: { name: '羊角锤', icon: '羊', kind: 'orbit', dmg: 40, cd: 0.52, orbitR: 78, orbitN: 2, hitCd: 0.45, iconImg: 'assets/weapon-icons/w_m31.png', color: '#C0392B' },
     w_robin: { name: '降落伞', icon: '降', kind: 'orbit', dmg: 44, cd: 0.52, orbitR: 78, orbitN: 2, hitCd: 0.45, iconImg: 'assets/weapon-icons/w_robin.png', color: '#C0392B' },
     w_swordsman: { name: '格挡之剑', icon: '格', kind: 'orbit', dmg: 40, cd: 0.52, orbitR: 78, orbitN: 2, hitCd: 0.45, iconImg: 'assets/weapon-icons/w_swordsman.png', color: '#C0392B' },
-    w_tuffy: { name: '隐形感应雷', icon: '隐', kind: 'chain', dmg: 22, cd: 0.95, range: 600, jumps: 3, iconImg: 'assets/weapon-icons/w_tuffy.png', color: '#FFE08A' },
+    w_tuffy: { name: '隐形感应雷', icon: '隐', kind: 'chain', dmg: 22, cd: 0.95, range: 600, jumps: 3, iconImg: 'assets/weapon-icons/w_tuffy_mine.png?v=5', color: '#FFE08A' },
     w_butch: { name: '旋转桶盖', icon: '旋', kind: 'ranged', dmg: 14, cd: 0.92, speed: 390, range: 800, proj: 'plate', bounce: 2, iconImg: 'assets/weapon-icons/w_butch.png', color: '#E4572E' },
     w_c01: { name: '皇家火炮', icon: '皇', kind: 'ranged', dmg: 27, cd: 1.8, speed: 280, range: 850, proj: 'rocket', splash: 95, iconImg: 'assets/weapon-icons/w_c01.png', color: '#F2A03D' },
     w_c02: { name: '侦探放大镜', icon: '侦', kind: 'beam', dmg: 30, cd: 1, range: 640, width: 26, iconImg: 'assets/weapon-icons/w_c02.png', color: '#FFD34D' },

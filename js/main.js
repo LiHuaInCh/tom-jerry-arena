@@ -59,7 +59,8 @@
 
       const cv = document.createElement('img');
       cv.className = 'portrait';
-      cv.src = portraitSrc(c.id);
+      cv.src = 'assets/sprites/' + c.id + '.png';
+      cv.onerror = function () { this.onerror = null; this.src = portraitSrc(c.id); };
       cv.alt = c.name;
       cv.draggable = false;
       card.appendChild(cv);
@@ -87,7 +88,10 @@
       body.appendChild(pk);
 
       const wp = document.createElement('div');
-      wp.className = 'c-weapon'; wp.textContent = D.weapons[c.weapon].name;
+      wp.className = 'c-weapon';
+      const __wdef = D.weapons[c.weapon];
+      if (__wdef.iconImg) { const wi = document.createElement('img'); wi.className = 'c-wicon'; wi.src = __wdef.iconImg; wi.alt = ''; wp.appendChild(wi); }
+      wp.appendChild(document.createTextNode(__wdef.name));
       body.appendChild(wp);
 
       card.appendChild(body);
@@ -119,6 +123,7 @@
 
   const SKILL_LABEL = { blink: '位移', shield: '护盾', invuln: '无敌', heal: '治疗', haste: '加速', slow: '减速', stealth: '隐身', beam: '光束', nova: '范围爆发' };
 
+  const KIND_CN = { ranged:'远程', orbit:'环绕', aura:'光环', chain:'连锁', tether:'连锁', beam:'光束', deploy:'布置', summon:'召唤' };
   function openChar(c) {
     const w = D.weapons[c.weapon];
     const sk = c.skill;
@@ -127,7 +132,7 @@
     $('cmSub').textContent = c.title + ' · ' + (c.faction === 'cat' ? '猫阵营' : '鼠阵营');
     const tags = $('cmTags');
     tags.innerHTML = '';
-    [(D.elementNames && D.elementNames[c.element] ? D.elementNames[c.element] + '属性' : ''), c.perk, (w.kind === 'melee' ? '近战' : '远程'), SKILL_LABEL[sk.kind] || '技能'].filter(Boolean).forEach(function (t) {
+    [(KIND_CN[w.kind] || ''), (w.label || ''), c.perk, (SKILL_LABEL[sk.kind] || '技能')].filter(Boolean).forEach(function (t) {
       const s = document.createElement('span'); s.textContent = t; tags.appendChild(s);
     });
     $('cmDesc').textContent = c.desc;
@@ -141,9 +146,12 @@
 
     $('cmWIcon').src = w.iconImg || '';
     $('cmWName').textContent = w.name;
-    const wd = w.kind === 'melee'
-      ? '近战 · 伤害 ' + w.dmg + ' · 冷却 ' + w.cd + 's'
-      : '远程 · 伤害 ' + w.dmg + ' · 冷却 ' + w.cd + 's';
+    let wd = (KIND_CN[w.kind] || '') + ' · ' + (w.label || '') + ' · 伤害 ' + w.dmg + ' · 冷却 ' + (w.cd || 1) + 's';
+    if (w.kind === 'orbit') wd += ' · 半径 ' + (w.orbitR || 78);
+    if (w.kind === 'aura') wd += ' · 光环半径 ' + (w.auraR || 96);
+    if (w.kind === 'deploy') wd += ' · 持续 ' + (w.duration || 12) + 's · 上限 ' + (w.maxActive || 4);
+    if (w.kind === 'summon') wd += ' · 存在 ' + (w.duration || 8) + 's';
+    if (w.pellets) wd += ' · 弹丸 ' + w.pellets;
     $('cmWInfo').textContent = wd;
 
     $('cmSIcon').src = sk.iconImg || '';
@@ -358,6 +366,7 @@
   function startRun() {
     TJ.Audio.unlock();
     g = mode === 'arena' ? TJ.createArenaGame({ charId: selected }) : TJ.createGame({ charId: selected });
+    if (TJ.Missions && TJ.Missions.recenter) TJ.Missions.recenter(g);
     g.cov = { spawn: 1, elite: 1, noHeal: 0, score: 1, list: [] };
     if (mode !== 'arena') {
       if (covenants.has('horde')) { g.cov.spawn = 0.8; g.cov.score *= 1.2; g.cov.list.push('怪潮'); }
@@ -893,7 +902,7 @@
     input.setEnabled(false);
   }
 
-  const BUILD_TAG = '2026-11-07j';
+  const BUILD_TAG = '2026-11-08a';
   function titleLockScroll() {
     const t = document.getElementById('title');
     if (t) {

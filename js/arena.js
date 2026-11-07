@@ -282,7 +282,8 @@
       if (cards.length === 2) return cards;
     }
     const out = [];
-    const w = D.weapons[f.weapon];
+    let w = D.weapons[f.weapon];
+    if (w && ['ranged','orbit','beam','chain','aura'].indexOf(w.kind) < 0) w = Object.assign({}, w, { kind: 'ranged', proj: 'bolt', projSpeed: 520, projR: 5, life: 1 });
     if (f.weaponLv < 5) {
       out.push({
         key: 'up:' + f.weapon, kind: 'weapon_up', weapon: f.weapon, icon: w.icon,
@@ -585,6 +586,58 @@
     f.hitFlash = Math.max(0, f.hitFlash - dt);
     f.fireCd -= dt;
     f.dashCd = Math.max(0, f.dashCd - dt);
+    const wK = D.weapons[f.weapon];
+    if (wK && f.alive) {
+      if (wK.kind === 'aura') {
+        f.auraT = (f.auraT || 0) - dt;
+        if (f.auraT <= 0) {
+          f.auraT = 0.45;
+          const R = (wK.auraR || 96);
+          for (const o of g.fighters) {
+            if (o === f || !o.alive) continue;
+            if (Math.hypot(o.x - f.x, o.y - f.y) < R + o.r) damageFighter(g, o, (wK.dmg || 20) * f.stats.damage * 0.85, f);
+          }
+        }
+      }
+      if (wK.kind === 'tether') {
+        f.tetT = (f.tetT || 0) - dt;
+        if (f.tetT <= 0) {
+          f.tetT = 0.4;
+          const t = nearestFighter(g, f, 300);
+          if (t) damageFighter(g, t, (wK.dmg || 15) * f.stats.damage * 0.8, f);
+        }
+      }
+      if (wK.kind === 'summon') {
+        f.sumT = (f.sumT || 0) - dt;
+        f.sumActive = Math.max(0, (f.sumActive || 0) - dt);
+        if (f.sumT <= 0) { f.sumT = wK.cd || 12; f.sumActive = wK.duration || 8; }
+        if (f.sumActive > 0) {
+          f.sumHit = (f.sumHit || 0) - dt;
+          if (f.sumHit <= 0) {
+            f.sumHit = 0.8;
+            const t2 = nearestFighter(g, f, 260);
+            if (t2) damageFighter(g, t2, (wK.dmg || 14) * f.stats.damage * 0.9, f);
+          }
+        }
+      }
+      if (wK.kind === 'deploy') {
+        f.depT = (f.depT || 0) - dt;
+        if (f.depT <= 0) {
+          f.depT = wK.cd || 1.2;
+          const t3 = nearestFighter(g, f, 420);
+          if (t3) { f.bombX = t3.x; f.bombY = t3.y; f.bombT = 0.9; }
+        }
+        if (f.bombT > 0) {
+          f.bombT -= dt;
+          if (f.bombT <= 0) {
+            for (const o of g.fighters) {
+              if (o === f || !o.alive) continue;
+              if (Math.hypot(o.x - f.bombX, o.y - f.bombY) < (wK.boomR || 90) + o.r) damageFighter(g, o, (wK.dmg || 18) * f.stats.damage * 2.0, f);
+            }
+          }
+        }
+      }
+    }
 
     if (f.stats.shieldMax > 0 && f.shield < f.stats.shieldMax && f.shieldCd > 0) {
       f.shieldCd -= dt;

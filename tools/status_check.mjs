@@ -1,0 +1,11 @@
+import fs from 'node:fs'; import vm from 'node:vm';
+const ctx={window:{},console,Math,Set,Object,Array,Number,JSON,Date}; vm.createContext(ctx);
+for (const f of ['js/data-chars.js','js/data-enemies.js','js/data.js','js/feedback.js','js/pickups.js','js/combat.js','js/systems.js','js/core.js','js/missions.js','js/skills.js']) vm.runInContext(fs.readFileSync(f,'utf8'),ctx,{filename:f});
+const TJ=ctx.window.TJ; const g=TJ.createGame({charId:'jerry',seed:3});
+TJ.Core.spawnEnemy(g,'kitten',1,g.player.x+120,g.player.y);
+const e=g.enemies[0]; e.spawnT=0; const hp0=e.hp;
+g.stats.slowOnHit=0.28; g.stats.dotDps=7;
+TJ.Combat.damageEnemy(g,e,1,false);
+console.log('after hit slowMul',e.slowMul,'dotT',e.dotT);
+for(let i=0;i<120;i++) TJ.update(g,1/60,{moveX:0,moveY:0});
+console.log('after 2s hp',Math.round(e.hp),'vs',hp0,'slowT',e.slowT.toFixed(2));

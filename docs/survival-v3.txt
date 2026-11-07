@@ -1,0 +1,23 @@
+chars 57 avgDeathRate 0.96 reach5 0.77 reach10 0.25 reach15 0.05 avgTime 166
+TOP10
+追风汤姆 reach10 1 wave 0 kills 1429 lvl 25
+剑客汤姆 reach10 1 wave 15 kills 833 lvl 22
+托普斯 reach10 1 wave 12 kills 726 lvl 21
+剑客杰瑞 reach10 1 wave 0 kills 708 lvl 21
+仙女鼠 reach10 1 wave 11 kills 686 lvl 21
+牛仔杰瑞 reach10 1 wave 14 kills 677 lvl 22
+佩克斯 reach10 1 wave 11 kills 672 lvl 21
+剑客泰菲 reach10 1 wave 10 kills 600 lvl 21
+马索尔 reach10 1 wave 13 kills 550 lvl 20
+恶魔汤姆 reach10 1 wave 12 kills 512 lvl 21
+BOTTOM10
+凯特 reach10 0 wave 4 kills 72 lvl 8
+图茨 reach10 0 wave 4 kills 66 lvl 9
+恶魔泰菲 reach10 0 wave 4 kills 62 lvl 7
+泰菲 reach10 0 wave 3 kills 54 lvl 8
+音乐家杰瑞 reach10 0 wave 3 kills 53 lvl 6
+侦探泰菲 reach10 0 wave 4 kills 52 lvl 6
+霜月 reach10 0 wave 4 kills 52 lvl 9
+米可 reach10 0 wave 3 kills 50 lvl 5
+尼宝 reach10 0 wave 4 kills 35 lvl 7
+魔术师 reach10 0 wave 3 kills 29 lvl 5

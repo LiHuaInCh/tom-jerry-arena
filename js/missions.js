@@ -24,6 +24,13 @@
     { id: 'nohit', text: '连续 3 波不受伤', need: 3 },
     { id: 'escort', text: '护送小老鼠到鼠洞', need: 1 }
   ];
+  function safeSpot(g, x, y, pad) {
+    if (!g.obstacles) return true;
+    for (const o of g.obstacles) {
+      if (x > o.x - pad && x < o.x + o.w + pad && y > o.y - pad && y < o.y + o.h + pad) return false;
+    }
+    return true;
+  }
   function bumpMission(g, kind, val, zone) {
     if (!g.missions) return;
     for (const m of g.missions) {
@@ -49,9 +56,35 @@
       }
     }
   }
+  function failMission(g, kind) {
+    if (!g.missions) return;
+    const m = g.missions[g.missionIdx];
+    if (!m || m.id !== kind || m.done) return;
+    m.done = true; m.active = false; m.failed = true;
+    addText(g, g.player.x, g.player.y - 90, '任务失败：' + m.text, '#FF8A6A', 20);
+    if (!g.missions[g.missionIdx + 1]) {
+      const tpl = MISSION_DEFS[Math.floor(g.rng() * MISSION_DEFS.length)];
+      const nm = { id: tpl.id, text: tpl.text, need: tpl.need, cur: 0, done: false, active: false };
+      if (tpl.id === 'zone') { const z2 = ZONES[Math.floor(g.rng() * ZONES.length)]; nm.zoneId = z2.id; nm.text = '在' + z2.name + '击倒 15 只'; }
+      g.missions.push(nm);
+    }
+    g.missionIdx++;
+    g.missions[g.missionIdx].active = true;
+    addText(g, g.player.x, g.player.y - 70, '新任务：' + g.missions[g.missionIdx].text, '#FFE08A', 18);
+    if (g.missions[g.missionIdx].id === 'timed') g.missionTimer = 60;
+  }
   TJ.Missions = {
     zoneOf: zoneOf,
     bump: function (g, kind, val, zone) { bumpMission(g, kind, val, zone); },
+    fail: function (g, kind) { failMission(g, kind); },
+    recenter: function (g) {
+      if (!g.decor || !g.decor.length) return;
+      const dx = g.player.x - g.W / 2, dy = g.player.y - g.H / 2;
+      for (const d of g.decor) {
+        d.x = Math.max(120, Math.min(g.W - 120, d.x + dx));
+        d.y = Math.max(120, Math.min(g.H - 120, d.y + dy));
+      }
+    },
     init: function (g) {
       const shuffled = MISSION_DEFS.slice().sort(function () { return g.rng() - 0.5; }).slice(0, 3);
       g.missions = shuffled.map(function (m) { return { id: m.id, text: m.text, need: m.need, cur: 0, done: false }; });
@@ -65,7 +98,18 @@
       g.cheeseT = 4;
       if (g.W > 3000) {
         g.decor = [];
-        for (let i = 0; i < 26; i++) g.decor.push({ x: rand(g, 140, g.W - 140), y: rand(g, 140, g.H - 140), k: Math.floor(g.rng() * 3), s: 16 + g.rng() * 22 });
+        const sx0 = (g.player && g.player.x) || g.W / 2, sy0 = (g.player && g.player.y) || g.H / 2;
+        const d0Pad = 70;
+        for (let i = 0; i < 12; i++) {
+          const a = g.rng() * Math.PI * 2, rr = 160 + g.rng() * 320;
+          const dx0 = Math.max(140, Math.min(g.W - 140, sx0 + Math.cos(a) * rr));
+          const dy0 = Math.max(140, Math.min(g.H - 140, sy0 + Math.sin(a) * rr));
+          if (safeSpot(g, dx0, dy0, d0Pad)) g.decor.push({ x: dx0, y: dy0, k: i % 6, z: zoneOf(g, dx0, dy0), s: 120 + g.rng() * 50 });
+        }
+        for (let i = 0; i < 14; i++) {
+          const rx = rand(g, 140, g.W - 140), ry = rand(g, 140, g.H - 140);
+          if (safeSpot(g, rx, ry, 70)) g.decor.push({ x: rx, y: ry, k: Math.floor(g.rng() * 6), z: zoneOf(g, rx, ry), s: 110 + g.rng() * 50 });
+        }
       }
       const z = ZONES[Math.floor(g.rng() * ZONES.length)];
       const zm = g.missions.find(function (m) { return m.id === 'zone'; });

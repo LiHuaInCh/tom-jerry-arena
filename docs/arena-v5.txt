@@ -1,0 +1,23 @@
+TOP10
+仙女鼠    win 1 kills 10 place 1 talent 暴击
+侦探汤姆   win 1 kills 10 place 1 talent 铁壁
+朵朵     win 1 kills 9 place 1 talent 疾行
+天使杰瑞   win 0.67 kills 9.7 place 1.33 talent 回春
+朝圣者泰菲  win 0.67 kills 7.7 place 1.67 talent 处决
+天使泰菲   win 0.67 kills 6.3 place 1.33 talent 铁壁
+侍卫汤姆   win 0.67 kills 2.3 place 1.67 talent 疾行
+侦探泰菲   win 0.33 kills 5.7 place 2.67 talent 回春
+追风汤姆   win 0.33 kills 5.7 place 2 talent 铁壁
+魔术师    win 0.33 kills 5.3 place 2 talent 铁壁
+BOTTOM10
+鲍姆     win 0 kills 1 place 5.33 talent 回春
+托普斯    win 0 kills 1 place 4.67 talent 元素亲和
+佩克斯    win 0 kills 0.7 place 5.67 talent 疾行
+剑客莉莉   win 0 kills 0.7 place 5.67 talent 疾行
+罗宾汉泰菲  win 0 kills 0.7 place 3 talent 重击
+马索尔    win 0 kills 0.7 place 6 talent 处决
+国王杰瑞   win 0 kills 0.3 place 5.67 talent 铁壁
+如玉     win 0 kills 0.3 place 4.33 talent 疾行
+恶魔汤姆   win 0 kills 0.3 place 6 talent 疾行
+剑客汤姆   win 0 kills 0.3 place 5 talent 重击
+AVG win 0.192 chars 57

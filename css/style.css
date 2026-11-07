@@ -884,3 +884,80 @@ html, body { overflow: hidden !important; overscroll-behavior: none; }
 .up-card.k-evo_sub { border-color: #4B7DA8 !important; box-shadow: 0 0 0 4px rgba(75,125,168,.25), 0 8px 0 rgba(58,36,24,.18) !important; background: linear-gradient(180deg, #EAF4FF, #D9E9FA) !important; }
 .up-card.k-evo_sub .up-rarity { color: #3A6A96 !important; }
 
+
+#title .c-sub { font-size: 10px; font-weight: 800; color: #B4760F; background: #FFF0CC; border-radius: 6px; padding: 1px 6px; }
+
+#title .c-sub { display: none !important; }
+
+/* ---- UI polish ---- */
+.panel { background: linear-gradient(180deg, rgba(74,47,28,.92), rgba(44,26,15,.92)) !important; border: 2px solid rgba(228,161,27,.55) !important; box-shadow: 0 10px 24px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,240,200,.18) !important; }
+.avatar-wrap { border: 3px solid #E4A11B !important; box-shadow: 0 0 0 2px rgba(58,36,24,.6), inset 0 0 0 2px rgba(255,246,224,.5) !important; }
+.hp-bar { background: #22120A !important; border: 2px solid rgba(0,0,0,.5) !important; box-shadow: inset 0 2px 4px rgba(0,0,0,.6); }
+#hpFill { background: linear-gradient(180deg, #FF9A6A, #E4572E 55%, #B93518) !important; box-shadow: inset 0 2px 0 rgba(255,255,255,.28), 0 0 10px rgba(228,87,46,.35) !important; }
+.wave-panel { background: rgba(35,20,12,.55); border-radius: 14px; padding: 6px 14px 4px; }
+#timer { text-shadow: 0 2px 0 rgba(0,0,0,.5), 0 0 14px rgba(255,211,77,.25); }
+.score-panel .kills b { color: #FFD34D; text-shadow: 0 0 10px rgba(255,211,77,.3); }
+.up-card { transition: transform .15s ease, box-shadow .15s ease; }
+.up-card:hover { transform: translateY(-6px); }
+.up-card .up-icon, .up-card .up-ico { box-shadow: 0 4px 10px rgba(0,0,0,.25), inset 0 0 0 2px rgba(255,246,224,.6); }
+#pause .pm-box, #over .over-box, #over .panel { border: 3px solid #E4A11B !important; box-shadow: 0 12px 30px rgba(0,0,0,.4), inset 0 0 0 3px rgba(255,246,224,.35) !important; }
+
+/* ---- results screen ---- */
+#over .modal {
+  background: linear-gradient(180deg, #FFF8E7 0%, #F6E7C4 100%) !important;
+  border: 3px solid #3A2418 !important;
+  border-radius: 22px !important;
+  box-shadow: 0 16px 0 rgba(58,36,24,.18), 0 24px 60px rgba(0,0,0,.45) !important;
+  padding: 26px 30px 22px !important;
+  position: relative;
+  overflow: hidden;
+}
+#over .modal::after {
+  content: ''; position: absolute; inset: 8px; border: 2px dashed rgba(138,106,82,.35); border-radius: 16px; pointer-events: none;
+}
+.over-tag {
+  display: inline-block; background: #3A2418; color: #FFD34D;
+  font-size: 9.5px; letter-spacing: .34em; padding: 4px 12px; border-radius: 999px; margin-bottom: 10px;
+}
+#overTitle {
+  font-size: 30px !important; color: #3A2418 !important; letter-spacing: .06em;
+  text-shadow: 0 2px 0 #FFE9B8, 0 4px 0 rgba(58,36,24,.12);
+  margin: 2px 0 14px !important;
+}
+#over .stats {
+  display: grid !important; grid-template-columns: 1fr 1fr; gap: 10px !important;
+  margin: 0 0 18px !important;
+}
+#over .stat {
+  background: rgba(255,255,255,.55) !important;
+  border: 2px solid rgba(138,106,82,.45) !important;
+  border-radius: 12px !important;
+  padding: 9px 12px !important;
+  display: flex; flex-direction: column; gap: 2px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.7);
+}
+#over .stat span { font-size: 10.5px !important; color: #8A6A52 !important; letter-spacing: .08em; }
+#over .stat b { font-size: 20px !important; color: #3A2418 !important; }
+#over .stat.wide { grid-column: 1 / -1; background: linear-gradient(180deg,#FFEFC2,#FFE29A) !important; border-color: #E4A11B !important; }
+#over .stat.wide b { font-size: 28px !important; color: #B4760F !important; }
+#over .modal-actions { gap: 10px !important; }
+#over .modal-actions .btn { min-width: 130px; }
+.rank-list { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 4px; margin-bottom: 4px; }
+
+#over .modal-actions { flex-direction: row !important; justify-content: center; flex-wrap: wrap; }
+#over .modal { width: min(430px, 94vw) !important; }
+
+#title .c-weapon { display: flex; align-items: center; gap: 3px; }
+#title .c-wicon { width: 18px; height: 18px; object-fit: contain; }
+
+#title .c-wicon { width: 12px !important; height: 12px !important; opacity: .9; }
+@media (pointer: coarse) { #title .c-wicon { width: 10px !important; height: 10px !important; } }
+
+#title .char-card .portrait {
+  width: 78px !important; height: 78px !important;
+  object-fit: contain !important;
+  object-position: 50% 50% !important;
+  transform: none;
+  border-radius: 12px;
+  background: #FFF6E0;
+}

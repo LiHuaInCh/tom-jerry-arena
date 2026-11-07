@@ -203,3 +203,9 @@ cd android && ./gradlew assembleDebug
 - 默认用网页版测试（http://127.0.0.1:8126）
 - 改完代码不要自动构建 APK，等用户明确要求再出包
 - 网页端与手机端布局分开：网页恢复 1.0.9 原版布局，手机保留 1.2.3 自适应布局
+
+
+## 素材致谢
+
+- 家具/厨具贴图：OpenGameArt「Top Down Home Furniture」，作者 drt，CC-BY 3.0
+- 角色立绘与图标：华纳兄弟 / 网易官方素材，非商业同人使用

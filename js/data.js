@@ -275,9 +275,56 @@
     [/光|镜|圣|天使|净化/, 'light'],
     [/暗|恶魔|影|梦/, 'dark']
   ];
+
+  const SUB_LABEL = { summon:'召唤物', rapid:'速射连发', spread:'散射弹丸', lob:'抛物弹跳', homing:'追踪弹', pierce:'穿透长弹', heavy:'蓄力重炮', blade:'短刃快斩', polearm:'长柄横扫', maul:'重锤范围震荡', guard:'守护环绕', burn:'持续灼烧', aegis:'守护光环', arc:'闪电跳跃', tether:'持续电弧', lance:'瞬发贯穿', mine:'触发地雷', spike:'地刺陷阱' };
+  const SUB_KIND = { summon:'summon', rapid:'ranged', spread:'ranged', lob:'ranged', homing:'ranged', pierce:'ranged', heavy:'ranged', blade:'orbit', polearm:'orbit', maul:'orbit', guard:'orbit', burn:'aura', aegis:'aura', arc:'chain', tether:'tether', lance:'beam', mine:'deploy', spike:'deploy' };
+  const CHAR_SUB = { m09:'summon', m30:'summon', toots:'summon', c13:'rapid', lightning:'rapid', m08:'rapid', c04:'rapid', m10:'spread', m19:'spread', c03:'spread', c16:'spread', m21:'lob', c05:'lob', c14:'lob', c06:'lob', m11:'homing', m16:'homing', m22:'homing', m23:'homing', m18:'pierce', m25:'pierce', m26:'pierce', m28:'heavy', butch:'heavy', m20:'heavy', swordsman:'blade', m04:'blade', m05:'blade', m27:'blade', jerry:'polearm', m17:'polearm', robin:'polearm', c12:'polearm', tom:'maul', m29:'maul', m31:'maul', c10:'maul', m02:'guard', c11:'guard', knightcat:'guard', m06:'burn', c08:'burn', m12:'burn', c01:'aegis', m01:'aegis', m07:'arc', m15:'arc', c07:'tether', m14:'tether', c02:'lance', detective:'lance', m03:'lance', tuffy:'mine', c09:'mine', c15:'spike', m13:'mine', m24:'spike' };
+  const KIND_CN = { ranged:'远程', orbit:'环绕', aura:'光环', chain:'连锁', tether:'连锁', beam:'光束', deploy:'布置', summon:'召唤' };
+  const SUB_DESC = { rapid:'高射速持续压制', spread:'多弹丸近距爆发', lob:'抛物弹跳范围伤害', homing:'自动追踪残血', pierce:'直线穿透清场', heavy:'慢速高伤重击', blade:'贴身快速连斩', polearm:'横扫范围更大', maul:'重锤震荡', guard:'减伤守护', burn:'持续灼烧', aegis:'守护与反伤', arc:'闪电跳跃', tether:'持续电弧', lance:'瞬发贯穿', mine:'布置地雷', spike:'地刺陷阱', summon:'召唤伙伴协同' };
+  characters.forEach(function (c) {
+    const sub2 = CHAR_SUB[c.id];
+    if (sub2) { c.title = KIND_CN[SUB_KIND[sub2]] + ' · ' + SUB_LABEL[sub2]; c.perk = SUB_DESC[sub2] || c.perk; }
+  });
+  characters.forEach(function (c) {
+    const sub = CHAR_SUB[c.id];
+    const baseW = weapons[c.weapon];
+    if (!sub || !baseW) return;
+    const w = Object.assign({}, baseW);
+    weapons[c.id + '_w'] = w;
+    c.weapon = c.id + '_w';
+    let __h = 0;
+    for (let q = 0; q < c.id.length; q++) __h = (__h * 31 + c.id.charCodeAt(q)) % 360;
+    const PREFIX = [
+      ['烈焰', 'hsl(18,85%,58%)'], ['寒霜', 'hsl(196,80%,62%)'], ['雷鸣', 'hsl(268,70%,62%)'],
+      ['暗影', 'hsl(250,45%,45%)'], ['圣光', 'hsl(45,90%,60%)'], ['翠风', 'hsl(140,55%,50%)'],
+      ['岩铁', 'hsl(30,30%,50%)'], ['星辉', 'hsl(320,70%,65%)']
+    ];
+    const pfx = PREFIX[__h % PREFIX.length];
+    w.name = pfx[0] + '·' + baseW.name;
+    w.color = pfx[1];
+    w.kind = SUB_KIND[sub];
+    w.sub = sub;
+    w.label = SUB_LABEL[sub];
+    if (sub === 'rapid') { w.cd = Math.round((w.cd || 1) * 0.7 * 100) / 100; }
+    if (sub === 'heavy') { w.dmg = Math.round((w.dmg || 10) * 1.35); w.cd = Math.round((w.cd || 1) * 1.25 * 100) / 100; }
+    if (sub === 'spread') { w.pellets = 4; w.spread = 30; }
+    if (sub === 'lob') { w.gravity = 900; w.bounce = 1; w.boom = Math.round((w.dmg || 10) * 0.3); }
+    if (sub === 'summon') { w.kind = 'summon'; w.cd = 12; w.duration = 8; w.dmg = Math.round((w.dmg || 14) * 1.2); if (c.id === 'm09') { w.stationary = true; w.range = 96; w.duration = 10; } }
+    if (sub === 'mine') { w.duration = 12; w.triggerR = 46; w.armTime = 1.2; w.maxActive = 4; w.boomR = 90; }
+    if (sub === 'spike') { w.duration = 12; w.triggerR = 40; w.armTime = 0.8; w.maxActive = 4; }
+    if (sub === 'aegis') { w.selfDR = 0.08; }
+    if (sub === 'burn') { w.auraR = 96; w.tickCd = 0.45; w.tickDmg = Math.round((w.dmg || 10) * 1.6); }
+  });
+  const TOP_NERF = ['c16', 'knightcat'];
+  characters.forEach(function (c) {
+    if (TOP_NERF.indexOf(c.id) < 0) return;
+    c.hp = Math.round(c.hp * 0.95);
+    const w = weapons[c.weapon];
+    if (w) w.dmg = Math.round(w.dmg * 0.95);
+  });
   TJ.DATA.elementNames = { fire: '火', ice: '冰', thunder: '雷', light: '光', dark: '暗' };
-  weapons.w_aura_yu = { name: '舞花枪', icon: '花', kind: 'aura', dmg: 26, cd: 0.5, orbitR: 94, color: '#F2C14E' };
-  weapons.w_aura_king = { name: '光盾', icon: '盾', kind: 'aura', dmg: 22, cd: 0.5, orbitR: 86, color: '#9CD8FF' };
+  weapons.w_aura_yu = { name: '舞花枪', icon: '花', iconImg: 'assets/weapon-icons/w_c08.png', kind: 'aura', sub: 'burn', label: '持续灼烧', dmg: 26, cd: 0.5, orbitR: 94, auraR: 96, tickCd: 0.45, tickDmg: 40, color: '#F2C14E' };
+  weapons.w_aura_king = { name: '光盾', icon: '盾', iconImg: 'assets/weapon-icons/w_m06.png', kind: 'aura', sub: 'burn', label: '持续灼烧', dmg: 22, cd: 0.5, orbitR: 86, auraR: 96, tickCd: 0.45, tickDmg: 36, color: '#9CD8FF' };
   characters.forEach(function (c) {
     if (c.name === '如玉') c.weapon = 'w_aura_yu';
     if (c.name === '国王杰瑞') c.weapon = 'w_aura_king';
