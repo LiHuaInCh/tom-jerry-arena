@@ -1,0 +1,11 @@
+import fs from 'node:fs'; import vm from 'node:vm';
+const ctx={window:{},console,Math,Set,Object,Array,Number,JSON,Date}; vm.createContext(ctx);
+for (const f of ['js/data-chars.js','js/data-enemies.js','js/data.js','js/feedback.js','js/pickups.js','js/combat.js','js/systems.js','js/core.js','js/missions.js','js/skills.js']) vm.runInContext(fs.readFileSync(f,'utf8'),ctx,{filename:f});
+const TJ=ctx.window.TJ; const g=TJ.createGame({charId:'c08',seed:1});
+console.log('elem', g.player.char.element, 'weapon', TJ.DATA.weapons[g.player.char.weapon].kind);
+for(let i=0;i<600;i++) TJ.update(g,1/60,{moveX:0,moveY:0});
+console.log('kills', g.kills, 'wave', g.wave, 'damaged', g.enemies.filter(e=>e.hp<e.maxHp).length);
+g.player.level=5; g.pendingLevels=1;
+const ch=TJ.getUpgradeChoices(g); console.log('choices', ch.map(c=>c.name).join('|'));
+TJ.applyUpgrade(g,'evo_aura_r');
+console.log('orbitRBonus', g.stats.orbitRBonus, 'mainEvo', g.mainEvo);

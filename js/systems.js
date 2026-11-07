@@ -260,9 +260,22 @@
     if (p.moving) p.walk += dt * 11 * st.speed;
 
     const ow = D.weapons[p.char.weapon];
+    const aw = D.weapons[p.char.weapon];
+    if (aw && aw.kind === 'aura') {
+    p.auraT = (p.auraT || 0) - dt;
+    if (p.auraT <= 0) {
+      p.auraT = 0.45;
+      const rad = (aw.orbitR || 88) + (st.orbitRBonus || 0);
+      for (const e2 of g.enemies) {
+        if (e2.dead) continue;
+        if (Math.hypot(e2.x - p.x, e2.y - p.y) < rad + e2.r) damageEnemy(g, e2, aw.dmg * st.damage * (st.orbitDmgMul || 1) * 0.9, false);
+      }
+      g.effects.push({ kind: 'ring', x: p.x, y: p.y, r: rad, maxR: rad, life: 0.2, max: 0.2, color: aw.color || '#FFE08A' });
+    }
+    }
     if (ow.kind === 'orbit') {
       p.orbitA = (p.orbitA || 0) + dt * 3.4;
-      p.orbitBonus = st.orbitBonus || 0; p.orbitRBonus = st.orbitRBonus || 0;
+    p.orbitBonus = st.orbitBonus || 0; p.orbitRBonus = st.orbitRBonus || 0;
       const on = (ow.orbitN || 2) + (p.orbitBonus || 0);
       const orad = (ow.orbitR || 78) + 8 + (p.orbitRBonus || 0);
       for (const e of g.enemies) {

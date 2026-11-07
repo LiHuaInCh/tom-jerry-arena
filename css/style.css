@@ -836,55 +836,51 @@ html, body { overflow: hidden !important; overscroll-behavior: none; }
 #title .cov-list { transform: scale(.9); transform-origin: center; }
 
 #title .title-tools { display: none !important; }
-#title .title-inner { zoom: 1 !important; }
 #setBtn { position: fixed; top: 10px; right: 12px; z-index: 40; border: 2px solid #3A2418; background: #FFF6E0; color: #3A2418; border-radius: 999px; padding: 3px 14px; font-size: 12px; font-weight: 800; cursor: pointer; font-family: inherit; display: none; }
 .set-row { display: block; width: 100%; margin: 6px 0; border: 2px solid #B8905F; background: #FFF6E0; color: #3A2418; border-radius: 10px; padding: 10px 12px; font-size: 13px; font-weight: 800; cursor: pointer; font-family: inherit; text-align: left; }
+
 #startBtn { font-size: 15px !important; padding: 6px 26px !important; }
 
-#title .hero { display: flex !important; height: 17vh !important; min-height: 96px !important; flex-basis: auto !important; }
-#title .hero .logo, #title .hero .logo-en, #title .brand .logo, #title .brand .logo-en { display: block !important; }
+/* 保留 j 版整体布局，应用最新的卡片细节 */
+#title .c-info { position: static !important; width: 100% !important; margin: 4px 0 0 !important; padding: 3px 0 !important; text-align: center; opacity: 1 !important; }
+#title .c-lv { position: static !important; margin: 2px 0 0 !important; }
 
-#title .brand { display: block !important; }
-#title .char-grid { max-height: 340px !important; }
-
-@media (max-height: 560px) {
-  #title .title-inner { zoom: 0.46 !important; }
-}
-@media (max-height: 480px) {
-  #title .title-inner { zoom: 0.42 !important; }
-}
-
-@media (max-height: 560px) {
-  #title .hero { height: 15vh !important; min-height: 78px !important; }
-  #title .brand { margin-top: -14px !important; }
-  #title .title-inner { zoom: 0.52 !important; }
-  #title .char-grid { max-height: 272px !important; }
-  #title .char-card .portrait { width: 48px !important; height: 48px !important; }
-  #title .char-card .c-title { display: block !important; font-size: 10px !important; }
-}
-
-@media (max-height: 560px) {
+/* 手机端：1.2.3 自适应布局 */
+@media (pointer: coarse) {
   #title .hero { height: 12vh !important; min-height: 64px !important; }
+  #title .brand { margin-top: -54px !important; position: relative; z-index: 3; }
   #title .title-inner { zoom: 0.5 !important; }
   #title .char-grid { max-height: 300px !important; }
+  #title .char-card .portrait { width: 48px !important; height: 48px !important; }
+  #title .char-card .c-title { display: block !important; }
+  #title .char-card .c-perk { display: none !important; }
+  #title .cov-title { display: none !important; }
+  #title .mode-tab b { font-size: 13px !important; }
+  #title .mode-tab span { display: none !important; }
+  #title #startBtn { font-size: 14px !important; padding: 5px 22px !important; }
 }
 
-@media (max-height: 560px) {
-  #title .hero { height: 20vh !important; min-height: 88px !important; }
-  #title .hero img { object-position: center 30% !important; }
-  #title .brand { margin-top: -54px !important; position: relative; z-index: 3; }
-  #title .brand .logo { text-shadow: 0 2px 0 rgba(255,246,224,.85), 0 0 12px rgba(255,246,224,.7); }
+@media (pointer: coarse) {
+  #title .hero { display: flex !important; }
+  #title .brand { display: block !important; }
+  #title .logo { display: block !important; }
 }
 
-@media (max-height: 560px) { #title .brand { margin-top: -150px !important; } }
+#profile { display: flex !important; }
 
-.c-info { position: static !important; margin-top: 4px !important; width: 100% !important; padding: 3px 0 !important; text-align: center; opacity: 1 !important; }
-.c-lv { position: static !important; margin-top: 2px !important; }
+.map-modal { position: fixed; inset: 0; z-index: 120; display: none; align-items: center; justify-content: center; background: rgba(43,27,18,.55); padding: 16px; }
+.map-modal.on { display: flex; }
+.map-box { width: min(520px, 96vw); background: #FFF8E7; border: 3px solid #3A2418; border-radius: 20px; box-shadow: 0 6px 0 #B8905F; padding: 14px; }
+.map-head { font-size: 16px; font-weight: 900; color: #3A2418; margin-bottom: 10px; text-align: center; }
+.map-list { display: flex; flex-direction: column; gap: 10px; }
+.map-card { text-align: left; border: 3px solid #3A2418; background: #F2E2C6; border-radius: 14px; padding: 12px 14px; cursor: pointer; font-family: inherit; }
+.map-card b { display: block; font-size: 15px; color: #3A2418; }
+.map-card span { font-size: 11px; color: #8A6A52; }
+.map-card:hover { background: #FFE9C6; }
+.map-cancel { margin-top: 10px; width: 100%; border: 0; background: transparent; color: #8A6A52; font-size: 12px; cursor: pointer; font-family: inherit; }
 
-@media (pointer: fine) {
-  #title .title-inner { zoom: 1 !important; transform: none !important; }
-  #title .hero { height: auto !important; min-height: 165px !important; }
-  #title .brand { margin-top: 0 !important; }
-  #title .char-grid { max-height: 316px !important; }
-  #title { overflow-y: auto !important; }
-}
+.up-card.k-evo_main { border-color: #E4A11B !important; box-shadow: 0 0 0 4px rgba(228,161,27,.28), 0 8px 0 rgba(58,36,24,.18) !important; background: linear-gradient(180deg, #FFF6DC, #FFEFC2) !important; }
+.up-card.k-evo_main .up-rarity { color: #B4760F !important; }
+.up-card.k-evo_sub { border-color: #4B7DA8 !important; box-shadow: 0 0 0 4px rgba(75,125,168,.25), 0 8px 0 rgba(58,36,24,.18) !important; background: linear-gradient(180deg, #EAF4FF, #D9E9FA) !important; }
+.up-card.k-evo_sub .up-rarity { color: #3A6A96 !important; }
+
