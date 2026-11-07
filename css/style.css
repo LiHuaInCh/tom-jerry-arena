@@ -805,3 +805,13 @@ button { font-family: inherit; }
   #title .title-inner { justify-content: flex-start !important; align-content: flex-start !important; }
   #title .brand { flex: 0 0 auto; }
 }
+
+/* 全局弹性主页（不依赖媒体查询） */
+#title { align-items: stretch !important; justify-content: flex-start !important; padding: 0 !important; overflow: hidden !important; }
+#title .title-inner { display: flex !important; flex-direction: column !important; justify-content: flex-start !important; height: 100% !important; max-height: 100% !important; margin: 0 !important; padding: 6px 12px 8px !important; gap: 4px !important; box-sizing: border-box !important; transform: none !important; zoom: 1 !important; width: 100% !important; }
+#title .title-inner > * { flex: 0 0 auto; }
+#title .char-grid { flex: 1 1 auto !important; min-height: 80px !important; max-height: none !important; overflow-y: auto !important; }
+@media (max-height: 700px) { #title .logo, #title .logo-en { display: none !important; } }
+
+@media (max-height: 780px) { #title .brand { display: none !important; } }
+@media (max-height: 640px) { #title .foot, #title .tips { display: none !important; } }
