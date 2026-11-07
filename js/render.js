@@ -1202,6 +1202,8 @@
     }
 
     function draw(g, t) {
+      let zoomMul = 1.05;
+      try { const z = localStorage.getItem('tj_zoom'); if (z) zoomMul = parseFloat(z); } catch (e) {}
       const zoom = clamp(Math.min(cw, ch) / 560, 0.56, 1.15) * 0.9;
       const vw = cw / zoom, vh = ch / zoom;
       let camX = g.cam.x, camY = g.cam.y;

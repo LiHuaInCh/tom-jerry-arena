@@ -270,6 +270,18 @@
     impBtn.className = 'guide-btn'; impBtn.type = 'button'; impBtn.textContent = '导入存档';
     impBtn.onclick = function () { saveModal('import'); };
     toolsRow.appendChild(impBtn);
+    var zmBtn = document.createElement('button');
+    zmBtn.id = 'zoomBtn'; zmBtn.className = 'guide-btn'; zmBtn.type = 'button';
+    var zmVal = 1.05;
+    try { var zs = localStorage.getItem('tj_zoom'); if (zs) zmVal = parseFloat(zs); } catch (e) {}
+    var zmLabel = function (v) { return v <= 0.95 ? '视角：远' : (v >= 1.15 ? '视角：近' : '视角：中'); };
+    zmBtn.textContent = zmLabel(zmVal);
+    zmBtn.onclick = function () {
+      zmVal = zmVal >= 1.15 ? 0.9 : (zmVal <= 0.95 ? 1.05 : 1.2);
+      try { localStorage.setItem('tj_zoom', String(zmVal)); } catch (e) {}
+      zmBtn.textContent = zmLabel(zmVal);
+    };
+    toolsRow.appendChild(zmBtn);
     var dbtn = document.createElement('button');
     dbtn.id = 'dailyBtn';
     dbtn.className = 'guide-btn';
@@ -277,6 +289,27 @@
     var dbest = TJ.meta && TJ.meta.dailyBest ? TJ.meta.dailyBest(String(dailySeed())) : 0;
     dbtn.textContent = dbest ? ('每日挑战 · 最佳 ' + dbest) : '每日挑战';
     toolsRow.appendChild(dbtn);
+    if (zmBtn && zmBtn.parentNode) zmBtn.parentNode.removeChild(zmBtn);
+
+    var setBtn = document.createElement('button');
+    setBtn.id = 'setBtn';
+    setBtn.textContent = '设置';
+    document.body.appendChild(setBtn);
+    setBtn.onclick = function () {
+      var ov = document.createElement('div');
+      ov.className = 'guide-modal on';
+      ov.innerHTML = '<div class="guide-box"><div class="guide-head">设置<button class="guide-close">×</button></div><div class="guide-body" id="setBody"></div></div>';
+      document.body.appendChild(ov);
+      var body = ov.querySelector('#setBody');
+      [btn, mbtn, mapBtn, expBtn, impBtn, dbtn].forEach(function (b) {
+        var row = document.createElement('button');
+        row.className = 'set-row';
+        row.textContent = b.textContent;
+        row.onclick = function () { ov.remove(); b.click(); };
+        body.appendChild(row);
+      });
+      ov.querySelector('.guide-close').onclick = function () { ov.remove(); };
+    };
     dbtn.onclick = function () { mode = 'survival'; document.querySelectorAll('.mode-tab').forEach(function (n) { n.classList.toggle('sel', n.dataset.mode === 'survival'); }); startRun(true); };
 
     var SECTIONS = [
@@ -912,7 +945,7 @@
     input.setEnabled(false);
   }
 
-  const BUILD_TAG = '2026-11-07h';
+  const BUILD_TAG = '2026-11-07i';
   function titleLockScroll() {
     const t = document.getElementById('title');
     if (t) {
@@ -924,7 +957,29 @@
   setTimeout(titleLockScroll, 100);
 
   function fitTitle() {
-    return;
+    const t = document.getElementById('title');
+    if (!t || t.classList.contains('hidden')) return;
+    const inn = t.querySelector('.title-inner');
+    if (!inn) return;
+    inn.style.position = '';
+    inn.style.left = '';
+    inn.style.marginLeft = '';
+    inn.style.transform = '';
+    inn.style.height = '';
+    inn.style.maxHeight = '';
+    const availH = t.clientHeight - 6, availW = t.clientWidth - 6;
+    const h = inn.scrollHeight, w = inn.scrollWidth;
+    if (!h || !w || availH <= 0) return;
+    const k = Math.min(1, availH / h, availW / w);
+    if (k < 0.995) {
+      inn.style.position = 'absolute';
+      inn.style.top = Math.max(3, (availH - h * k) / 2 + 2) + 'px';
+      inn.style.left = Math.max(0, (t.clientWidth - w * k) / 2) + 'px';
+      inn.style.marginLeft = '0px';
+      inn.style.transformOrigin = 'top left';
+      inn.style.transform = 'scale(' + k.toFixed(4) + ')';
+    }
+    t.scrollTop = 0;
   }
   window.addEventListener('resize', function () { setTimeout(fitTitle, 50); });
   setTimeout(fitTitle, 60);
@@ -1074,6 +1129,8 @@
 
   function frame(now) {
     window.__tjState = state;
+    var sb = document.getElementById('setBtn');
+    if (sb) sb.style.display = state === 'title' ? 'inline-block' : 'none';
     var mhEl = document.getElementById('missionHud');
     if (mhEl) mhEl.style.display = state === 'playing' ? '' : 'none';
     const dt = Math.min(0.05, (now - last) / 1000);
