@@ -838,3 +838,5 @@ html, body { overflow: hidden !important; overscroll-behavior: none; }
 #title .title-tools { display: none !important; }
 #setBtn { position: fixed; top: 10px; right: 12px; z-index: 40; border: 2px solid #3A2418; background: #FFF6E0; color: #3A2418; border-radius: 999px; padding: 3px 14px; font-size: 12px; font-weight: 800; cursor: pointer; font-family: inherit; display: none; }
 .set-row { display: block; width: 100%; margin: 6px 0; border: 2px solid #B8905F; background: #FFF6E0; color: #3A2418; border-radius: 10px; padding: 10px 12px; font-size: 13px; font-weight: 800; cursor: pointer; font-family: inherit; text-align: left; }
+
+#startBtn { font-size: 15px !important; padding: 6px 26px !important; }
