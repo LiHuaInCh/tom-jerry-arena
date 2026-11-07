@@ -924,6 +924,7 @@
     input.setEnabled(false);
   }
 
+  const BUILD_TAG = '2026-11-07a';
   function fitTitle() {
     const t = document.getElementById('title');
     if (!t || t.classList.contains('hidden')) return;
@@ -938,6 +939,14 @@
   window.addEventListener('resize', function () { setTimeout(fitTitle, 50); });
   setTimeout(fitTitle, 80);
   setTimeout(fitTitle, 500);
+  (function markBuild() {
+    var host = document.querySelector('.title-inner');
+    if (!host) return;
+    var t = document.createElement('div');
+    t.style.cssText = 'font-size:10px;opacity:.5;margin-top:4px;text-align:center;color:#6B4A32';
+    t.textContent = '版本 ' + BUILD_TAG;
+    host.appendChild(t);
+  })();
 
   function goHome() {
     setTimeout(fitTitle, 60);
