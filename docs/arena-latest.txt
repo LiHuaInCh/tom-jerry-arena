@@ -1,0 +1,23 @@
+TOP10
+天使杰瑞   win 1 kills 10 place 1 talent 回春
+塔拉     win 1 kills 9.3 place 1 talent 重击
+泰菲     win 0.67 kills 8.3 place 1.67 talent 弹幕
+侦探汤姆   win 0.67 kills 7.7 place 1.33 talent 铁壁
+仙女鼠    win 0.67 kills 6.7 place 1.33 talent 暴击
+恶魔杰瑞   win 0.67 kills 6 place 2 talent 元素亲和
+音乐家杰瑞  win 0.33 kills 5 place 3.67 talent 疾行
+牛仔汤姆   win 0.33 kills 5 place 3.67 talent 重击
+图多盖洛   win 0.33 kills 4.7 place 2 talent 元素亲和
+天使泰菲   win 0.33 kills 4.3 place 2 talent 铁壁
+BOTTOM10
+库博     win 0 kills 1 place 3 talent 铁壁
+斯飞     win 0 kills 1 place 5.67 talent 疾行
+剑客莉莉   win 0 kills 0.7 place 5 talent 疾行
+马索尔    win 0 kills 0.7 place 6 talent 处决
+追风汤姆   win 0 kills 0.7 place 5 talent 铁壁
+图茨     win 0 kills 0.7 place 4 talent 元素亲和
+杰瑞     win 0 kills 0.3 place 6 talent 拾取
+牛仔杰瑞   win 0 kills 0.3 place 5.67 talent 回春
+佩克斯    win 0 kills 0 place 6 talent 疾行
+恶魔汤姆   win 0 kills 0 place 6 talent 疾行
+AVG win 0.152 chars 57

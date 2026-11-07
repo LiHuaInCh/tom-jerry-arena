@@ -530,6 +530,24 @@
   function updateBoss(g, e, dt, d, ux, uy) {
     const p = g.player;
     e.atkCd -= dt;
+    if (e.kind === 'bigboss') {
+      e.qkT = (e.qkT == null ? 4 : e.qkT) - dt;
+      if (e.qkT <= 0) {
+        e.qkT = 6;
+        g.effects.push({ kind: 'ring', x: e.x, y: e.y, r: 30, maxR: 300, life: 0.5, max: 0.5, color: '#FF9A5C' });
+        addText(g, e.x, e.y - 90, '地震！', '#FF7A5C', 26);
+        if (d < 300) hurtPlayer(g, e.dmg * 0.9, e.x, e.y);
+        g.shake = Math.max(g.shake || 0, 12);
+        sfx(g, 'boss');
+      }
+      e.chT = (e.chT == null ? 5 : e.chT) - dt;
+      if (e.chT <= 0 && d > 140) {
+        e.chT = 5;
+        e.kx = ux * 560; e.ky = uy * 560;
+        addText(g, e.x, e.y - 70, '冲撞！', '#FFB44D', 24);
+        sfx(g, 'charge');
+      }
+    }
 
     if (e.kind === 'tom') {
       const frac = e.hp / e.maxHp;

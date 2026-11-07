@@ -880,3 +880,13 @@ html, body { overflow: hidden !important; overscroll-behavior: none; }
 
 .c-info { position: static !important; margin-top: 4px !important; width: 100% !important; padding: 3px 0 !important; text-align: center; opacity: 1 !important; }
 .c-lv { position: static !important; margin-top: 2px !important; }
+
+@media (pointer: fine) {
+  #title .title-inner { zoom: 1 !important; transform: none !important; }
+  #title .hero { height: auto !important; min-height: 165px !important; }
+  #title .brand { margin-top: 0 !important; }
+  #title .logo, #title .logo-en { display: block !important; }
+  #title .char-grid { max-height: 316px !important; }
+}
+
+@media (pointer: fine) { #title { overflow-y: auto !important; } }
