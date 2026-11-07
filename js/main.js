@@ -270,18 +270,6 @@
     impBtn.className = 'guide-btn'; impBtn.type = 'button'; impBtn.textContent = '导入存档';
     impBtn.onclick = function () { saveModal('import'); };
     toolsRow.appendChild(impBtn);
-    var zmBtn = document.createElement('button');
-    zmBtn.id = 'zoomBtn'; zmBtn.className = 'guide-btn'; zmBtn.type = 'button';
-    var zmVal = 1.05;
-    try { var zs = localStorage.getItem('tj_zoom'); if (zs) zmVal = parseFloat(zs); } catch (e) {}
-    var zmLabel = function (v) { return v <= 0.95 ? '视角：远' : (v >= 1.15 ? '视角：近' : '视角：中'); };
-    zmBtn.textContent = zmLabel(zmVal);
-    zmBtn.onclick = function () {
-      zmVal = zmVal >= 1.15 ? 0.9 : (zmVal <= 0.95 ? 1.05 : 1.2);
-      try { localStorage.setItem('tj_zoom', String(zmVal)); } catch (e) {}
-      zmBtn.textContent = zmLabel(zmVal);
-    };
-    toolsRow.appendChild(zmBtn);
     var dbtn = document.createElement('button');
     dbtn.id = 'dailyBtn';
     dbtn.className = 'guide-btn';
@@ -924,7 +912,7 @@
     input.setEnabled(false);
   }
 
-  const BUILD_TAG = '2026-11-07g';
+  const BUILD_TAG = '2026-11-07h';
   function titleLockScroll() {
     const t = document.getElementById('title');
     if (t) {

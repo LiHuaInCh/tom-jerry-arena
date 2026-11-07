@@ -844,3 +844,5 @@ html, body { overflow: hidden !important; overscroll-behavior: none; }
   #title .cov-title { display: none !important; }
   #startBtn { margin-top: 2px !important; }
 }
+
+#startBtn { font-size: 15px !important; padding: 6px 26px !important; }
