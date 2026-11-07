@@ -924,7 +924,7 @@
     input.setEnabled(false);
   }
 
-  const BUILD_TAG = '2026-11-07f';
+  const BUILD_TAG = '2026-11-07g';
   function titleLockScroll() {
     const t = document.getElementById('title');
     if (t) {
@@ -936,29 +936,7 @@
   setTimeout(titleLockScroll, 100);
 
   function fitTitle() {
-    const t = document.getElementById('title');
-    if (!t || t.classList.contains('hidden')) return;
-    const inn = t.querySelector('.title-inner');
-    if (!inn) return;
-    inn.style.position = '';
-    inn.style.left = '';
-    inn.style.marginLeft = '';
-    inn.style.transform = '';
-    inn.style.height = '';
-    inn.style.maxHeight = '';
-    const availH = t.clientHeight - 6, availW = t.clientWidth - 6;
-    const h = inn.scrollHeight, w = inn.scrollWidth;
-    if (!h || !w || availH <= 0) return;
-    const k = Math.min(1, availH / h, availW / w);
-    if (k < 0.995) {
-      inn.style.position = 'absolute';
-      inn.style.top = Math.max(3, (availH - h * k) / 2 + 2) + 'px';
-      inn.style.left = Math.max(0, (t.clientWidth - w * k) / 2) + 'px';
-      inn.style.marginLeft = '0px';
-      inn.style.transformOrigin = 'top left';
-      inn.style.transform = 'scale(' + k.toFixed(4) + ')';
-    }
-    t.scrollTop = 0;
+    return;
   }
   window.addEventListener('resize', function () { setTimeout(fitTitle, 50); });
   setTimeout(fitTitle, 60);
