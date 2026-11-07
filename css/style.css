@@ -868,3 +868,12 @@ html, body { overflow: hidden !important; overscroll-behavior: none; }
   #title .title-inner { zoom: 0.5 !important; }
   #title .char-grid { max-height: 300px !important; }
 }
+
+@media (max-height: 560px) {
+  #title .hero { height: 20vh !important; min-height: 88px !important; }
+  #title .hero img { object-position: center 30% !important; }
+  #title .brand { margin-top: -54px !important; position: relative; z-index: 3; }
+  #title .brand .logo { text-shadow: 0 2px 0 rgba(255,246,224,.85), 0 0 12px rgba(255,246,224,.7); }
+}
+
+@media (max-height: 560px) { #title .brand { margin-top: -150px !important; } }
