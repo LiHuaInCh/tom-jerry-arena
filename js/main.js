@@ -945,7 +945,7 @@
     input.setEnabled(false);
   }
 
-  const BUILD_TAG = '2026-11-07r';
+  const BUILD_TAG = '2026-11-07s';
   function titleLockScroll() {
     const t = document.getElementById('title');
     if (t) {
@@ -963,19 +963,24 @@
     if (!inn) return;
     inn.style.position = '';
     inn.style.left = '';
-    inn.style.marginLeft = '';
     inn.style.transform = '';
-    inn.style.height = '';
-    inn.style.maxHeight = '';
     const availH = t.clientHeight - 6, availW = t.clientWidth - 6;
-    const h = inn.scrollHeight, w = inn.scrollWidth;
-    if (!h || !w || availH <= 0) return;
+    if (availH <= 0) return;
+    let h = 0, w = 0;
+    for (const c of inn.children) {
+      const st = getComputedStyle(c);
+      if (st.display === 'none') continue;
+      const r = c.getBoundingClientRect();
+      h += r.height + (parseFloat(st.marginTop) || 0) + (parseFloat(st.marginBottom) || 0);
+      w = Math.max(w, r.width);
+    }
+    h += (parseFloat(getComputedStyle(inn).rowGap) || 0) * Math.max(0, inn.children.length - 1);
+    if (!h || !w) return;
     const k = Math.min(1, availH / h, availW / w);
     if (k < 0.995) {
       inn.style.position = 'absolute';
-      inn.style.top = Math.max(3, (availH - h * k) / 2 + 2) + 'px';
+      inn.style.top = '2px';
       inn.style.left = Math.max(0, (t.clientWidth - w * k) / 2) + 'px';
-      inn.style.marginLeft = '0px';
       inn.style.transformOrigin = 'top left';
       inn.style.transform = 'scale(' + k.toFixed(4) + ')';
     }
