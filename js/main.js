@@ -305,7 +305,7 @@
     copyBtn.type = 'button';
     copyBtn.textContent = '侵权删除声明';
     copyBtn.onclick = function () {
-      alert('侵权删除声明\n\n本作是非商业同人作品，角色与素材版权归华纳兄弟 / 网易等权利方所有。\n素材来源：猫和老鼠教学网站 wiki\nhttps://wiki.biligame.com/tomandjerry/\n如权利方认为内容侵权，请联系：2637079593@qq.com\n核实后将立即删除相关内容并停止分发。');
+      alert('侵权删除声明\n\n本作是非商业同人作品，角色与素材版权归华纳兄弟 / 网易等权利方所有。\n素材来源：猫和老鼠教学网站 wiki\nhttps://tjwiki.com\n如权利方认为内容侵权，请联系：2637079593@qq.com\n核实后将立即删除相关内容并停止分发。');
     };
     toolsRow.appendChild(copyBtn);
 
