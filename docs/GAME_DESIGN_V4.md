@@ -205,7 +205,7 @@
 
 ## 13. 美术与音频
 
-- 角色立绘、武器/技能图标：来自猫和老鼠教学网站 wiki，非商业同人使用
+- 角色立绘、武器/技能图标：来自[猫和老鼠教学网站 wiki](https://wiki.biligame.com/tomandjerry/)，非商业同人使用
 - 武器图标：官方图标；泰菲地雷为用户提供的素材
 - 家具贴图：OpenGameArt「Top Down Home Furniture」，CC-BY 3.0
 - 音效与音乐：程序化合成 / CC0

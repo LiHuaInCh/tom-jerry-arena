@@ -961,3 +961,5 @@ html, body { overflow: hidden !important; overscroll-behavior: none; }
   border-radius: 12px;
   background: #FFF6E0;
 }
+
+.credit-link { color: #B4760F; text-decoration: underline; }
