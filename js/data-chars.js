@@ -477,6 +477,8 @@ TJ.DATA_PARTS.upgrades = [
     { id: 'explode',   name: '爆炸弹', desc: '弹丸命中时产生小范围爆炸',      icon: '爆', rarity: 'epic', max: 1, apply(s) { s.explode += 1; } },
     { id: 'homing',    name: '追踪',   desc: '弹丸会追踪附近的猫',            icon: '追', rarity: 'epic', max: 1, apply(s) { s.homing += 1; } },
     { id: 'exp',       name: '学识',     desc: '经验获取 +30%',                icon: '学', rarity: 'common', max: 4, apply(s) { s.xpMul = (s.xpMul || 1) * 1.3; } },
+    { id: 'armor',    name: '护甲',   desc: '受到伤害 -6%', icon: '甲', rarity: 'rare', max: 4, apply(s) { s.armor += 0.06; s.speed *= 0.985; } },
+    { id: 'pen',      name: '破甲',   desc: '无视敌人 8% 护甲', icon: '破', rarity: 'rare', max: 3, apply(s) { s.pen = (s.pen || 0) + 0.08; } },
     { id: 'orbitN',    name: '环绕刀刃', desc: '环绕武器额外 +1 把刀刃',        icon: '刃', rarity: 'epic', max: 2, apply(s) { s.orbitBonus = (s.orbitBonus || 0) + 1; } },
     { id: 'orbitR',    name: '巨刃',     desc: '环绕伤害 +35%，环绕半径 +20',   icon: '巨', rarity: 'rare', max: 3, apply(s) { s.orbitDmgMul = (s.orbitDmgMul || 1) * 1.35; s.orbitRBonus = (s.orbitRBonus || 0) + 20; } },
     { id: 'skill',     name: '秘技',   desc: '角色技能冷却 -20%',            icon: '技', rarity: 'rare', max: 3, apply(s) { s.skillCdMul *= 0.8; } },

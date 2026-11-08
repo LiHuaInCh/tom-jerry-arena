@@ -12,7 +12,8 @@
 
   function damageEnemy(g, e, dmg, crit) {
     if (e.dead) return;
-    if (e.armor) dmg *= (1 - e.armor);
+    const __arm = Math.max(0, (e.armor || 0) - (g.stats.pen || 0));
+    if (__arm) dmg *= (1 - __arm);
     if (g.stats.stunChance && !e.boss && g.rng() < g.stats.stunChance) e.stunT = 0.35;
     if (g.stats.slowOnHit && !e.boss) { e.slowT = 1.2; e.slowMul = 1 - g.stats.slowOnHit; }
     if (g.stats.dotDps && !e.boss) { e.dotT = 2.4; e.dotDps = g.stats.dotDps; e.dotTick = e.dotTick || 0; }

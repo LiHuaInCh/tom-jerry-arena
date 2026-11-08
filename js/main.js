@@ -290,7 +290,7 @@
       ov.innerHTML = '<div class="guide-box"><div class="guide-head">设置<button class="guide-close">×</button></div><div class="guide-body" id="setBody"></div></div>';
       document.body.appendChild(ov);
       var body = ov.querySelector('#setBody');
-      [btn, mbtn, expBtn, impBtn].forEach(function (b) {
+      [btn, mbtn, expBtn, impBtn, copyBtn].forEach(function (b) {
         var row = document.createElement('button');
         row.className = 'set-row';
         row.textContent = b.textContent;
@@ -299,6 +299,15 @@
       });
       ov.querySelector('.guide-close').onclick = function () { ov.remove(); };
     };
+
+    var copyBtn = document.createElement('button');
+    copyBtn.className = 'guide-btn';
+    copyBtn.type = 'button';
+    copyBtn.textContent = '侵权删除声明';
+    copyBtn.onclick = function () {
+      alert('侵权删除声明\n\n本作是非商业同人作品，角色与素材版权归华纳兄弟 / 网易等权利方所有。\n如权利方认为内容侵权，请联系：2637079593@qq.com\n核实后将立即删除相关内容并停止分发。');
+    };
+    toolsRow.appendChild(copyBtn);
 
     var SECTIONS = [
       ['基础操作', [
@@ -381,8 +390,10 @@
       const rb = TJ.meta.bonuses();
       const st = g.player.stats || g.stats;
       st.damage *= 1 + rb.dmg;
+      st.armor += rb.armor || 0;
       st.speed *= 1 + rb.speed;
       if (g.stats) g.stats.xpMul = (g.stats.xpMul || 1) * (1 + rb.xp);
+      if (rb.armor) { g.player.armorBonus = rb.armor; }
       g.player.maxHp = Math.round(g.player.maxHp * (1 + rb.hp));
       g.player.hp = g.player.maxHp;
       const tt = g.player.char.talent;

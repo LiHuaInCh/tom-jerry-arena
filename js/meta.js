@@ -18,7 +18,8 @@
     sharp: { name: '锐利', desc: '伤害 +2%/级' },
     swift: { name: '疾行', desc: '移速 +1.5%/级' },
     learn: { name: '求知', desc: '经验 +3%/级' },
-    tough: { name: '坚韧', desc: '生命 +2%/级' }
+    tough: { name: '坚韧', desc: '生命 +2%/级' },
+    armor: { name: '护甲', desc: '护甲 +0.5%/级，移速 -0.25%/级' }
   };
   function save() { try { localStorage.setItem(KEY, JSON.stringify(m)); } catch (e) {} }
   function levelFor(xp) { let lv = 1, need = 100, left = xp; while (left >= need && lv < 60) { left -= need; lv++; need = 100 + (lv - 1) * 60; } return { level: Math.min(60, lv), into: left, need: need }; }
@@ -41,9 +42,9 @@
     levelInfo() { return levelFor(m.xp); },
     points() { return { total: totalPoints(), spent: spentPoints() }; },
     runeLv(id) { return m.runes[id] || 0; },
-    spend(id) { if (spentPoints() >= totalPoints() || (m.runes[id] || 0) >= 5) return false; m.runes[id] = (m.runes[id] || 0) + 1; save(); return true; },
+    spend(id) { if (spentPoints() >= totalPoints() || (m.runes[id] || 0) >= 50) return false; m.runes[id] = (m.runes[id] || 0) + 1; save(); return true; },
     refund(id) { if ((m.runes[id] || 0) <= 0) return false; m.runes[id]--; save(); return true; },
     resetRunes() { m.runes = {}; save(); },
-    bonuses() { return { dmg: 0.02 * (m.runes.sharp || 0), speed: 0.015 * (m.runes.swift || 0), xp: 0.03 * (m.runes.learn || 0), hp: 0.02 * (m.runes.tough || 0) }; }
+    bonuses() { return { dmg: 0.02 * (m.runes.sharp || 0), speed: 0.015 * (m.runes.swift || 0) - 0.0025 * (m.runes.armor || 0), xp: 0.03 * (m.runes.learn || 0), hp: 0.02 * (m.runes.tough || 0), armor: 0.005 * (m.runes.armor || 0) }; }
   };
 })();
