@@ -440,6 +440,7 @@
   const __propCrops = [[200, 318, 92, 66], [38, 318, 34, 54], [148, 30, 86, 46], [150, 108, 64, 46], [38, 420, 34, 46], [196, 432, 52, 46]];
   let __playerLight = null;
   let __grain = null;
+  const __coarseGfx = (typeof window !== 'undefined') && window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
 
   function drawMouse(ctx, m, char) {
     if (m.shieldT > 0) {
@@ -1337,6 +1338,7 @@
         ctx.fillStyle = z.color;
         ctx.fillRect(z.x * g.W, z.y * g.H, z.w * g.W, z.h * g.H);
       }
+      if (__coarseGfx) { }
       const vx0 = g.cam.x - ctx.canvas.width / 2 - 140, vx1 = g.cam.x + ctx.canvas.width / 2 + 140;
       const vy0 = g.cam.y - ctx.canvas.height / 2 - 140, vy1 = g.cam.y + ctx.canvas.height / 2 + 140;
       const h2 = (x, y) => (Math.abs(Math.sin(x * 12.9898 + y * 78.233)) * 43758.5453) % 1;
@@ -1424,7 +1426,7 @@
         if (!floorPattern) floorPattern = ctx.createPattern(makeFloorTile((g.seed || 0) % 4), 'repeat');
         ctx.fillStyle = floorPattern;
         ctx.fillRect(camX - vw / 2 - 80, camY - vh / 2 - 80, vw + 160, vh + 160);
-        if (!__grain) {
+        if (!__coarseGfx && !__grain) {
           const gc = document.createElement('canvas'); gc.width = 256; gc.height = 256;
           const gx = gc.getContext('2d');
           gx.strokeStyle = 'rgba(120,84,48,.06)'; gx.lineWidth = 1;
@@ -1438,10 +1440,11 @@
           }
           __grain = ctx.createPattern(gc, 'repeat');
         }
-        ctx.save(); ctx.globalAlpha = 0.5;
+        if (__grain) { ctx.save(); ctx.globalAlpha = 0.5;
         ctx.fillStyle = __grain;
         ctx.fillRect(camX - vw / 2 - 80, camY - vh / 2 - 80, vw + 160, vh + 160);
         ctx.restore();
+        }
       } else {
         ctx.drawImage(bg, 0, 0, D.W, D.H);
       }

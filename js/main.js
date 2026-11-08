@@ -36,7 +36,7 @@
 
   /* ---------- 布局 ---------- */
   function resize() {
-    renderer.resize(window.innerWidth, window.innerHeight, Math.min(2, window.devicePixelRatio || 1));
+    renderer.resize(window.innerWidth, window.innerHeight, Math.min(window.matchMedia('(pointer: coarse)').matches ? 1.5 : 2, window.devicePixelRatio || 1));
   }
   window.addEventListener('resize', resize);
   resize();
@@ -1095,7 +1095,11 @@
   /* ---------- 主循环 ---------- */
   window.addEventListener('error', function () { window.__tjErrs = (window.__tjErrs || 0) + 1; });
 
+  let __lastDraw = 0;
   function frame(now) {
+    const __coarse = window.matchMedia('(pointer: coarse)').matches;
+    if (__coarse && __lastDraw && now - __lastDraw < 1000 / 45) { requestAnimationFrame(frame); return; }
+    __lastDraw = now;
     window.__tjState = state;
     var sb = document.getElementById('setBtn');
     if (sb) sb.style.display = state === 'title' ? 'inline-block' : 'none';
