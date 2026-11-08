@@ -12,9 +12,9 @@ TJ.DATA_PARTS.enemies = {
     dasher:  { name: '扑扑猫', hp: 78,  speed: 136, radius: 19, dmg: 12, xp: 6, score: 25, fur: '#D96C5B', furDark: '#A64A3C', belly: '#F7D9CE', eye: '#2B1B12' },
     tom:     { name: '汤姆',   hp: 900, speed: 108, radius: 44, dmg: 18, xp: 60, score: 400, fur: '#8FA3B8', furDark: '#63788F', belly: '#EDF2F7', eye: '#F2C14E', boss: true },
     spike:   { name: '斯派克', hp: 1200, speed: 96, radius: 50, dmg: 22, xp: 90, score: 650, fur: '#A9A29B', furDark: '#7A736D', belly: '#E9E4DE', eye: '#2B1B12', boss: true },
-    qianchang: { name: '浅唱', hp: 3400, armor: 0.15, speed: 72, radius: 34, dmg: 22, xp: 120, score: 600, boss: true, sprite: 'assets/bosses/qianchang.webp' },
-    angryqc:   { name: '不甘心的浅唱', hp: 4200, armor: 0.18, speed: 88, radius: 34, dmg: 26, xp: 140, score: 750, boss: true, sprite: 'assets/bosses/angryqc.webp' },
-    chenjr:    { name: '陈佳嵘', hp: 5200, armor: 0.28, speed: 64, radius: 38, dmg: 24, xp: 160, score: 900, boss: true, sprite: 'assets/bosses/chenjr.webp' }
+    qianchang: { name: '浅唱', hp: 3400, armor: 0.15, speed: 72, radius: 34, dmg: 22, xp: 120, score: 600, boss: true, sprite: 'assets/bosses/qianchang.png' },
+    angryqc:   { name: '不甘心的浅唱', hp: 4200, armor: 0.18, speed: 88, radius: 34, dmg: 26, xp: 140, score: 750, boss: true, sprite: 'assets/bosses/angryqc.png' },
+    chenjr:    { name: '陈佳嵘', hp: 5200, armor: 0.28, speed: 64, radius: 38, dmg: 24, xp: 160, score: 900, boss: true, sprite: 'assets/bosses/chenjr.png' }
   }
 TJ.DATA_PARTS.fusions = {
     'fire+fire': { name: '野火', kind: 'crit' },
