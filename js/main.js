@@ -616,7 +616,9 @@
 
       const st = document.createElement('span');
       st.className = 'up-stack';
-      st.textContent = (u.kind === 'evo_main' || u.kind === 'evo_sub') ? '仅此一次' : (u.stack ? u.stack : '已拥有 ' + ((g.upgradeCounts || {})[u.id] || 0) + ' / ' + u.max);
+      const __owned = ((g.upgradeCounts || {})[u.id] || 0);
+      const __max = (u.max != null) ? u.max : (u.kind && u.kind.indexOf('evo') === 0 ? 1 : (u.kind && u.kind.indexOf('sub') === 0 ? 1 : '—'));
+      st.textContent = u.stack ? u.stack : ('已拥有 ' + __owned + ' / ' + __max);
       el.appendChild(st);
 
       el.addEventListener('click', function () { choose(u.key || u.id); });
@@ -812,11 +814,16 @@
     input.setEnabled(false);
     var mins = Math.floor(g.elapsed / 60), secs = Math.floor(g.elapsed % 60);
     var tstr = mins + ':' + (secs < 10 ? '0' : '') + secs;
-    if (g.mode === 'arena') {
-      $('pauseStats').textContent = '乱斗 · ' + tstr + ' · ' + g.player.kills + ' 杀 · 等级 ' + g.player.level + ' · 剩余 ' + Math.max(0, (g.timeLimit - g.elapsed) | 0) + ' 秒';
-    } else {
-      $('pauseStats').textContent = '无尽 · ' + tstr + ' · 第 ' + g.wave + ' 波 · 击倒 ' + g.kills + ' · 分数 ' + g.score + ' · 等级 ' + g.player.level + ' · 伤害 ' + Math.round(g.stats.damage * 100) + '% · 移速 ' + Math.round(g.stats.speed * 100) + '%';
-    }
+    const st = g.stats || {};
+    const pct = function (v) { return Math.round((v || 0) * 100) + '%'; };
+    const rows = [
+      ['时间', tstr], ['波次', g.wave], ['击倒', g.kills], ['分数', g.score], ['等级', g.player.level],
+      ['伤害', pct(st.damage)], ['射速', pct(st.fireRate)], ['移速', pct(st.speed)],
+      ['生命', Math.round(g.player.maxHp)], ['护甲', pct(st.armor)], ['暴击', pct(st.crit)],
+      ['爆伤', Math.round((st.critMul || 1) * 100) + '%'], ['穿透', st.pierce || 0], ['多重', st.multishot || 0],
+      ['吸血', pct(st.lifesteal)], ['回血', pct(st.regen)], ['经验', pct(st.xpMul)]
+    ];
+    $('pauseStats').innerHTML = '<div class="pause-grid">' + rows.map(function (r) { return '<div class="pg-row"><span>' + r[0] + '</span><b>' + r[1] + '</b></div>'; }).join('') + '</div>' + (($('buffs') && $('buffs').innerHTML) ? '<div class="pause-buffs">' + $('buffs').innerHTML + '</div>' : '');
     $('pause').classList.remove('hidden');
   }
 
@@ -964,7 +971,7 @@
     input.setEnabled(false);
   }
 
-  const BUILD_TAG = '2026-11-08e';
+  const BUILD_TAG = '2026-11-08f';
   function titleLockScroll() {
     const t = document.getElementById('title');
     if (t) {

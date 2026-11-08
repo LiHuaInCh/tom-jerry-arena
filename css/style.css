@@ -984,3 +984,23 @@ html, body { overflow: hidden !important; overscroll-behavior: none; }
 .cx-item span { font-size: 9.5px; color: #B4760F; }
 .cx-item em { font-size: 9.5px; color: #8A6A52; font-style: normal; }
 @media (pointer: coarse) { .codex-grid { grid-template-columns: repeat(2, 1fr); } }
+
+#buffs { display: none !important; }
+.pause-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 18px; margin: 8px 0; text-align: left; }
+.pg-row { display: flex; justify-content: space-between; font-size: 11px; border-bottom: 1px dashed rgba(138,106,82,.25); padding: 2px 0; }
+.pg-row b { color: #B4760F; }
+.pause-buffs { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
+@media (pointer: coarse) {
+  .panel { padding: 4px 8px 4px 6px !important; border-radius: 12px !important; }
+  .avatar-wrap { width: 38px !important; height: 38px !important; border-width: 2px !important; }
+  #lvlBadge { width: 17px !important; height: 17px !important; font-size: 9px !important; }
+  .hp-bar { width: 124px !important; height: 10px !important; }
+  .hp-row { font-size: 9px !important; }
+  #timer { font-size: 18px !important; }
+  #waveLabel { font-size: 9px !important; }
+  .score-panel .kills { font-size: 9px !important; }
+  .up-card { width: 150px !important; padding: 10px 8px !important; }
+  .up-card .up-name { font-size: 14px !important; }
+  .up-card .up-desc { font-size: 10px !important; }
+  .up-icon, .up-ico { width: 42px !important; height: 42px !important; }
+}

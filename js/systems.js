@@ -853,27 +853,30 @@
       g.hitTaken = false;
     }
       g.events.push({ type: 'wave', wave });
-      const BOSS_SCHED = { 4: ['tom'], 8: ['spike'], 12: ['bigboss'], 16: ['qianchang'], 20: ['angryqc'], 24: ['chenjr'] };
-      const ALL_BOSS = ['tom', 'spike', 'bigboss', 'qianchang', 'angryqc', 'chenjr'];
+      const BOSS_SCHED = { 3: ['tom'], 6: ['spike'], 9: ['bigboss'], 12: ['qianchang'], 15: ['angryqc'], 18: ['chenjr'] };
+      const NEW_BOSS = ['qianchang', 'angryqc', 'chenjr'];
+      const OLD_BOSS = ['tom', 'spike', 'bigboss'];
       const BOSS_NAME = { tom: '汤姆', spike: '斯派克', bigboss: '鼠王', qianchang: '浅唱', angryqc: '不甘心的浅唱', chenjr: '陈佳嵘' };
-      let bossList = BOSS_SCHED[wave] || null;
-      if (!bossList && wave >= 28) {
-        const n = wave >= 36 ? 6 : (wave >= 32 ? 4 : 2);
-        const pool = ALL_BOSS.slice();
-        bossList = [];
-        for (let i = 0; i < n; i++) bossList.push(pool.splice(Math.floor(g.rng() * pool.length), 1)[0]);
-      }
+      let bossList = BOSS_SCHED[wave] || (wave >= 21 ? NEW_BOSS.slice() : null);
       if (bossList) {
         bossList.forEach(function (kind, bi) {
           const ang = (bi / bossList.length) * Math.PI * 2;
-          const bx = clamp(g.W / 2 + Math.cos(ang) * (bi ? 220 : 0), 160, g.W - 160);
-          const by = clamp(g.H / 2 + Math.sin(ang) * (bi ? 220 : 0), 160, g.H - 160);
+          const bx = clamp(g.W / 2 + Math.cos(ang) * (bossList.length > 1 ? 220 : 0), 160, g.W - 160);
+          const by = clamp(g.H / 2 + Math.sin(ang) * (bossList.length > 1 ? 220 : 0), 160, g.H - 160);
           const bb = spawnEnemy(g, kind, wave, bx, by);
           if (bb) { bb.boss = true; g.boss = g.boss || bb; addText(g, bx, by - 80, (BOSS_NAME[kind] || 'BOSS') + ' 降临！', '#FF7A5C', 28); }
         });
         g.shake = 16;
       }
-    }
+      if (wave > 18) {
+        const ek = OLD_BOSS[Math.floor(g.rng() * OLD_BOSS.length)];
+        const ea = g.rng() * Math.PI * 2;
+        const ex = clamp(g.player.x + Math.cos(ea) * (360 + g.rng() * 200), 120, g.W - 120);
+        const ey = clamp(g.player.y + Math.sin(ea) * (360 + g.rng() * 200), 120, g.H - 120);
+        const el = spawnEnemy(g, ek, Math.max(1, wave - 8), ex, ey);
+        if (el) { el.elite = true; el.boss = false; el.maxHp = Math.round(el.maxHp * 0.6); el.hp = el.maxHp; el.mod = ['shield', 'swift', 'split'][Math.floor(g.rng() * 3)]; }
+      }
+      }
     g.spawnTimer -= dt * (g.boss ? 0.55 : 1);
     for (const e of g.enemies) {
       if (!e.dead && Math.hypot(e.x - g.player.x, e.y - g.player.y) > 1400) e.dead = true;

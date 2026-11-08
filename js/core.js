@@ -191,6 +191,7 @@
 
   TJ.applyUpgrade = function (g, id) {
     if (id.indexOf('evo_') === 0) {
+      g.upgradeCounts[id] = (g.upgradeCounts[id] || 0) + 1;
       const pool = (id.indexOf('evo_sub') === 0) ? subEvoChoices() : evoChoices(g);
       const card = pool.filter(function (x) { return x.id === id; })[0];
       if (!card) return null;
