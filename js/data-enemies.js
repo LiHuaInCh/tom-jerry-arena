@@ -16,7 +16,7 @@ TJ.DATA_PARTS.enemies = {
     angryqc:   { name: '不甘心的浅唱', hp: 11000, armor: 0.18, speed: 88, radius: 34, dmg: 26, xp: 140, score: 750, boss: true, sprite: 'assets/bosses/angryqc_cut.png' },
     chenjr:    { name: '陈佳嵘', hp: 14000, armor: 0.28, speed: 64, radius: 38, dmg: 24, xp: 160, score: 900, boss: true, sprite: 'assets/bosses/chenjr_cut.png' },
     kunkun:  { name: '坤坤杰瑞', hp: 9000, speed: 96, radius: 34, dmg: 24, xp: 150, score: 800, boss: true, sprite: 'assets/enemies/kunkun_cut.png' },
-    cthulhu: { name: '克苏鲁杰瑞', hp: 11000, speed: 78, radius: 36, dmg: 26, xp: 170, score: 900, boss: true, sprite: 'assets/enemies/cthulhu_cut.png' },
+    cthulhu: { name: '绷带杰瑞', hp: 11000, speed: 78, radius: 36, dmg: 26, xp: 170, score: 900, boss: true, sprite: 'assets/enemies/cthulhu_cut.png' },
     giant:   { name: '巨人僵尸', hp: 16000, speed: 58, radius: 46, dmg: 32, xp: 220, score: 1200, boss: true, sprite: 'assets/enemies/giant_cut.png' },
     security: { name: '保安', hp: 420, speed: 84, radius: 24, dmg: 18, xp: 40, score: 150, sprite: 'assets/enemies/security_cut.png' },
     spikejr: { name: '斯派克儿子', hp: 160, speed: 130, radius: 16, dmg: 12, xp: 20, score: 80, sprite: 'assets/enemies/spikejr_cut.png' },

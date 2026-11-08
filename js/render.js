@@ -424,7 +424,7 @@
       const h = ent.r * 3.4;
       const w = h * (im.naturalWidth / im.naturalHeight);
       const flip = Math.cos(ent.facing || 0) < 0;
-      ctx.translate(ent.x, ent.y + ent.r * 0.95);
+      ctx.translate(ent.x, ent.y + ent.r * 0.95 + Math.sin(performance.now() / 420 + ent.x * 0.02) * ent.r * 0.05);
       if (flip) ctx.scale(-1, 1);
       if (ent.invisT > 0) ctx.globalAlpha = 0.35;
       ctx.drawImage(im, -w / 2, -h, w, h);
@@ -1623,7 +1623,7 @@
             const bs = it.e.r * 4.2;
             ctx.save();
             ctx.globalAlpha = 0.96;
-            ctx.drawImage(__bs, it.e.x - bs / 2, it.e.y - bs * 0.78, bs, bs);
+            ctx.drawImage(__bs, it.e.x - bs / 2, it.e.y - bs * 0.78 + Math.sin(performance.now() / 460 + it.e.x * 0.02) * it.e.r * 0.12, bs, bs);
             ctx.globalAlpha = 1;
             ctx.restore();
           } else if (it.e.kind === 'spike') drawDog(ctx, it.e);

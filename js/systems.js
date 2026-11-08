@@ -955,7 +955,7 @@
       const BOSS_SCHED = { 3: ['kunkun'], 6: ['cthulhu'], 9: ['giant'], 12: ['qianchang'], 15: ['angryqc'], 18: ['chenjr'] };
       const NEW_BOSS = ['qianchang', 'angryqc', 'chenjr'];
       
-      const BOSS_NAME = { kunkun: '坤坤杰瑞', cthulhu: '克苏鲁杰瑞', giant: '巨人僵尸', tom: '汤姆', spike: '斯派克', bigboss: '鼠王', qianchang: '浅唱', angryqc: '不甘心的浅唱', chenjr: '陈佳嵘' };
+      const BOSS_NAME = { kunkun: '坤坤杰瑞', cthulhu: '绷带杰瑞', giant: '巨人僵尸', tom: '汤姆', spike: '斯派克', bigboss: '鼠王', qianchang: '浅唱', angryqc: '不甘心的浅唱', chenjr: '陈佳嵘' };
       let bossList = BOSS_SCHED[wave] || (wave >= 21 ? NEW_BOSS.slice() : null);
       if (bossList) {
         bossList.forEach(function (kind, bi) {
