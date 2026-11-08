@@ -13,7 +13,7 @@ ok('survival created', !!g.player && g.missions.length === 3);
 for (let i = 0; i < 600; i++) TJ.update(g, 1 / 60, { moveX: 1, moveY: 0.3, dash: false });
 ok('survival 10s finite', isFinite(g.player.x) && isFinite(g.player.hp));
 ok('cheese system', Array.isArray(g.holes) && g.holes.length === 4);
-ok('fusion table', Object.keys(TJ.DATA.fusions).length === 10);
+ok('fusion table', Object.keys(TJ.DATA.fusions).length === 15 && !!TJ.DATA.fusions['dark+fire']);
 
 const a = TJ.createArenaGame({ charId: 'tom', seed: 7 });
 ok('arena created', a.fighters.length === 6);

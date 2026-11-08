@@ -1046,7 +1046,12 @@
     'ice+thunder': '170 范围追加 18',
     'dark+light': '回复 12% 生命',
     'fire+thunder': '90 范围溅射 30%',
-    'dark+ice': '减速 2.5 秒，伤害 ×1.1'
+    'dark+ice': '减速 2.5 秒，伤害 ×1.1',
+    'fire+light': '回复 10% 生命',
+    'dark+fire': '30% 概率双倍伤害',
+    'ice+light': '冻结 0.8 秒',
+    'light+thunder': '150 范围连锁 14',
+    'dark+thunder': '持续伤害 3 秒'
   };
 
   TJ.Core = TJ.Core || {};

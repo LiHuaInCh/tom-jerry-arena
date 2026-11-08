@@ -26,6 +26,11 @@ TJ.DATA_PARTS.fusions = {
     'ice+thunder': { name: '感电', kind: 'aoe' },
     'dark+light': { name: '净化', kind: 'leech' },
     'fire+thunder': { name: '爆燃', kind: 'splash' },
-    'dark+ice': { name: '霜蚀', kind: 'debuff' }
+    'dark+ice': { name: '霜蚀', kind: 'debuff' },
+    'fire+light': { name: '圣火', kind: 'heal' },
+    'dark+fire': { name: '焚影', kind: 'crit' },
+    'ice+light': { name: '冰晶', kind: 'freeze' },
+    'light+thunder': { name: '圣雷', kind: 'chain' },
+    'dark+thunder': { name: '暗雷', kind: 'dot' }
   }
 })();
