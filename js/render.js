@@ -277,6 +277,31 @@
     return c;
   }
 
+  function drawSkinned(ctx, img, w, h, mode, ph) {
+    const N = 7, sh = h / N;
+    for (let i = 0; i < N; i++) {
+      const t = i / (N - 1);
+      let dx = 0, dy = 0, rot = 0;
+      if (mode === 'run') {
+        dx = Math.sin(ph + t * 2.4) * w * 0.035 * t;
+        rot = Math.sin(ph + 0.6) * 0.03 * t;
+      } else if (mode === 'attack') {
+        dx = -w * 0.06 * (0.5 - t);
+        rot = -0.05 * (0.5 - t);
+      } else if (mode === 'hurt') {
+        dx = w * 0.07 * (1 - t);
+        rot = 0.05 * (1 - t);
+      } else {
+        dy = Math.sin(ph * 0.7 + t * 1.6) * 1.4;
+      }
+      ctx.save();
+      ctx.translate(dx, dy);
+      ctx.rotate(rot);
+      ctx.drawImage(img, 0, i * (img.height / N), img.width, img.height / N, -w / 2, -h + i * sh, w, sh + 0.6);
+      ctx.restore();
+    }
+  }
+
   function drawMouseSprite(ctx, m, char, img) {
     const r = m.r;
     const walk = m.walk || 0;
@@ -433,7 +458,7 @@
       ctx.translate(ent.x, ent.y + ent.r * 0.95 + Math.sin(performance.now() / 420 + ent.x * 0.02) * ent.r * 0.05);
       if (flip) ctx.scale(-1, 1);
       if (ent.invisT > 0) ctx.globalAlpha = 0.35;
-      ctx.drawImage(im, -w / 2, -h, w, h);
+      drawSkinned(ctx, im, w, h, ent.atkAnimT > 0 ? 'attack' : (ent.flash > 0 ? 'hurt' : (Math.abs(ent.vx || 0) + Math.abs(ent.vy || 0) > 20 ? 'run' : 'idle')), (ent.walk || 0) * 1.2 + (ent.x || 0) * 0.01);
     } else {
       if (char && char.faction === 'cat' && ent.def) drawCat(ctx, ent); else drawMouse(ctx, ent, char);
     }
@@ -1284,9 +1309,12 @@
       const gk = e.life / e.max;
       const gimg = orbitImg(e.sprite);
       if (gimg) {
-        const gs = e.r * 4.2 * (1.25 - 0.25 * gk);
+        const gs = e.r * 4.2 * (1.05 + 0.2 * gk);
+        const fall = (1 - gk);
         ctx.save(); ctx.globalAlpha = gk * 0.75;
-        ctx.drawImage(gimg, e.x - gs / 2, e.y - gs * 0.8, gs, gs);
+        ctx.translate(e.x, e.y - gs * 0.3 + fall * gs * 0.2);
+        ctx.rotate(fall * 1.2 * (e.r > 30 ? 1 : 0.7));
+        ctx.drawImage(gimg, -gs / 2, -gs * 0.5, gs, gs);
         ctx.restore();
       }
     } else if (e.kind === 'flash') {
