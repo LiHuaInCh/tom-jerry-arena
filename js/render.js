@@ -868,6 +868,16 @@
 
   /* ---------------- 弹道 / 拾取 / 特效 ---------------- */
   function drawProjectile(ctx, pr) {
+    if (!pr.icon && pr.vx !== undefined && Math.hypot(pr.vx, pr.vy) > 80) {
+      for (let i = 1; i <= 3; i++) {
+        ctx.save();
+        ctx.globalAlpha = 0.20 / i;
+        ctx.fillStyle = pr.color || (pr.from === 'enemy' ? '#FF9A6A' : '#FFD34D');
+        ellipse(ctx, pr.x - pr.vx * 0.012 * i, pr.y - pr.vy * 0.012 * i, Math.max(2, pr.r * (1 - i * 0.18)), Math.max(2, pr.r * (1 - i * 0.18)));
+        ctx.fill();
+        ctx.restore();
+      }
+    }
     if (pr.icon) {
       const pi = orbitImg(pr.icon);
       if (pi) {
