@@ -131,6 +131,8 @@
   }
   TJ.getUpgradeChoices = function (g) {
     const p = g.player;
+    if (p.level >= 7 && !p.elemSlots[0]) return elemChoices(g, 0);
+    if (p.level >= 14 && p.elemSlots[0] && !p.elemSlots[1]) return elemChoices(g, 1);
     if (p.level % 4 === 0) {
       const pool = evoChoices(g).slice();
       if (p.subWeapon) pool.push.apply(pool, subEvoChoices());
@@ -138,8 +140,6 @@
       for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(g.rng() * (i + 1)); const t = pool[i]; pool[i] = pool[j]; pool[j] = t; }
       return pool.slice(0, 3);
     }
-    if (p.level >= 7 && !p.elemSlots[0]) return elemChoices(g, 0);
-    if (p.level >= 14 && p.elemSlots[0] && !p.elemSlots[1]) return elemChoices(g, 1);
     if ((p.level === 3 || p.level === 6) && !p.subWeapon) {
       const wids = Object.keys(D.weapons).filter(function (k) {
         return k !== p.char.weapon && (D.weapons[k].kind === 'ranged' || D.weapons[k].kind === 'orbit');

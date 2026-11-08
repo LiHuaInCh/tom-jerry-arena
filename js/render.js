@@ -1326,7 +1326,44 @@
       canvas.style.height = h + 'px';
     }
 
-    function drawZones(ctx, g) {
+    const __zoneTileCache = {};
+  function __zoneTile(name) {
+    if (__zoneTileCache[name]) return __zoneTileCache[name];
+    const c = document.createElement('canvas'); const g2 = c.getContext('2d');
+    const rnd = function (x, y) { return (Math.abs(Math.sin(x * 12.9898 + y * 78.233)) * 43758.5453) % 1; };
+    if (name === '厨房') {
+      c.width = 300; c.height = 300;
+      g2.strokeStyle = 'rgba(135,88,45,.30)'; g2.lineWidth = 3;
+      for (let i = 0; i <= 300; i += 150) { g2.beginPath(); g2.moveTo(i, 0); g2.lineTo(i, 300); g2.stroke(); g2.beginPath(); g2.moveTo(0, i); g2.lineTo(300, i); g2.stroke(); }
+      g2.fillStyle = 'rgba(228,161,27,.06)'; g2.fillRect(0, 0, 150, 150); g2.fillRect(150, 150, 150, 150);
+    } else if (name === '客厅') {
+      c.width = 260; c.height = 184;
+      g2.strokeStyle = 'rgba(80,50,26,.34)'; g2.lineWidth = 3;
+      for (let y = 0; y <= 184; y += 92) { g2.beginPath(); g2.moveTo(0, y); g2.lineTo(260, y); g2.stroke(); }
+      g2.lineWidth = 2;
+      for (let row = 0; row < 2; row++) { const off = row * 130; for (let x = off; x <= 260; x += 260) { g2.beginPath(); g2.moveTo(x, row * 92); g2.lineTo(x, row * 92 + 92); g2.stroke(); } }
+    } else if (name === '花园') {
+      c.width = 68; c.height = 68;
+      for (let x = 0; x < 68; x += 34) for (let y = 0; y < 68; y += 34) {
+        const n = rnd(x, y);
+        g2.strokeStyle = n > 0.5 ? 'rgba(60,120,55,.30)' : 'rgba(150,200,110,.30)'; g2.lineWidth = 2;
+        g2.beginPath(); g2.moveTo(x + n * 20, y + 24); g2.lineTo(x + n * 20 + 3, y + 16 - n * 6); g2.stroke();
+      }
+    } else {
+      c.width = 168; c.height = 168;
+      for (let row = 0; row < 2; row++) { const off = row * 42; for (let x = off; x <= 168; x += 84) {
+        const n = rnd(x, row);
+        g2.fillStyle = 'rgba(255,255,255,' + (0.03 + n * 0.05) + ')';
+        g2.strokeStyle = 'rgba(40,34,26,.36)'; g2.lineWidth = 2;
+        g2.beginPath(); g2.ellipse(x, row * 84 + 42, 38, 34, 0, 0, Math.PI * 2); g2.fill(); g2.stroke();
+      } }
+    }
+    const pat = ctx.createPattern(c, 'repeat');
+    __zoneTileCache[name] = pat;
+    return pat;
+  }
+
+  function drawZones(ctx, g) {
       const zones = [
         { name: '厨房', x: 0, y: 0, w: 0.5, h: 0.5, color: '#E8A85C' },
         { name: '客厅', x: 0.5, y: 0, w: 0.5, h: 0.5, color: '#6FA8D8' },
@@ -1340,51 +1377,17 @@
         ctx.fillRect(z.x * g.W, z.y * g.H, z.w * g.W, z.h * g.H);
       }
       if (__coarseGfx) { }
-      const vx0 = g.cam.x - ctx.canvas.width / 2 - 140, vx1 = g.cam.x + ctx.canvas.width / 2 + 140;
-      const vy0 = g.cam.y - ctx.canvas.height / 2 - 140, vy1 = g.cam.y + ctx.canvas.height / 2 + 140;
-      const h2 = (x, y) => (Math.abs(Math.sin(x * 12.9898 + y * 78.233)) * 43758.5453) % 1;
+      ctx.globalAlpha = 0.9;
       for (const z of zones) {
         const zx = z.x * g.W, zy = z.y * g.H, zw = z.w * g.W, zh = z.h * g.H;
-        const x0 = Math.max(zx, vx0), x1 = Math.min(zx + zw, vx1);
-        const y0 = Math.max(zy, vy0), y1 = Math.min(zy + zh, vy1);
-        if (x1 <= x0 || y1 <= y0) continue;
+        const pat = __zoneTile(z.name);
+        if (!pat) continue;
         ctx.save(); ctx.beginPath(); ctx.rect(zx, zy, zw, zh); ctx.clip();
-        if (z.name === '厨房') {
-          const S = 150;
-          ctx.strokeStyle = 'rgba(135,88,45,.32)'; ctx.lineWidth = 3;
-          for (let x = Math.floor(x0 / S) * S; x < x1; x += S) { ctx.beginPath(); ctx.moveTo(x, y0); ctx.lineTo(x, y1); ctx.stroke(); }
-          for (let y = Math.floor(y0 / S) * S; y < y1; y += S) { ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke(); }
-          ctx.fillStyle = 'rgba(228,161,27,.06)';
-          for (let x = Math.floor(x0 / S) * S; x < x1; x += S) for (let y = Math.floor(y0 / S) * S; y < y1; y += S) if (((x / S) + (y / S)) % 2 === 0) ctx.fillRect(x, y, S, S);
-        } else if (z.name === '客厅') {
-          const H = 92;
-          for (let y = Math.floor(y0 / H) * H; y < y1; y += H) {
-            ctx.strokeStyle = 'rgba(80,50,26,.38)'; ctx.lineWidth = 3;
-            ctx.beginPath(); ctx.moveTo(x0, y + H); ctx.lineTo(x1, y + H); ctx.stroke();
-            const off = ((y / H) % 2) * 130;
-            ctx.strokeStyle = 'rgba(90,58,30,.20)'; ctx.lineWidth = 2;
-            for (let x = Math.floor((x0 - off) / 260) * 260 + off; x < x1; x += 260) { ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y + H); ctx.stroke(); }
-          }
-        } else if (z.name === '花园') {
-          for (let x = Math.floor(x0 / 34) * 34; x < x1; x += 34) for (let y = Math.floor(y0 / 34) * 34; y < y1; y += 34) {
-            const n = h2(x, y);
-            ctx.strokeStyle = n > 0.5 ? 'rgba(60,120,55,.28)' : 'rgba(150,200,110,.28)'; ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.moveTo(x + n * 20, y + 24); ctx.lineTo(x + n * 20 + 3, y + 16 - n * 6); ctx.stroke();
-          }
-        } else {
-          const G = 84;
-          for (let row = Math.floor(y0 / G) * G; row < y1; row += G) {
-            const off = ((row / G) % 2) * (G / 2);
-            for (let x = Math.floor((x0 - off) / G) * G + off; x < x1; x += G) {
-              const n = h2(x, row);
-              ctx.fillStyle = 'rgba(255,255,255,' + (0.03 + n * 0.05) + ')';
-              ctx.strokeStyle = 'rgba(40,34,26,.40)'; ctx.lineWidth = 2;
-              ctx.beginPath(); ctx.ellipse(x + G / 2, row + G / 2, G * 0.44, G * 0.40, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-            }
-          }
-        }
+        ctx.fillStyle = pat;
+        ctx.fillRect(zx, zy, zw, zh);
         ctx.restore();
       }
+      ctx.globalAlpha = 1;
       ctx.globalAlpha = 0.30;
       ctx.font = '900 54px sans-serif';
       ctx.textAlign = 'center';
@@ -1577,9 +1580,11 @@
         } else {
           const __bs = it.e.def && it.e.def.sprite ? orbitImg(it.e.def.sprite) : null;
           if (__bs) {
-            const bs = it.e.r * 5.2;
+            const bs = it.e.r * 4.2;
             ctx.save();
+            ctx.globalAlpha = 0.96;
             ctx.drawImage(__bs, it.e.x - bs / 2, it.e.y - bs * 0.78, bs, bs);
+            ctx.globalAlpha = 1;
             ctx.restore();
           } else if (it.e.kind === 'spike') drawDog(ctx, it.e);
           else drawCat(ctx, it.e);

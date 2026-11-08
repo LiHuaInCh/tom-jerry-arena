@@ -156,7 +156,8 @@
 
     $('cmSIcon').src = sk.iconImg || '';
     $('cmSName').textContent = sk.name;
-    let sd = (SKILL_LABEL[sk.kind] || '技能') + ' · 冷却 ' + sk.cd + 's';
+    const SDESC = { blink: '向瞄准方向瞬移一段距离', shield: '获得护盾抵挡伤害', invuln: '短时间无敌', heal: '立即回复生命', haste: '短时间提升移速', slow: '减速周围敌人', stealth: '进入隐身状态', beam: '朝瞄准方向发射光束', nova: '以自身为中心的范围爆发' };
+    let sd = (SDESC[sk.kind] || '') + (sk.kind && SDESC[sk.kind] ? ' · ' : '') + (SKILL_LABEL[sk.kind] || '技能') + ' · 冷却 ' + sk.cd + 's';
     if (sk.dmg) sd += ' · 伤害 ' + sk.dmg;
     if (sk.dur) sd += ' · 持续 ' + sk.dur + 's';
     if (sk.pct) sd += ' · 回复 ' + Math.round(sk.pct * 100) + '%';
@@ -290,7 +291,7 @@
       ov.innerHTML = '<div class="guide-box"><div class="guide-head">设置<button class="guide-close">×</button></div><div class="guide-body" id="setBody"></div></div>';
       document.body.appendChild(ov);
       var body = ov.querySelector('#setBody');
-      [btn, mbtn, qualityBtn, fpsBtn, expBtn, impBtn, copyBtn].forEach(function (b) {
+      [btn, mbtn, qualityBtn, fpsBtn, codexBtn, expBtn, impBtn, copyBtn].forEach(function (b) {
         var row = document.createElement('button');
         row.className = 'set-row';
         row.textContent = b.textContent;
@@ -333,6 +334,12 @@
       fpsBtn.textContent = '帧率：' + f;
     };
     toolsRow.appendChild(fpsBtn);
+
+    var codexBtn = document.createElement('button');
+    codexBtn.className = 'guide-btn'; codexBtn.type = 'button';
+    codexBtn.textContent = '武器图鉴';
+    codexBtn.onclick = openCodex;
+    toolsRow.appendChild(codexBtn);
 
     var SECTIONS = [
       ['基础操作', [
@@ -763,10 +770,14 @@
     $('kills').textContent = g.kills;
     $('score').textContent = g.score;
 
-    if (g.boss && !g.boss.dead) {
+    const __bosses = (g.enemies || []).filter(function (e) { return e.boss && !e.dead; }).slice(0, 3);
+    if (__bosses.length) {
       $('bossBar').classList.remove('hidden');
-      $('bossName').textContent = g.boss.def.name;
-      $('bossFill').style.width = Math.max(0, (g.boss.hp / g.boss.maxHp) * 100) + '%';
+      $('bossRows').innerHTML = __bosses.map(function (b) {
+        const nm = (b.def && b.def.name) || 'BOSS';
+        const pc = Math.max(0, Math.min(100, b.hp / b.maxHp * 100));
+        return '<div class="boss-row"><div class="boss-name">' + nm + '</div><div class="boss-track"><div class="boss-fill" style="width:' + pc.toFixed(1) + '%"></div></div></div>';
+      }).join('');
     } else {
       $('bossBar').classList.add('hidden');
     }
@@ -856,6 +867,21 @@
       };
     });
     ov.querySelector('#rmReset').onclick = function () { TJ.meta.resetRunes(); renderRunes(ov); };
+  }
+
+  function openCodex() {
+    let ov = document.getElementById('codexOverlay');
+    if (!ov) { ov = document.createElement('div'); ov.id = 'codexOverlay'; ov.className = 'codex-overlay'; document.body.appendChild(ov); }
+    const KC = { ranged: '远程', orbit: '环绕', aura: '光环', chain: '连锁', tether: '连锁', beam: '光束', deploy: '布置', summon: '召唤' };
+    const items = D.characters.map(function (c) {
+      const w = D.weapons[c.weapon] || {};
+      const ic = w.iconImg ? '<img src="' + w.iconImg + '" alt="">' : '<span class="cx-ph">?</span>';
+      return '<div class="cx-item">' + ic + '<b>' + (w.name || '—') + '</b><span>' + (KC[w.kind] || '') + (w.label ? ' · ' + w.label : '') + '</span><em>' + c.name + '</em></div>';
+    }).join('');
+    ov.innerHTML = '<div class="codex-box"><div class="codex-head"><b>武器图鉴</b><span>57 把 · 每角色独立</span><button class="codex-close">×</button></div><div class="codex-grid">' + items + '</div></div>';
+    ov.classList.add('on');
+    ov.querySelector('.codex-close').onclick = function () { ov.classList.remove('on'); };
+    ov.onclick = function (ev) { if (ev.target === ov) ov.classList.remove('on'); };
   }
 
   function openRunes() {
