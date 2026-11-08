@@ -490,7 +490,7 @@
       if (ent.invisT > 0) ctx.globalAlpha = 0.35;
       const __mode = ent.atkAnimT > 0 ? 'attack' : (ent.flash > 0 ? 'hurt' : (Math.abs(ent.vx || 0) + Math.abs(ent.vy || 0) > 20 ? 'run' : 'idle'));
       const __ph = (ent.walk || 0) * 1.2 + (ent.x || 0) * 0.01;
-      if (!drawPartRig(ctx, ent.char && ent.char.id, w, h, __mode, __ph)) drawSkinned(ctx, im, w, h, __mode, __ph);
+      drawSkinned(ctx, im, w, h, __mode, __ph);
     } else {
       if (char && char.faction === 'cat' && ent.def) drawCat(ctx, ent); else drawMouse(ctx, ent, char);
     }
@@ -1714,10 +1714,13 @@
           const __bs = it.e.def && it.e.def.sprite ? orbitImg(it.e.def.sprite) : null;
           if (__bs) {
             const bs = it.e.r * 4.2;
+            const __bmode = it.e.atkAnimT > 0 ? 'attack' : (it.e.flash > 0 ? 'hurt' : (Math.hypot(it.e.vx || 0, it.e.vy || 0) > 15 ? 'run' : 'idle'));
+            const __bph = (it.e.walk || 0) * 1.1 + it.e.x * 0.01;
             ctx.save();
             if (it.e.boss && it.e.hp < it.e.maxHp * 0.5) ctx.filter = 'saturate(1.55) contrast(1.06) hue-rotate(-14deg)';
             ctx.globalAlpha = 0.96;
-            ctx.drawImage(__bs, it.e.x - bs / 2, it.e.y - bs * 0.78 + Math.sin(performance.now() / 460 + it.e.x * 0.02) * it.e.r * 0.12, bs, bs);
+            ctx.translate(it.e.x, it.e.y + bs * 0.22 + Math.sin(performance.now() / 460 + it.e.x * 0.02) * it.e.r * 0.12);
+            drawSkinned(ctx, __bs, bs, bs, __bmode, __bph);
             ctx.globalAlpha = 1; ctx.filter = 'none';
             ctx.restore();
           } else if (it.e.kind === 'spike') drawDog(ctx, it.e);
