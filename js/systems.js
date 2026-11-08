@@ -242,11 +242,12 @@
       }
     } else {
       const hs = (p.hasteT > 0 ? (p.hasteMul || 1.5) : 1) * (p.slowT > 0 ? 0.5 : 1) * (p.stealthT > 0 ? 1.25 : 1);
-      p.x += mx * p.speed * st.speed * hs * dt;
-      p.y += my * p.speed * st.speed * hs * dt;
+      p.x += mx * p.speed * st.speed * hs * (p.slowT > 0 ? 0.6 : 1) * dt;
+      p.y += my * p.speed * st.speed * hs * (p.slowT > 0 ? 0.6 : 1) * dt;
     }
 
     resolveObstacles(g, p, p.r);
+    if (p.slowT > 0) p.slowT -= dt;
     if (p.moving) p.walk += dt * 11 * st.speed;
 
     const ow = D.weapons[p.char.weapon];
@@ -441,6 +442,14 @@
 
       if (e.spawnT > 0.2) continue;
       if (e.freezeT > 0) { e.freezeT -= dt; continue; }
+      if (e.kind === 'security') {
+        e.rocketCd = (e.rocketCd == null ? 3.5 : e.rocketCd) - dt;
+        if (e.rocketCd <= 0 && d < 520 && d > 120) {
+          e.rocketCd = 3.8;
+          const ra = Math.atan2(p.y - e.y, p.x - e.x);
+          g.projectiles.push({ x: e.x, y: e.y, vx: Math.cos(ra) * 210, vy: Math.sin(ra) * 210, r: 9, dmg: e.dmg * 0.8, from: 'enemy', kind: 'orb', life: 2.6, hit: {}, icon: 'assets/enemies/rocket_cut.png', explodeOnDeath: true, splash: 80 });
+        }
+      }
       if (e.kind === 'spike' && !e.sons && e.hp < e.maxHp * 0.5) {
         e.sons = 1;
         for (let si = 0; si < 2; si++) {

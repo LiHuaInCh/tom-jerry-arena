@@ -116,6 +116,7 @@
       if (!pr.stageHit || pr.dead) continue;
       if (Math.hypot(pr.x - p.x, pr.y - p.y) < pr.r + p.r) {
         pr.dead = true; s.count++;
+        if (s.kind !== 'good') p.slowT = 1.0;
         TJ.Combat.hurtPlayer(g, 1, p.x, p.y);
         addText(g, p.x, p.y - 40, (s.kind === 'good' ? '赞美 +1 ' : '降温 +1 ') + s.count + '/' + s.need, s.kind === 'good' ? '#FFD34D' : '#9CD8FF', 16);
       }
