@@ -92,7 +92,7 @@
           const line = fuseName(e, o);
           if (line && list.indexOf(line) < 0) list.push(line);
         });
-        lines.push('可融合：' + list.join(' · '));
+        lines.push('可融合：' + list.slice(0, 6).join('、') + (list.length > 6 ? ' 等' : ''));
       }
       return { id: 'elem' + slot + '_' + e, name: '元素 · ' + names[e], desc: lines.join('\n'), icon: names[e], rarity: 'epic', stack: slot === 0 ? '第 1 槽' : '第 2 槽' };
     });

@@ -1127,7 +1127,7 @@
       return;
     }
     if (pk.kind === 'xp') {
-      if (drawCake(ctx, 0, 0)) return;
+      if (drawCake(ctx, 0, 0)) { ctx.restore(); return; }
       ctx.fillStyle = 'rgba(255,210,80,0.25)';
       ellipse(ctx, 0, 0, 11, 11); ctx.fill();
       ctx.fillStyle = '#FFD34D';
