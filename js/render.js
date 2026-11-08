@@ -1573,13 +1573,10 @@
         } else {
           const __bs = it.e.def && it.e.def.sprite ? orbitImg(it.e.def.sprite) : null;
           if (__bs) {
-            const bs = it.e.r * 3.4;
+            const bs = it.e.r * 5.2;
             ctx.save();
-            ctx.beginPath(); ctx.arc(it.e.x, it.e.y, bs * 0.46, 0, TAU); ctx.clip();
-            ctx.drawImage(__bs, it.e.x - bs / 2, it.e.y - bs * 0.62, bs, bs);
+            ctx.drawImage(__bs, it.e.x - bs / 2, it.e.y - bs * 0.78, bs, bs);
             ctx.restore();
-            ctx.save(); ctx.strokeStyle = 'rgba(58,36,24,.55)'; ctx.lineWidth = 3;
-            ctx.beginPath(); ctx.arc(it.e.x, it.e.y, bs * 0.46, 0, TAU); ctx.stroke(); ctx.restore();
           } else if (it.e.kind === 'spike') drawDog(ctx, it.e);
           else drawCat(ctx, it.e);
         }
