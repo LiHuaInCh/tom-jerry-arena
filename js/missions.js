@@ -128,6 +128,7 @@
         if (s.kind !== 'good') p.slowT = 1.0;
         TJ.Combat.hurtPlayer(g, 1, p.x, p.y);
         if (s.mission) TJ.Missions.bump(g, s.mission.id, 1);
+        if (s.count % 5 === 1 && p) { g.emotes = g.emotes || []; g.emotes.push({ x: p.x, y: p.y - p.r * 1.6, img: 'assets/emotes/carrot.png', life: 0.8, max: 0.8 }); }
         addText(g, p.x, p.y - 40, (s.kind === 'good' ? '赞美 +1 ' : '降温 +1 ') + s.count + '/' + s.need, s.kind === 'good' ? '#FFD34D' : '#9CD8FF', 16);
       }
     }
