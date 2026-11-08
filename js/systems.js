@@ -809,6 +809,7 @@
             pr.dead = true;
             if (pr.stageHit && g.stage) {
               g.stage.count++;
+              if (g.stage.mission) TJ.Missions.bump(g, g.stage.mission.id, 1);
               addText(g, p.x, p.y - 40, (g.stage.kind === 'good' ? '赞美 +1 ' : '降温 +1 ') + g.stage.count + '/' + g.stage.need, g.stage.kind === 'good' ? '#FFD34D' : '#9CD8FF', 16);
             }
             g.effects.push({ kind: 'ring', x: pr.x, y: pr.y, r: 3, maxR: 26, life: 0.16, max: 0.16, color: '#FFE08A' });

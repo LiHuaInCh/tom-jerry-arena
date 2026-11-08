@@ -82,6 +82,7 @@
   function killEnemy(g, e) {
     if (e.dead) return;
     e.dead = true;
+    if (g.boss === e) g.boss = null;
     if (e.elite && e.mod === 'split') {
       for (let i = 0; i < 2; i++) {
         const c = spawnEnemy(g, 'kitten', Math.max(1, g.wave - 1));
@@ -102,9 +103,9 @@
     g.effects.push({ kind: 'spark', x: e.x, y: e.y, life: 0.3, max: 0.3, color: e.def.fur, n: 10, r1: 40, width: 3, rot: rand(g, 0, 6.28) });
     g.effects.push({ kind: 'tex', src: 'assets/fx/kenney/flame_03.png', x: e.x, y: e.y, life: 0.32, max: 0.32, s0: 14, s1: 44, rot: rand(g, 0, 6.28), spin: 1.4 });
     g.effects.push({ kind: 'tex', src: 'assets/fx/kenney/smoke_01.png', x: e.x, y: e.y, life: 0.5, max: 0.5, s0: 18, s1: 58, alpha: 0.55, rot: rand(g, 0, 6.28) });
-    if (e.def.boss) g.effects.push({ kind: 'tex', src: 'assets/fx/kenney/circle_05.png', x: e.x, y: e.y, life: 0.7, max: 0.7, s0: 40, s1: 220, alpha: 0.8 });
+    if (e.boss) g.effects.push({ kind: 'tex', src: 'assets/fx/kenney/circle_05.png', x: e.x, y: e.y, life: 0.7, max: 0.7, s0: 40, s1: 220, alpha: 0.8 });
     g.effects.push({ kind: 'ring', x: e.x, y: e.y, r: 8, maxR: e.r * 2.4, life: 0.28, max: 0.28, color: '#FFFFFF' });
-    const orbCount = e.def.boss ? 22 : (e.def.xp >= 6 ? 3 : 1);
+    const orbCount = e.boss ? 22 : (e.def.xp >= 6 ? 3 : 1);
     for (let i = 0; i < orbCount; i++) {
       g.pickups.push({
         kind: 'xp', x: e.x + rand(g, -14, 14), y: e.y + rand(g, -14, 14),
@@ -115,8 +116,8 @@
     if (g.rng() < 0.04) g.pickups.push({ kind: 'magnet', x: e.x, y: e.y, vx: 0, vy: 0, r: 13, value: 0, life: 24, pull: false });
     if (g.rng() < 0.04 && !(g.cov && g.cov.noHeal)) g.pickups.push({ kind: 'heart', x: e.x, y: e.y, vx: 0, vy: 0, r: 11, value: 22, life: 22, pull: false });
     if (g.rng() < 0.055) g.pickups.push({ kind: 'cheese', x: e.x + 12, y: e.y, vx: 0, vy: 0, r: 12, value: 60, life: 22, pull: false });
-    if (e.def.boss) {
-      g.shake = 18; g.boss = null; sfx(g, 'bossdown');
+    if (e.boss) {
+      g.shake = 18; if (g.boss === e) g.boss = null; sfx(g, 'bossdown');
       g.player.hp = Math.min(g.player.maxHp, g.player.hp + 30);
       g.effects.push({ kind: 'ring', x: e.x, y: e.y, r: 10, maxR: 320, life: 0.6, max: 0.6, color: '#FFD34D' });
       addText(g, e.x, e.y - 60, 'BOSS 击破！', '#FFD34D', 30);
