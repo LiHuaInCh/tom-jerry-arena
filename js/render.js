@@ -868,6 +868,15 @@
 
   /* ---------------- 弹道 / 拾取 / 特效 ---------------- */
   function drawProjectile(ctx, pr) {
+    if (pr.icon) {
+      const pi = orbitImg(pr.icon);
+      if (pi) {
+        ctx.save(); ctx.translate(pr.x, pr.y);
+        ctx.rotate(Math.atan2(pr.vy, pr.vx) + Math.PI / 2);
+        ctx.drawImage(pi, -14, -14, 28, 28);
+        ctx.restore(); return;
+      }
+    }
     ctx.save();
     ctx.translate(pr.x, pr.y);
     const a = Math.atan2(pr.vy, pr.vx);
@@ -1045,6 +1054,13 @@
     if (!itemImgs[src]) { const im = new Image(); im.src = src; itemImgs[src] = im; }
     const im = itemImgs[src];
     return im.complete && im.naturalWidth ? im : null;
+  }
+
+  function drawCake(ctx, x, y) {
+    const c = orbitImg('assets/enemies/cake_cut.png');
+    if (!c) return false;
+    ctx.save(); ctx.drawImage(c, x - 16, y - 16, 32, 32); ctx.restore();
+    return true;
   }
 
   function drawTrap(ctx, tr, t) {
@@ -1511,6 +1527,13 @@
         ctx.rotate(Math.sin(__t * 0.8) * 0.1);
         ctx.drawImage(__aico, -__sz / 2, -__sz / 2, __sz, __sz);
         ctx.restore();
+        }
+      }
+      if (g.stage) {
+        const sImg = orbitImg(g.stage.kind === 'good' ? 'assets/enemies/goodjerry_cut.png' : 'assets/enemies/angryjerry_cut.png');
+        if (sImg) {
+          const ss = 180;
+          ctx.save(); ctx.drawImage(sImg, g.stage.x - ss / 2, g.stage.y - ss * 0.82, ss, ss); ctx.restore();
         }
       }
       const list = [];

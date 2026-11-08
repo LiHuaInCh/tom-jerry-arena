@@ -154,20 +154,9 @@
       state: 'idle', stateT: 0, atkCd: rand(g, 0.6, 1.6) * (wave <= 3 ? 1.2 : 1), charge: null,
       pending: null, summoned: 0, walk: rand(g, 0, TAU), boss: !!def.boss, recoil: 0
     };
-    const eliteMul = TJ.Missions.zoneOf(g, g.player.x, g.player.y) === 'cellar' ? 1.6 : 1;
-    if (!def.boss && wave >= 2 && g.rng() < Math.min(0.34, (0.08 + wave * 0.012) * eliteMul) * ((g.cov && g.cov.elite) || 1)) {
-      e.elite = true;
-      e.armor = Math.min(0.6, (e.armor || 0) + 0.08);
-      e.mod = ['shield', 'swift', 'split'][Math.floor(g.rng() * 3)];
-      e.hp = Math.round(e.hp * (e.mod === 'shield' ? 2.0 : 1.5));
-      e.maxHp = e.hp;
-      e.dmg *= 1.15;
-      if (e.mod === 'swift') e.speed *= 1.45;
-      if (e.mod === 'shield') e.armor = 0.35;
-    }
     e.element = { kitten: 'light', spitter: 'ice', bruiser: 'fire', dasher: 'thunder', tom: 'dark', spike: 'light', hunter: 'dark' }[kind] || null;
     g.enemies.push(e);
-    if (def.boss) {
+    if (def.boss && !g._eliteSpawn) {
       g.boss = e; sfx(g, 'boss'); g.shake = 14;
       addText(g, e.x, e.y - 70, def.name + ' 出现了！', '#FF7A5C', 28);
       g.events.push({ type: 'boss', e });
@@ -452,6 +441,14 @@
 
       if (e.spawnT > 0.2) continue;
       if (e.freezeT > 0) { e.freezeT -= dt; continue; }
+      if (e.kind === 'spike' && !e.sons && e.hp < e.maxHp * 0.5) {
+        e.sons = 1;
+        for (let si = 0; si < 2; si++) {
+          const son = spawnEnemy(g, 'spikejr', Math.max(1, g.wave - 3), e.x + (si ? 30 : -30), e.y + 20);
+          if (son) { son.elite = true; son.hp = son.maxHp = Math.round(son.maxHp * 0.8); }
+        }
+        addText(g, e.x, e.y - 60, '儿子们，上！', '#FFD34D', 20);
+      }
       if (e.stunT > 0) { e.stunT -= dt; continue; }
       if (e.slowT > 0) { e.slowT -= dt; if (e.slowT <= 0) e.slowMul = 1; }
       if (e.dotT > 0) {
@@ -698,6 +695,44 @@
       }
     }
 
+    if (e.kind === 'kunkun') {
+      e.dashCd = (e.dashCd == null ? 3 : e.dashCd) - dt;
+      if (e.dashCd <= 0 && d > 90) { e.dashCd = 3.2; e.charge = { dx: ux, dy: uy, t: 0.5 }; addText(g, e.x, e.y - 60, '坤坤冲刺！', '#FFD34D', 20); }
+      e.featCd = (e.featCd == null ? 4 : e.featCd) - dt;
+      if (e.featCd <= 0) {
+        e.featCd = 4.5;
+        for (let i = 0; i < 6; i++) {
+          const aa = i / 6 * Math.PI * 2;
+          g.projectiles.push({ x: e.x, y: e.y, vx: Math.cos(aa) * 220, vy: Math.sin(aa) * 220, r: 7, dmg: e.dmg * 0.5, from: 'enemy', kind: 'orb', life: 2.0, hit: {}, color: '#FFD34D' });
+        }
+      }
+      if (d > 200) { e.x += ux * e.speed * dt; e.y += uy * e.speed * dt; }
+      return;
+    }
+    if (e.kind === 'cthulhu') {
+      e.tentCd = (e.tentCd == null ? 3.5 : e.tentCd) - dt;
+      if (e.tentCd <= 0) { e.tentCd = 3.6; g.projectiles.push({ x: e.x, y: e.y, vx: 0, vy: 0, r: 22, grow: 300, maxR: 240, dmg: e.dmg * 0.8, from: 'enemy', kind: 'ring', life: 1.0, hit: {} }); addText(g, e.x, e.y - 60, '触手拍击！', '#9CD8FF', 20); }
+      e.mindCd = (e.mindCd == null ? 9 : e.mindCd) - dt;
+      if (e.mindCd <= 0) { e.mindCd = 9; p.reverseT = 1.4; addText(g, p.x, p.y - 50, '精神污染！', '#B9A7FF', 20); }
+      if (!e.summoned && e.hp / e.maxHp < 0.66) { e.summoned = 1; summonAdds(g, e, 2); }
+      if (d > 220) { e.x += ux * e.speed * dt; e.y += uy * e.speed * dt; }
+      return;
+    }
+    if (e.kind === 'giant') {
+      e.smashCd = (e.smashCd == null ? 4 : e.smashCd) - dt;
+      if (e.smashCd <= 0) { e.smashCd = 4.2; g.projectiles.push({ x: e.x, y: e.y, vx: 0, vy: 0, r: 26, grow: 340, maxR: 220, dmg: e.dmg * 1.1, from: 'enemy', kind: 'ring', life: 0.9, hit: {} }); addText(g, e.x, e.y - 80, '砸地！', '#FF9A5C', 22); g.shake = Math.max(g.shake || 0, 10); }
+      e.carCd = (e.carCd == null ? 5 : e.carCd) - dt;
+      if (e.carCd <= 0) {
+        e.carCd = 5.5;
+        const an = Math.atan2(p.y - e.y, p.x - e.x);
+        for (let i = -1; i <= 1; i++) {
+          const aa = an + i * 0.2;
+          g.projectiles.push({ x: e.x, y: e.y, vx: Math.cos(aa) * 240, vy: Math.sin(aa) * 240, r: 10, dmg: e.dmg * 0.6, from: 'enemy', kind: 'orb', life: 2.4, hit: {}, color: '#FF8A3D' });
+        }
+      }
+      if (d > 140) { e.x += ux * e.speed * 0.8 * dt; e.y += uy * e.speed * 0.8 * dt; }
+      return;
+    }
     if (e.kind === 'tom') {
       const frac = e.hp / e.maxHp;
       if (e.summoned === 0 && frac < 0.66) { e.summoned = 1; summonAdds(g, e, 1); }
@@ -903,10 +938,10 @@
       g.hitTaken = false;
     }
       g.events.push({ type: 'wave', wave });
-      const BOSS_SCHED = { 3: ['tom'], 6: ['spike'], 9: ['bigboss'], 12: ['qianchang'], 15: ['angryqc'], 18: ['chenjr'] };
+      const BOSS_SCHED = { 3: ['kunkun'], 6: ['cthulhu'], 9: ['giant'], 12: ['qianchang'], 15: ['angryqc'], 18: ['chenjr'] };
       const NEW_BOSS = ['qianchang', 'angryqc', 'chenjr'];
-      const OLD_BOSS = ['tom', 'spike', 'bigboss'];
-      const BOSS_NAME = { tom: '汤姆', spike: '斯派克', bigboss: '鼠王', qianchang: '浅唱', angryqc: '不甘心的浅唱', chenjr: '陈佳嵘' };
+      
+      const BOSS_NAME = { kunkun: '坤坤杰瑞', cthulhu: '克苏鲁杰瑞', giant: '巨人僵尸', tom: '汤姆', spike: '史派克', bigboss: '鼠王', qianchang: '浅唱', angryqc: '不甘心的浅唱', chenjr: '陈佳嵘' };
       let bossList = BOSS_SCHED[wave] || (wave >= 21 ? NEW_BOSS.slice() : null);
       if (bossList) {
         bossList.forEach(function (kind, bi) {
@@ -918,13 +953,24 @@
         });
         g.shake = 16;
       }
-      if (wave > 18) {
-        const ek = OLD_BOSS[Math.floor(g.rng() * OLD_BOSS.length)];
-        const ea = g.rng() * Math.PI * 2;
-        const ex = clamp(g.player.x + Math.cos(ea) * (360 + g.rng() * 200), 120, g.W - 120);
-        const ey = clamp(g.player.y + Math.sin(ea) * (360 + g.rng() * 200), 120, g.H - 120);
-        const el = spawnEnemy(g, ek, Math.max(1, wave - 8), ex, ey);
-        if (el) { el.elite = true; el.boss = false; el.maxHp = Math.round(el.maxHp * 0.6); el.hp = el.maxHp; el.mod = ['shield', 'swift', 'split'][Math.floor(g.rng() * 3)]; }
+      const ELITE_UNLOCK = [['spikejr',1],['security',1],['cowhead',3],['spike',5],['tom',8],['bigboss',11],['kunkun',12],['cthulhu',13],['giant',14]];
+      const avail = ELITE_UNLOCK.filter(function (x) { return wave >= x[1]; });
+      const ecount = wave >= 15 ? 3 : (wave >= 4 ? 2 : 1);
+      for (let ei = 0; ei < ecount; ei++) {
+        const pickE = avail[Math.floor(g.rng() * avail.length)][0];
+        const ea2 = g.rng() * Math.PI * 2;
+        const ex2 = clamp(g.player.x + Math.cos(ea2) * (300 + g.rng() * 220), 120, g.W - 120);
+        const ey2 = clamp(g.player.y + Math.sin(ea2) * (300 + g.rng() * 220), 120, g.H - 120);
+        g._eliteSpawn = true;
+        const el = spawnEnemy(g, pickE, Math.max(1, wave - 2), ex2, ey2);
+        g._eliteSpawn = false;
+        if (el) {
+          el.elite = true; el.boss = false;
+          el.maxHp = Math.round(el.maxHp * (wave <= 3 ? 0.3 : (ei > 0 ? 0.38 : 0.5)));
+          el.hp = el.maxHp;
+          el.armor = Math.min(0.45, (el.armor || 0) + 0.02);
+          el.mod = ['shield', 'swift', 'split'][Math.floor(g.rng() * 3)];
+        }
       }
       }
     g.spawnTimer -= dt * (g.boss ? 0.55 : 1);
@@ -1055,6 +1101,7 @@
 
   /* ---------------- 主更新 ---------------- */
   TJ.update = function (g, dt, input) {
+    if (TJ.Missions && TJ.Missions.tick) TJ.Missions.tick(g, dt);
     if (g.over) return;
     dt = Math.min(dt, 0.05);
     g.t += dt;

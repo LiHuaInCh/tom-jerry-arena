@@ -53,6 +53,7 @@
         addText(g, g.player.x, g.player.y - 70, '任务完成！选择奖励', '#FFD34D', 22);
         if (g.missions.every(function (mm) { return mm.done; }) && !g.ultGiven) { g.ultGiven = true; g.missionPicks++; addText(g, g.player.x, g.player.y - 100, '全部完成：终极强化！', '#FFB44D', 26); }
         g.events.push({ type: 'mission', id: m.id });
+        maybeStartStage(g);
       }
     }
   }
@@ -73,7 +74,63 @@
     addText(g, g.player.x, g.player.y - 70, '新任务：' + g.missions[g.missionIdx].text, '#FFE08A', 18);
     if (g.missions[g.missionIdx].id === 'timed') g.missionTimer = 60;
   }
+  function startStage(g, kind) {
+    g.stage = {
+      kind: kind, need: kind === 'good' ? 78 : 91, count: 0,
+      x: g.W / 2, y: g.H / 2, still: 0, spawn: 0.6, t: 0
+    };
+    addText(g, g.W / 2, g.H / 2 - 80, kind === 'good' ? '干的真棒杰瑞！' : '愤怒杰瑞！', kind === 'good' ? '#FFD34D' : '#FF7A5C', 26);
+  }
+
+  function maybeStartStage(g) {
+    if (g.stage) return;
+    const done = (g.missions || []).filter(function (x) { return x.done; }).length;
+    if (done < 2) return;
+    if (g.rng() > 0.12) return;
+    startStage(g, g.rng() < 0.5 ? 'good' : 'angry');
+  }
+
+  function tickStage(g, dt) {
+    const s = g.stage;
+    if (!s) return;
+    const p = g.player;
+    s.t += dt;
+    if (p.moving) s.still = 0; else s.still += dt;
+    if (s.still >= 10) { addText(g, p.x, p.y - 70, '任务失败：站桩太久', '#FF8A6A', 20); g.stage = null; return; }
+    s.spawn -= dt;
+    if (s.spawn <= 0) {
+      s.spawn = s.kind === 'good' ? 0.6 : 0.5;
+      const n = s.kind === 'good' ? 2 : 1;
+      for (let i = 0; i < n; i++) {
+        const a = g.rng() * Math.PI * 2;
+        const sx = p.x + Math.cos(a) * 320, sy = p.y + Math.sin(a) * 320;
+        const vx = Math.cos(a + Math.PI) * 240, vy = Math.sin(a + Math.PI) * 240;
+        g.projectiles.push({
+          x: sx, y: sy, vx: vx, vy: vy, r: 10, dmg: 1, from: 'enemy', kind: 'orb',
+          life: 3, hit: {}, stageHit: true,
+          icon: s.kind === 'good' ? 'assets/enemies/carrot_cut.png' : 'assets/enemies/ice_cut.png'
+        });
+      }
+    }
+    for (const pr of g.projectiles) {
+      if (!pr.stageHit || pr.dead) continue;
+      if (Math.hypot(pr.x - p.x, pr.y - p.y) < pr.r + p.r) {
+        pr.dead = true; s.count++;
+        TJ.Combat.hurtPlayer(g, 1, p.x, p.y);
+        addText(g, p.x, p.y - 40, (s.kind === 'good' ? '赞美 +1 ' : '降温 +1 ') + s.count + '/' + s.need, s.kind === 'good' ? '#FFD34D' : '#9CD8FF', 16);
+      }
+    }
+    if (s.count >= s.need) {
+      addText(g, p.x, p.y - 80, '任务完成！', '#FFD34D', 24);
+      g.missionPicks = (g.missionPicks || 0) + 1;
+      g.stage = null;
+    }
+  }
+
   TJ.Missions = {
+    tick: function (g, dt) { tickStage(g, dt); },
+    stage: function (g) { return g.stage || null; },
+    start: function (g, kind) { startStage(g, kind); },
     zoneOf: zoneOf,
     bump: function (g, kind, val, zone) { bumpMission(g, kind, val, zone); },
     fail: function (g, kind) { failMission(g, kind); },
