@@ -150,7 +150,7 @@
       hp: Math.round(def.hp * scale), maxHp: Math.round(def.hp * scale),
       speed: def.speed * (1 + Math.min(0.45, wave * 0.016)) * (wave >= 6 && wave <= 9 ? 1.08 : 1), dmg: def.dmg * Math.min(2.2, 1.85 + Math.max(0, wave - 5) * 0.04) * (1 + wave * 0.032),
       flash: 0, hitCd: 0, spawnT: 0.35, dead: false, kx: 0, ky: 0,
-      armor: (!def.boss && wave >= 8 && rand(g, 0, 1) < 0.12) ? 0.3 : 0,
+      armor: def.armor || ((!def.boss && wave >= 8 && rand(g, 0, 1) < 0.12) ? 0.3 : 0),
       state: 'idle', stateT: 0, atkCd: rand(g, 0.6, 1.6) * (wave <= 3 ? 1.2 : 1), charge: null,
       pending: null, summoned: 0, walk: rand(g, 0, TAU), boss: !!def.boss, recoil: 0
     };
@@ -853,14 +853,25 @@
       g.hitTaken = false;
     }
       g.events.push({ type: 'wave', wave });
-      if (wave % 8 === 0) {
-        const bb = spawnEnemy(g, 'bigboss', wave, g.W / 2, g.H / 2);
-        if (bb) { bb.x = g.W / 2; bb.y = g.H / 2; bb.boss = true; g.boss = bb; }
-        addText(g, g.W / 2, g.H / 2 - 80, '鼠王降临！', '#FF7A5C', 32);
+      const BOSS_SCHED = { 4: ['tom'], 8: ['spike'], 12: ['bigboss'], 16: ['qianchang'], 20: ['angryqc'], 24: ['chenjr'] };
+      const ALL_BOSS = ['tom', 'spike', 'bigboss', 'qianchang', 'angryqc', 'chenjr'];
+      const BOSS_NAME = { tom: '汤姆', spike: '斯派克', bigboss: '鼠王', qianchang: '浅唱', angryqc: '不甘心的浅唱', chenjr: '陈佳嵘' };
+      let bossList = BOSS_SCHED[wave] || null;
+      if (!bossList && wave >= 28) {
+        const n = wave >= 36 ? 6 : (wave >= 32 ? 4 : 2);
+        const pool = ALL_BOSS.slice();
+        bossList = [];
+        for (let i = 0; i < n; i++) bossList.push(pool.splice(Math.floor(g.rng() * pool.length), 1)[0]);
       }
-      if (wave % 4 === 0) {
-        const kind = (wave / 4) % 2 === 1 ? 'tom' : 'spike';
-        spawnBossAt(g, kind, wave);
+      if (bossList) {
+        bossList.forEach(function (kind, bi) {
+          const ang = (bi / bossList.length) * Math.PI * 2;
+          const bx = clamp(g.W / 2 + Math.cos(ang) * (bi ? 220 : 0), 160, g.W - 160);
+          const by = clamp(g.H / 2 + Math.sin(ang) * (bi ? 220 : 0), 160, g.H - 160);
+          const bb = spawnEnemy(g, kind, wave, bx, by);
+          if (bb) { bb.boss = true; g.boss = g.boss || bb; addText(g, bx, by - 80, (BOSS_NAME[kind] || 'BOSS') + ' 降临！', '#FF7A5C', 28); }
+        });
+        g.shake = 16;
       }
     }
     g.spawnTimer -= dt * (g.boss ? 0.55 : 1);

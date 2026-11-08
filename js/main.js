@@ -761,7 +761,7 @@
       const ev = g.events[i];
       if (ev.type === 'sfx') TJ.Audio.play(ev.name);
       else if (ev.type === 'wave') toast('第 ' + ev.wave + ' 波');
-      else if (ev.type === 'boss') toast(ev.e.name + ' 出现了！');
+      else if (ev.type === 'boss') toast(((ev.e.def && ev.e.def.name) || ev.e.name || 'BOSS') + ' 出现了！');
       else if (ev.type === 'revive') toast('杰瑞从不认输！');
       else if (ev.type === 'kill') addFeed(ev.killer, ev.victim, ev.color);
       else if (ev.type === 'eliminated') toast(ev.name + ' 被淘汰');
