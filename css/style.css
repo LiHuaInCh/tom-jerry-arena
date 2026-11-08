@@ -1038,3 +1038,16 @@ html, body { overflow: hidden !important; overscroll-behavior: none; }
   #cards .up-card, #cards .lu-refresh { flex: 0 0 150px !important; width: 150px !important; max-width: 150px !important; }
   .lu-refresh { font-size: 10px !important; min-height: 70px; display: flex; align-items: center; justify-content: center; }
 }
+
+#over .modal { width: min(362px, 92vw) !important; padding: 18px 20px 16px !important; }
+#overTitle { font-size: 22px !important; margin: 0 0 8px !important; }
+#over .stat b { font-size: 17px !important; }
+#over .stat.wide b { font-size: 22px !important; }
+#over .stat { padding: 6px 9px !important; }
+#over .over-tag { font-size: 8.5px !important; padding: 3px 10px !important; }
+@media (pointer: coarse) {
+  #over .modal { width: min(330px, 92vw) !important; }
+  #over .stats { gap: 6px !important; }
+  #over .stat span { font-size: 9px !important; }
+  #over .stat b { font-size: 15px !important; }
+}

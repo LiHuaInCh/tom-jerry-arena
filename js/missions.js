@@ -15,6 +15,18 @@
     for (const z of ZONES) if (fx >= z.x0 && fx < z.x1 && fy >= z.y0 && fy < z.y1) return z.id;
     return 'kitchen';
   }
+  const SPECIAL_DEFS = [
+    { id: 'stage_good', text: '被 78 个萝卜命中', need: 78 },
+    { id: 'stage_angry', text: '被 91 个冰块命中', need: 91 }
+  ];
+  function pickTpl(g) {
+    const done = (g.missions || []).filter(function (x) { return x.done; }).length;
+    if (done >= 2 && !g.stageUsed && g.rng() < 0.2) {
+      g.stageUsed = true;
+      return SPECIAL_DEFS[Math.floor(g.rng() * SPECIAL_DEFS.length)];
+    }
+    return MISSION_DEFS[Math.floor(g.rng() * MISSION_DEFS.length)];
+  }
   const MISSION_DEFS = [
     { id: 'kill', text: '击倒 40 只猫', need: 40 },
     { id: 'wave', text: '撑到第 6 波', need: 6 },
@@ -41,19 +53,21 @@
         m.done = true; m.active = false;
         g.missionPicks = (g.missionPicks || 0) + 1;
         if (!g.missions[g.missionIdx + 1]) {
-          const tpl = MISSION_DEFS[Math.floor(g.rng() * MISSION_DEFS.length)];
+          const tpl = pickTpl(g);
           const nm = { id: tpl.id, text: tpl.text, need: tpl.need, cur: 0, done: false, active: false };
           if (tpl.id === 'zone') { const z2 = ZONES[Math.floor(g.rng() * ZONES.length)]; nm.zoneId = z2.id; nm.text = '在' + z2.name + '击倒 15 只'; }
           g.missions.push(nm);
         }
         g.missionIdx++;
         g.missions[g.missionIdx].active = true;
+        if (g.missions[g.missionIdx].id.indexOf('stage_') === 0) {
+          startStage(g, g.missions[g.missionIdx].id === 'stage_good' ? 'good' : 'angry', g.missions[g.missionIdx]);
+        }
         addText(g, g.player.x, g.player.y - 90, '新任务：' + g.missions[g.missionIdx].text, '#FFE08A', 20);
         if (g.missions[g.missionIdx].id === 'timed') g.missionTimer = 60;
         addText(g, g.player.x, g.player.y - 70, '任务完成！选择奖励', '#FFD34D', 22);
         if (g.missions.every(function (mm) { return mm.done; }) && !g.ultGiven) { g.ultGiven = true; g.missionPicks++; addText(g, g.player.x, g.player.y - 100, '全部完成：终极强化！', '#FFB44D', 26); }
         g.events.push({ type: 'mission', id: m.id });
-        maybeStartStage(g);
       }
     }
   }
@@ -64,30 +78,25 @@
     m.done = true; m.active = false; m.failed = true;
     addText(g, g.player.x, g.player.y - 90, '任务失败：' + m.text, '#FF8A6A', 20);
     if (!g.missions[g.missionIdx + 1]) {
-      const tpl = MISSION_DEFS[Math.floor(g.rng() * MISSION_DEFS.length)];
+      const tpl = pickTpl(g);
       const nm = { id: tpl.id, text: tpl.text, need: tpl.need, cur: 0, done: false, active: false };
       if (tpl.id === 'zone') { const z2 = ZONES[Math.floor(g.rng() * ZONES.length)]; nm.zoneId = z2.id; nm.text = '在' + z2.name + '击倒 15 只'; }
       g.missions.push(nm);
     }
     g.missionIdx++;
     g.missions[g.missionIdx].active = true;
+    if (g.missions[g.missionIdx].id.indexOf('stage_') === 0) {
+      startStage(g, g.missions[g.missionIdx].id === 'stage_good' ? 'good' : 'angry', g.missions[g.missionIdx]);
+    }
     addText(g, g.player.x, g.player.y - 70, '新任务：' + g.missions[g.missionIdx].text, '#FFE08A', 18);
     if (g.missions[g.missionIdx].id === 'timed') g.missionTimer = 60;
   }
-  function startStage(g, kind) {
+  function startStage(g, kind, mission) {
     g.stage = {
-      kind: kind, need: kind === 'good' ? 78 : 91, count: 0,
+      kind: kind, mission: mission, need: mission.need, count: 0,
       x: g.W / 2, y: g.H / 2, still: 0, spawn: 0.6, t: 0
     };
     addText(g, g.W / 2, g.H / 2 - 80, kind === 'good' ? '干的真棒杰瑞！' : '愤怒杰瑞！', kind === 'good' ? '#FFD34D' : '#FF7A5C', 26);
-  }
-
-  function maybeStartStage(g) {
-    if (g.stage) return;
-    const done = (g.missions || []).filter(function (x) { return x.done; }).length;
-    if (done < 2) return;
-    if (g.rng() > 0.12) return;
-    startStage(g, g.rng() < 0.5 ? 'good' : 'angry');
   }
 
   function tickStage(g, dt) {
@@ -96,7 +105,7 @@
     const p = g.player;
     s.t += dt;
     if (p.moving) s.still = 0; else s.still += dt;
-    if (s.still >= 10) { addText(g, p.x, p.y - 70, '任务失败：站桩太久', '#FF8A6A', 20); g.stage = null; return; }
+    if (s.still >= 10) { addText(g, p.x, p.y - 70, '任务失败：站桩太久', '#FF8A6A', 20); const sm = s.mission; g.stage = null; if (sm && TJ.Missions.fail) TJ.Missions.fail(g, sm.id); return; }
     s.spawn -= dt;
     if (s.spawn <= 0) {
       s.spawn = s.kind === 'good' ? 0.6 : 0.5;
@@ -118,20 +127,17 @@
         pr.dead = true; s.count++;
         if (s.kind !== 'good') p.slowT = 1.0;
         TJ.Combat.hurtPlayer(g, 1, p.x, p.y);
+        if (s.mission) TJ.Missions.bump(g, s.mission.id, 1);
         addText(g, p.x, p.y - 40, (s.kind === 'good' ? '赞美 +1 ' : '降温 +1 ') + s.count + '/' + s.need, s.kind === 'good' ? '#FFD34D' : '#9CD8FF', 16);
       }
     }
-    if (s.count >= s.need) {
-      addText(g, p.x, p.y - 80, '任务完成！', '#FFD34D', 24);
-      g.missionPicks = (g.missionPicks || 0) + 1;
-      g.stage = null;
-    }
+    if (s.mission && s.mission.done) g.stage = null;
   }
 
   TJ.Missions = {
     tick: function (g, dt) { tickStage(g, dt); },
     stage: function (g) { return g.stage || null; },
-    start: function (g, kind) { startStage(g, kind); },
+    start: function (g, kind) { startStage(g, kind, { id: 'stage_' + kind, need: kind === 'good' ? 78 : 91, cur: 0, done: false, active: true }); },
     zoneOf: zoneOf,
     bump: function (g, kind, val, zone) { bumpMission(g, kind, val, zone); },
     fail: function (g, kind) { failMission(g, kind); },
