@@ -736,7 +736,7 @@
         const an = Math.atan2(p.y - e.y, p.x - e.x);
         for (let i = -1; i <= 1; i++) {
           const aa = an + i * 0.2;
-          g.projectiles.push({ x: e.x, y: e.y, vx: Math.cos(aa) * 240, vy: Math.sin(aa) * 240, r: 10, dmg: e.dmg * 0.6, from: 'enemy', kind: 'orb', life: 2.4, hit: {}, color: '#FF8A3D' });
+          g.projectiles.push({ x: e.x, y: e.y, vx: Math.cos(aa) * 240, vy: Math.sin(aa) * 240, r: 10, dmg: e.dmg * 0.6, from: 'enemy', kind: 'orb', life: 2.4, hit: {}, icon: 'assets/enemies/carrot_cut.png' });
         }
       }
       if (d > 140) { e.x += ux * e.speed * 0.8 * dt; e.y += uy * e.speed * 0.8 * dt; }
