@@ -1575,6 +1575,20 @@
       list.sort(function (a, b) { const az = a.kind === 'player' ? 200000 : ((a.kind === 'enemy' && a.e.def && a.e.def.sprite) ? 100000 : 0); const bz = b.kind === 'player' ? 200000 : ((b.kind === 'enemy' && b.e.def && b.e.def.sprite) ? 100000 : 0); return (a.y + az) - (b.y + bz); });
 
       for (const it of list) {
+        if (it.kind === 'enemy' && it.e.boss && (it.e.charge || it.e.pending)) {
+          const ee = it.e;
+          const pulse = 0.45 + 0.25 * Math.sin(performance.now() / 90);
+          ctx.save();
+          ctx.globalAlpha = pulse; ctx.strokeStyle = '#FF4B3A'; ctx.lineWidth = 5;
+          ctx.beginPath(); ctx.arc(ee.x, ee.y, ee.r * 2.1, 0, Math.PI * 2); ctx.stroke();
+          if (ee.charge && (ee.charge.dx || ee.charge.dy)) {
+            const dl = Math.hypot(ee.charge.dx, ee.charge.dy) || 1;
+            ctx.beginPath(); ctx.moveTo(ee.x, ee.y);
+            ctx.lineTo(ee.x + ee.charge.dx / dl * 320, ee.y + ee.charge.dy / dl * 320);
+            ctx.strokeStyle = 'rgba(255,75,58,.55)'; ctx.lineWidth = 12; ctx.stroke();
+          }
+          ctx.restore();
+        }
         if (it.kind === 'fighter') {
           drawFighterRing(ctx, it.e);
           if (it.e.invisT > 0) { ctx.save(); ctx.globalAlpha = 0.35; }
