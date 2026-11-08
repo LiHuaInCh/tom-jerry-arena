@@ -690,6 +690,12 @@
     ctx.strokeStyle = OUT; ctx.lineWidth = Math.max(2.5, r * 0.1); ctx.stroke();
     ellipse(ctx, 0, r * 0.46, r * 0.4, r * 0.36);
     ctx.fillStyle = def.belly; ctx.globalAlpha = 0.8; ctx.fill(); ctx.globalAlpha = 1;
+    ctx.save();
+    ctx.globalAlpha = 0.16; ctx.fillStyle = '#FFF6E0';
+    ellipse(ctx, -r * 0.38, r * 0.02, r * 0.5, r * 0.62, -0.45); ctx.fill();
+    ctx.globalAlpha = 0.12; ctx.fillStyle = '#2A1A10';
+    ellipse(ctx, r * 0.34, r * 0.72, r * 0.62, r * 0.26, 0.1); ctx.fill();
+    ctx.restore();
 
     // 前爪
     ctx.fillStyle = def.fur;
@@ -722,6 +728,8 @@
     ellipse(ctx, 0, -r * 0.64, r * 0.8, r * 0.6);
     ctx.fillStyle = def.fur; ctx.fill();
     ctx.strokeStyle = OUT; ctx.lineWidth = Math.max(2.5, r * 0.1); ctx.stroke();
+    ctx.save(); ctx.globalAlpha = 0.2; ctx.fillStyle = '#FFF6E0';
+    ellipse(ctx, -r * 0.28, -r * 0.9, r * 0.34, r * 0.2, -0.5); ctx.fill(); ctx.restore();
 
     // 虎斑
     ctx.strokeStyle = def.furDark; ctx.globalAlpha = 0.5;
