@@ -215,7 +215,13 @@
     p.stealthT = Math.max(0, (p.stealthT || 0) - dt);
     p.slowT = Math.max(0, (p.slowT || 0) - dt);
     if (input.dash && p.skillCd <= 0 && p.skill) {
-      if (TJ.skills.use(g, p, false)) p.skillCd = p.skill.cd * (st.skillCdMul || 1);
+      if (TJ.skills.use(g, p, false)) {
+      p.skillCd = p.skill.cd * (st.skillCdMul || 1);
+      const __skCol = { heal: '#7FE08A', shield: '#7FD1FF', invuln: '#FFE08A', haste: '#FFD34D', slow: '#9CD8FF', stealth: '#B9A7FF', blink: '#FFD34D', beam: '#FFD34D', nova: '#FF7A5C' }[p.skill.kind] || '#FFD34D';
+      g.effects.push({ kind: 'ring', x: p.x, y: p.y, r: 18, maxR: 150, life: 0.45, max: 0.45, color: __skCol });
+      g.effects.push({ kind: 'spark', x: p.x, y: p.y, life: 0.35, max: 0.35, color: __skCol, n: 10, r1: 14, r2: 84 });
+      if (p.skill.kind === 'nova' || p.skill.kind === 'beam') g.effects.push({ kind: 'flash', color: __skCol, life: 0.18, max: 0.18 });
+    } /* __skillfx */
     }
 
     if (false) {
