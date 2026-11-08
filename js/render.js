@@ -336,7 +336,8 @@
     const R = (w.orbitR || 78) + (m.orbitRBonus || 0);
     const a0 = m.orbitA || 0;
     const img = orbitImg(w.iconImg);
-    const size = 54;
+    const __evoN = (function () { const gg = window.__tjG; if (!gg) return 0; return Object.keys(gg.upgradeCounts || {}).filter(function (k) { return k.indexOf('evo_') === 0; }).length; })();
+    const size = 54 + Math.min(3, __evoN) * 8;
     ctx.save();
     for (let i = 0; i < n; i++) {
       const a = a0 + i * Math.PI * 2 / n;
@@ -346,12 +347,12 @@
       ctx.translate(x, y);
       ctx.rotate(a + Math.PI / 2);
       ctx.shadowColor = w.color || '#FFD34D';
-      ctx.shadowBlur = 8;
+      ctx.shadowBlur = 8 + Math.min(3, __evoN) * 5;
       const sub = w.sub;
       const col = w.color || '#FFD34D';
       if (img) {
         ctx.globalAlpha = 0.95;
-        ctx.drawImage(img, -27, -27, 54, 54);
+        ctx.drawImage(img, -size / 2, -size / 2, size, size);
         ctx.globalAlpha = 1;
       } else if (sub === 'blade') {
         ctx.strokeStyle = col; ctx.lineWidth = 5; ctx.lineCap = 'round';
@@ -1665,6 +1666,15 @@
 
       for (const pr of g.projectiles) drawProjectile(ctx, pr);
       for (const e of g.effects) drawEffect(ctx, e);
+      const __hpR = g.player ? g.player.hp / g.player.maxHp : 1;
+      if (g.player && __hpR < 0.3) {
+        ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0);
+        const vw = ctx.canvas.width, vh = ctx.canvas.height;
+        const vg = ctx.createRadialGradient(vw / 2, vh / 2, Math.min(vw, vh) * 0.28, vw / 2, vh / 2, Math.max(vw, vh) * 0.65);
+        const va = 0.30 * (1 - __hpR / 0.3) * (0.78 + 0.22 * Math.sin(performance.now() / 260));
+        vg.addColorStop(0, 'rgba(255,40,40,0)'); vg.addColorStop(1, 'rgba(230,30,30,' + va.toFixed(3) + ')');
+        ctx.fillStyle = vg; ctx.fillRect(0, 0, vw, vh); ctx.restore(); /* __lowhp */
+      }
 
       if (__QUALITY() !== 'low') for (const p of g.particles) {
         const a = Math.max(0, p.life / p.max);
