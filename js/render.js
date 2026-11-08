@@ -1473,12 +1473,9 @@
       if (g.escort) {
         const e = g.escort;
         ctx.save();
-        ctx.fillStyle = '#F2D4A8';
-        ctx.beginPath(); ctx.arc(e.x, e.y, e.r, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = '#8A6A52'; ctx.lineWidth = 3; ctx.stroke();
-        ctx.fillStyle = '#E4572E';
-        ctx.beginPath(); ctx.arc(e.x - 6, e.y - 6, 4, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(e.x + 6, e.y - 6, 4, 0, Math.PI * 2); ctx.fill();
+        const esImg = orbitImg('assets/enemies/escort_cut.png');
+        if (esImg) { const ess = 96; ctx.drawImage(esImg, e.x - ess / 2, e.y - ess * 0.9, ess, ess); }
+        else { ctx.fillStyle = '#F2D4A8'; ctx.beginPath(); ctx.arc(e.x, e.y, e.r, 0, Math.PI * 2); ctx.fill(); }
         ctx.restore();
       }
       if (g.decor) {

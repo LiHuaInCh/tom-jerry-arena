@@ -291,7 +291,7 @@
       ov.innerHTML = '<div class="guide-box"><div class="guide-head">设置<button class="guide-close">×</button></div><div class="guide-body" id="setBody"></div></div>';
       document.body.appendChild(ov);
       var body = ov.querySelector('#setBody');
-      [btn, mbtn, qualityBtn, fpsBtn, codexBtn, expBtn, impBtn, copyBtn].forEach(function (b) {
+      [btn, mbtn, qualityBtn, fpsBtn, codexBtn, liveBtn, expBtn, impBtn, copyBtn].forEach(function (b) {
         var row = document.createElement('button');
         row.className = 'set-row';
         row.textContent = b.textContent;
@@ -326,7 +326,7 @@
     var fpsBtn = document.createElement('button');
     fpsBtn.className = 'guide-btn'; fpsBtn.type = 'button';
     var FLIST = [30, 45, 60];
-    function fNow() { return parseInt(localStorage.getItem('tj_fps') || (window.matchMedia('(pointer: coarse)').matches ? '30' : '60'), 10); }
+    function fNow() { return parseInt(localStorage.getItem('tj_fps') || '60', 10); }
     fpsBtn.textContent = '帧率：' + fNow();
     fpsBtn.onclick = function () {
       var f = FLIST[(FLIST.indexOf(fNow()) + 1) % FLIST.length];
@@ -340,6 +340,12 @@
     codexBtn.textContent = '武器图鉴';
     codexBtn.onclick = openCodex;
     toolsRow.appendChild(codexBtn);
+
+    var liveBtn = document.createElement('button');
+    liveBtn.className = 'guide-btn'; liveBtn.type = 'button';
+    liveBtn.textContent = '体验服（网页版）';
+    liveBtn.onclick = function () { window.open('https://lihuainch.github.io/tom-jerry-arena/', '_blank'); window.location.reload(); };
+    toolsRow.appendChild(liveBtn);
 
     var SECTIONS = [
       ['基础操作', [
@@ -971,7 +977,7 @@
     input.setEnabled(false);
   }
 
-  const BUILD_TAG = '2026-11-08i';
+  const BUILD_TAG = '2026-11-08j';
   function titleLockScroll() {
     const t = document.getElementById('title');
     if (t) {
@@ -1156,7 +1162,7 @@
   let __lastDraw = 0;
   function frame(now) {
     const __coarse = window.matchMedia('(pointer: coarse)').matches;
-    const __fps = parseInt(localStorage.getItem('tj_fps') || (__coarse ? '30' : '60'), 10);
+    const __fps = parseInt(localStorage.getItem('tj_fps') || '60', 10);
     if (__lastDraw && now - __lastDraw < 1000 / __fps - 1.5) { requestAnimationFrame(frame); return; }
     __lastDraw = now;
     window.__tjState = state;
