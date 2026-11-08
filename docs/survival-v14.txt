@@ -1,0 +1,23 @@
+chars 57 avgDeathRate 0.96 reach5 0.77 reach10 0.21 reach15 0.05 avgTime 170
+TOP10
+米特 reach10 1 wave 0 kills 1463 lvl 24
+侍卫汤姆 reach10 1 wave 15 kills 1035 lvl 22
+斯飞 reach10 1 wave 0 kills 979 lvl 22
+玛丽 reach10 1 wave 12 kills 826 lvl 21
+杰瑞 reach10 1 wave 12 kills 703 lvl 20
+剑客莉莉 reach10 1 wave 14 kills 625 lvl 20
+兔八哥 reach10 1 wave 14 kills 553 lvl 19
+仙女鼠 reach10 1 wave 11 kills 548 lvl 19
+牛仔汤姆 reach10 1 wave 10 kills 463 lvl 19
+天使汤姆 reach10 1 wave 10 kills 462 lvl 18
+BOTTOM10
+凯特 reach10 0 wave 5 kills 71 lvl 8
+表演者•杰瑞 reach10 0 wave 4 kills 70 lvl 8
+朵朵 reach10 0 wave 4 kills 68 lvl 6
+巴特 reach10 0 wave 4 kills 60 lvl 8
+苏蕊 reach10 0 wave 4 kills 55 lvl 6
+梦游杰瑞 reach10 0 wave 4 kills 47 lvl 5
+米雪儿 reach10 0 wave 3 kills 47 lvl 5
+莱恩 reach10 0 wave 3 kills 39 lvl 7
+米可 reach10 0 wave 3 kills 33 lvl 4
+尼宝 reach10 0 wave 3 kills 11 lvl 3

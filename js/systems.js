@@ -141,22 +141,23 @@
       ok = dd > 380 && !inObstacle(g, x, y, def.radius + 10);
     }
     if (!ok) return;
-    const late = wave > 10 ? Math.pow(1.04, wave - 10) : 1;
+    const late = wave > 10 ? Math.pow(1.025, wave - 10) : 1;
     const dyn = Math.max(0.85, Math.min(2.0, Math.sqrt((g.dps || 80) / 100)));
-    let scale = (def.boss ? (1 + Math.max(0, wave - 1) * 0.07) : (1 + Math.max(0, wave - 1) * 0.21)) * late * dyn;
+    let scale = (def.boss ? (1 + Math.max(0, wave - 1) * 0.07) : (1 + Math.max(0, wave - 1) * 0.12)) * late * dyn;
     if (!def.boss && wave >= 8 && rand(g, 0, 1) < 0.05) scale *= 1.35;
     const e = {
       id: ++g._eid || (g._eid = 1), kind, def, x, y, vx: 0, vy: 0, r: def.radius,
       hp: Math.round(def.hp * scale), maxHp: Math.round(def.hp * scale),
       speed: def.speed * (1 + Math.min(0.45, wave * 0.016)) * (wave >= 6 && wave <= 9 ? 1.08 : 1), dmg: def.dmg * Math.min(2.2, 1.85 + Math.max(0, wave - 5) * 0.04) * (1 + wave * 0.032),
       flash: 0, hitCd: 0, spawnT: 0.35, dead: false, kx: 0, ky: 0,
-      armor: def.armor || ((!def.boss && wave >= 8 && rand(g, 0, 1) < 0.12) ? 0.3 : 0),
+      armor: Math.min(0.55, (def.armor || 0) + wave * (def.boss ? 0.0035 : 0.0015)),
       state: 'idle', stateT: 0, atkCd: rand(g, 0.6, 1.6) * (wave <= 3 ? 1.2 : 1), charge: null,
       pending: null, summoned: 0, walk: rand(g, 0, TAU), boss: !!def.boss, recoil: 0
     };
     const eliteMul = TJ.Missions.zoneOf(g, g.player.x, g.player.y) === 'cellar' ? 1.6 : 1;
     if (!def.boss && wave >= 2 && g.rng() < Math.min(0.34, (0.08 + wave * 0.012) * eliteMul) * ((g.cov && g.cov.elite) || 1)) {
       e.elite = true;
+      e.armor = Math.min(0.6, (e.armor || 0) + 0.08);
       e.mod = ['shield', 'swift', 'split'][Math.floor(g.rng() * 3)];
       e.hp = Math.round(e.hp * (e.mod === 'shield' ? 2.0 : 1.5));
       e.maxHp = e.hp;
@@ -486,8 +487,8 @@
         case 'spitter': {
           const want = 300;
           const dir = d > want + 40 ? 1 : (d < want - 40 ? -1 : 0);
-          e.x += ux * dir * (e.def.speed * (e.slowMul || 1)) * dt;
-          e.y += uy * dir * (e.def.speed * (e.slowMul || 1)) * dt;
+          e.x += ux * dir * ((e.boss ? e.speed : e.def.speed) * (e.slowMul || 1)) * dt;
+          e.y += uy * dir * ((e.boss ? e.speed : e.def.speed) * (e.slowMul || 1)) * dt;
           e.x += -uy * 40 * dt; e.y += ux * 40 * dt;
           e.atkCd -= dt;
           if (e.atkCd <= 0 && d < 700) {
@@ -509,7 +510,7 @@
             e.fuseT = (e.fuseT == null ? 2 : e.fuseT) - dt;
             if (e.fuseT <= 0) { e.exploded = true; explodeAt(g, e.x, e.y, 150, 40 + g.wave * 4, e); e.dead = true; continue; }
           } else if (e.fuseT != null) e.fuseT = 2;
-          e.x += ux * (e.def.speed * (e.slowMul || 1)) * dt; e.y += uy * (e.def.speed * (e.slowMul || 1)) * dt;
+          e.x += ux * ((e.boss ? e.speed : e.def.speed) * (e.slowMul || 1)) * dt; e.y += uy * ((e.boss ? e.speed : e.def.speed) * (e.slowMul || 1)) * dt;
           break;
         }
         case 'hunter': {
@@ -525,8 +526,8 @@
             sfx(g, 'eshoot');
           }
           const keep = 260;
-          if (d > keep) { e.x += ux * (e.def.speed * (e.slowMul || 1)) * dt; e.y += uy * (e.def.speed * (e.slowMul || 1)) * dt; }
-          else { e.x -= ux * (e.def.speed * (e.slowMul || 1)) * 0.4 * dt; e.y -= uy * (e.def.speed * (e.slowMul || 1)) * 0.4 * dt; }
+          if (d > keep) { e.x += ux * ((e.boss ? e.speed : e.def.speed) * (e.slowMul || 1)) * dt; e.y += uy * ((e.boss ? e.speed : e.def.speed) * (e.slowMul || 1)) * dt; }
+          else { e.x -= ux * ((e.boss ? e.speed : e.def.speed) * (e.slowMul || 1)) * 0.4 * dt; e.y -= uy * ((e.boss ? e.speed : e.def.speed) * (e.slowMul || 1)) * 0.4 * dt; }
           break;
         }
         case 'dasher': {
@@ -535,8 +536,8 @@
             e.pending = { kind: 'wind', t: 0.5, ang: Math.atan2(dy, dx) };
             e.atkCd = 2.2;
           } else {
-            e.x += ux * (e.def.speed * (e.slowMul || 1)) * 0.55 * dt;
-            e.y += uy * (e.def.speed * (e.slowMul || 1)) * 0.55 * dt;
+            e.x += ux * ((e.boss ? e.speed : e.def.speed) * (e.slowMul || 1)) * 0.55 * dt;
+            e.y += uy * ((e.boss ? e.speed : e.def.speed) * (e.slowMul || 1)) * 0.55 * dt;
           }
           break;
         }
@@ -549,8 +550,8 @@
           if (e.recoil > 0) {
             e.x -= ux * 150 * dt; e.y -= uy * 150 * dt;
           } else {
-            e.x += ux * (e.def.speed * (e.slowMul || 1)) * dt;
-            e.y += uy * (e.def.speed * (e.slowMul || 1)) * dt;
+            e.x += ux * ((e.boss ? e.speed : e.def.speed) * (e.slowMul || 1)) * dt;
+            e.y += uy * ((e.boss ? e.speed : e.def.speed) * (e.slowMul || 1)) * dt;
           }
           if (d < e.r + p.r + 2 && e.hitCd <= 0) {
             hurtPlayer(g, e.dmg, e.x, e.y);
@@ -629,6 +630,55 @@
   function updateBoss(g, e, dt, d, ux, uy) {
     const p = g.player;
     e.atkCd -= dt;
+    if (e.kind === 'qianchang') {
+      const qf = e.hp / e.maxHp;
+      if (!e.summoned && qf < 0.66) { e.summoned = 1; summonAdds(g, e, 2); addText(g, e.x, e.y - 70, '音符随从！', '#FFD34D', 20); }
+      if (e.summoned === 1 && qf < 0.33) { e.summoned = 2; summonAdds(g, e, 3); }
+      e.noteCd = (e.noteCd == null ? 4 : e.noteCd) - dt;
+      if (e.noteCd <= 0) {
+        e.noteCd = 4.2;
+        const an = Math.atan2(p.y - e.y, p.x - e.x);
+        for (let i = -1; i <= 1; i++) {
+          const aa = an + i * 0.22;
+          g.projectiles.push({ x: e.x, y: e.y, vx: Math.cos(aa) * 260, vy: Math.sin(aa) * 260, r: 8, dmg: e.dmg * 0.6, from: 'enemy', kind: 'orb', life: 2.2, hit: {}, color: '#FFD34D' });
+        }
+      }
+      if (e.atkCd <= 0) {
+        e.atkCd = 3.4;
+        g.projectiles.push({ x: e.x, y: e.y, vx: 0, vy: 0, r: 24, grow: 380, maxR: 300, dmg: e.dmg * 0.9, from: 'enemy', kind: 'ring', life: 1.1, hit: {} });
+        addText(g, e.x, e.y - 60, '人才能量！', '#FFD34D', 20);
+        g.shake = Math.max(g.shake || 0, 8);
+      }
+      if (d > 120) { e.x += ux * e.speed * dt; e.y += uy * e.speed * dt; }
+      return;
+    }
+    if (e.kind === 'angryqc') {
+      if (!e.enraged && e.hp / e.maxHp < 0.5) { e.enraged = true; e.speed *= 1.35; addText(g, e.x, e.y - 70, '彻底不甘心！', '#FF4B3A', 22); }
+      e.burnCd = (e.burnCd == null ? 2 : e.burnCd) - dt;
+      if (e.burnCd <= 0) { e.burnCd = 2.4; g.projectiles.push({ x: e.x, y: e.y, vx: 0, vy: 0, r: 18, grow: 120, maxR: 96, dmg: e.dmg * 0.45, from: 'enemy', kind: 'ring', life: 1.0, hit: {} }); }
+      if (e.atkCd <= 0 && d > 90) { e.atkCd = 3.0; e.charge = { dx: ux, dy: uy, t: 0.55 }; addText(g, e.x, e.y - 60, '不甘心！', '#FF7A5C', 20); }
+      if (d > 220) { e.x += ux * e.speed * dt; e.y += uy * e.speed * dt; }
+      return;
+    }
+    if (e.kind === 'chenjr') {
+      e.hp = Math.min(e.maxHp, e.hp + e.maxHp * 0.004 * dt);
+      e.sproutCd = (e.sproutCd == null ? 3 : e.sproutCd) - dt;
+      if (e.sproutCd <= 0) {
+        e.sproutCd = 5.5;
+        for (let i = 0; i < 3; i++) {
+          const aa = g.rng() * Math.PI * 2, rr = 70 + g.rng() * 90;
+          g.projectiles.push({ x: e.x + Math.cos(aa) * rr, y: e.y + Math.sin(aa) * rr, vx: 0, vy: 0, r: 14, grow: 0, maxR: 40, dmg: e.dmg * 0.4, from: 'enemy', kind: 'ring', life: 3.0, hit: {}, color: '#8FBF6A' });
+        }
+      }
+      if (e.atkCd <= 0) {
+        e.atkCd = 3.6;
+        if (d < 300) { p.rootT = Math.max(p.rootT || 0, 1.1); addText(g, p.x, p.y - 50, '根须缠绕！', '#8FBF6A', 18); }
+        g.projectiles.push({ x: e.x, y: e.y, vx: 0, vy: 0, r: 20, grow: 300, maxR: 220, dmg: e.dmg * 0.8, from: 'enemy', kind: 'ring', life: 0.9, hit: {} });
+        g.shake = Math.max(g.shake || 0, 6);
+      }
+      if (d > 150) { e.x += ux * e.speed * dt; e.y += uy * e.speed * dt; }
+      return;
+    }
     if (e.kind === 'bigboss') {
       e.qkT = (e.qkT == null ? 4 : e.qkT) - dt;
       if (e.qkT <= 0) {
@@ -657,7 +707,7 @@
         if (g.rng() < 0.55) e.pending = { kind: 'panwind', t: 0.55 };
         else e.pending = { kind: 'leapwind', t: 1.0, x: p.x, y: p.y };
       } else if (d > 150) {
-        e.x += ux * 100 * dt; e.y += uy * 100 * dt;
+        e.x += ux * e.speed * 0.9 * dt; e.y += uy * e.speed * 0.9 * dt;
       }
       if (d < e.r + p.r && e.hitCd <= 0) { hurtPlayer(g, e.dmg, e.x, e.y, e.kind === 'hunter'); e.hitCd = 1.1; }
     } else {
@@ -669,7 +719,7 @@
         if (r < 0.45 && d < 640) e.pending = { kind: 'chargewind', t: 0.55, ang: Math.atan2(p.y - e.y, p.x - e.x) };
         else e.pending = { kind: 'bark', t: 0.5 };
       } else if (d > 120) {
-        e.x += ux * 88 * dt; e.y += uy * 88 * dt;
+        e.x += ux * e.speed * 0.9 * dt; e.y += uy * e.speed * 0.9 * dt;
       }
       if (d < e.r + p.r && e.hitCd <= 0) { hurtPlayer(g, e.dmg, e.x, e.y, e.kind === 'hunter'); e.hitCd = 1.1; }
     }
