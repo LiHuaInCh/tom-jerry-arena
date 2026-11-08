@@ -36,7 +36,7 @@
 
   /* ---------- 布局 ---------- */
   function resize() {
-    renderer.resize(window.innerWidth, window.innerHeight, Math.min(window.matchMedia('(pointer: coarse)').matches ? 1.5 : 2, window.devicePixelRatio || 1));
+    renderer.resize(window.innerWidth, window.innerHeight, Math.min((function(){var q=localStorage.getItem('tj_quality')||'high';return q==='low'?1:(q==='mid'?1.25:(window.matchMedia('(pointer: coarse)').matches?1.5:2));})(), window.devicePixelRatio || 1));
   }
   window.addEventListener('resize', resize);
   resize();
@@ -290,7 +290,7 @@
       ov.innerHTML = '<div class="guide-box"><div class="guide-head">设置<button class="guide-close">×</button></div><div class="guide-body" id="setBody"></div></div>';
       document.body.appendChild(ov);
       var body = ov.querySelector('#setBody');
-      [btn, mbtn, expBtn, impBtn, copyBtn].forEach(function (b) {
+      [btn, mbtn, qualityBtn, fpsBtn, expBtn, impBtn, copyBtn].forEach(function (b) {
         var row = document.createElement('button');
         row.className = 'set-row';
         row.textContent = b.textContent;
@@ -308,6 +308,30 @@
       alert('侵权删除声明\n\n本作是非商业同人作品，角色与素材版权归华纳兄弟 / 网易等权利方所有。\n素材来源：猫和老鼠教学网站 wiki\nhttps://tjwiki.com\n如权利方认为内容侵权，请联系：2637079593@qq.com\n核实后将立即删除相关内容并停止分发。');
     };
     toolsRow.appendChild(copyBtn);
+
+    var qualityBtn = document.createElement('button');
+    qualityBtn.className = 'guide-btn'; qualityBtn.type = 'button';
+    var QLIST = ['high', 'mid', 'low'], QNAME = { high: '高', mid: '中', low: '低' };
+    function qNow() { return localStorage.getItem('tj_quality') || 'high'; }
+    qualityBtn.textContent = '画质：' + QNAME[qNow()];
+    qualityBtn.onclick = function () {
+      var q = QLIST[(QLIST.indexOf(qNow()) + 1) % QLIST.length];
+      localStorage.setItem('tj_quality', q);
+      qualityBtn.textContent = '画质：' + QNAME[q];
+    };
+    toolsRow.appendChild(qualityBtn);
+
+    var fpsBtn = document.createElement('button');
+    fpsBtn.className = 'guide-btn'; fpsBtn.type = 'button';
+    var FLIST = [30, 45, 60];
+    function fNow() { return parseInt(localStorage.getItem('tj_fps') || (window.matchMedia('(pointer: coarse)').matches ? '30' : '60'), 10); }
+    fpsBtn.textContent = '帧率：' + fNow();
+    fpsBtn.onclick = function () {
+      var f = FLIST[(FLIST.indexOf(fNow()) + 1) % FLIST.length];
+      localStorage.setItem('tj_fps', String(f));
+      fpsBtn.textContent = '帧率：' + f;
+    };
+    toolsRow.appendChild(fpsBtn);
 
     var SECTIONS = [
       ['基础操作', [
@@ -913,7 +937,7 @@
     input.setEnabled(false);
   }
 
-  const BUILD_TAG = '2026-11-08a';
+  const BUILD_TAG = '2026-11-08b';
   function titleLockScroll() {
     const t = document.getElementById('title');
     if (t) {
@@ -1098,7 +1122,8 @@
   let __lastDraw = 0;
   function frame(now) {
     const __coarse = window.matchMedia('(pointer: coarse)').matches;
-    if (__coarse && __lastDraw && now - __lastDraw < 1000 / 45) { requestAnimationFrame(frame); return; }
+    const __fps = parseInt(localStorage.getItem('tj_fps') || (__coarse ? '30' : '60'), 10);
+    if (__lastDraw && now - __lastDraw < 1000 / __fps - 1.5) { requestAnimationFrame(frame); return; }
     __lastDraw = now;
     window.__tjState = state;
     var sb = document.getElementById('setBtn');

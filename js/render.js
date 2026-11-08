@@ -435,6 +435,7 @@
   }
 
   let __vignette = null;
+  const __QUALITY = function () { try { return localStorage.getItem('tj_quality') || 'high'; } catch (e) { return 'high'; } };
   const __propImg = new Image();
   __propImg.src = 'assets/props/kitchen1.png';
   const __propCrops = [[200, 318, 92, 66], [38, 318, 34, 54], [148, 30, 86, 46], [150, 108, 64, 46], [38, 420, 34, 46], [196, 432, 52, 46]];
@@ -1588,7 +1589,7 @@
       for (const pr of g.projectiles) drawProjectile(ctx, pr);
       for (const e of g.effects) drawEffect(ctx, e);
 
-      for (const p of g.particles) {
+      if (__QUALITY() !== 'low') for (const p of g.particles) {
         const a = Math.max(0, p.life / p.max);
         ctx.globalAlpha = a;
         ctx.fillStyle = p.color;
