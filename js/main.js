@@ -782,7 +782,7 @@
     if (__bosses.length) {
       $('bossBar').classList.remove('hidden');
       $('bossRows').innerHTML = __bosses.map(function (b) {
-        const nm = (b.def && b.def.name) || 'BOSS';
+        const nm = ((b.def && b.def.name) || 'BOSS') + ' ' + Math.round(Math.max(0, Math.min(100, b.hp / b.maxHp * 100))) + '%';
         const pc = Math.max(0, Math.min(100, b.hp / b.maxHp * 100));
         return '<div class="boss-row"><div class="boss-name">' + nm + '</div><div class="boss-track"><div class="boss-fill" style="width:' + pc.toFixed(1) + '%"></div></div></div>';
       }).join('');

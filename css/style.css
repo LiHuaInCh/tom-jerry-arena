@@ -1068,3 +1068,11 @@ html, body { overflow: hidden !important; overscroll-behavior: none; }
 #over:not(.hidden) .stat:nth-child(4) { animation-delay: .12s; }
 #over:not(.hidden) .stat:nth-child(5) { animation-delay: .16s; }
 #over:not(.hidden) .stat:nth-child(6) { animation-delay: .2s; }
+
+.boss-track { background: #2E1B10 !important; border: 2px solid #3A2418 !important; border-radius: 6px !important; overflow: hidden !important; height: 12px !important; }
+.boss-row .boss-fill { background: #FF4B3A !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.35) !important; }
+.boss-row .boss-name { color: #3A2418 !important; font-weight: 700 !important; }
+#bossBar { background: rgba(255,246,224,.9) !important; border: 2px solid #3A2418 !important; border-radius: 10px !important; padding: 4px 8px !important; }
+
+.boss-row .boss-track { height: 12px !important; min-height: 12px !important; background: #2E1B10 !important; border: 2px solid #3A2418 !important; border-radius: 6px !important; overflow: hidden !important; }
+.boss-row .boss-fill { height: 12px !important; min-height: 12px !important; background: #FF4B3A !important; border-radius: 0 !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.35) !important; }

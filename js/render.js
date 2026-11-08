@@ -307,6 +307,22 @@
     return true;
   }
 
+  const __tintCache = {};
+  function tintedSprite(src) {
+    if (__tintCache[src]) return __tintCache[src];
+    const im = orbitImg(src);
+    if (!im) return null;
+    const c = document.createElement('canvas');
+    c.width = im.naturalWidth; c.height = im.naturalHeight;
+    const cx = c.getContext('2d');
+    cx.drawImage(im, 0, 0);
+    cx.globalCompositeOperation = 'source-atop';
+    cx.fillStyle = 'rgba(214,44,36,.34)';
+    cx.fillRect(0, 0, c.width, c.height);
+    __tintCache[src] = c;
+    return c;
+  }
+
   function drawSkinned(ctx, img, w, h, mode, ph) {
     const N = 7, sh = h / N;
     for (let i = 0; i < N; i++) {
@@ -1717,11 +1733,12 @@
             const __bmode = it.e.atkAnimT > 0 ? 'attack' : (it.e.flash > 0 ? 'hurt' : (Math.hypot(it.e.vx || 0, it.e.vy || 0) > 15 ? 'run' : 'idle'));
             const __bph = (it.e.walk || 0) * 1.1 + it.e.x * 0.01;
             ctx.save();
-            if (it.e.boss && it.e.hp < it.e.maxHp * 0.5) ctx.filter = 'saturate(1.55) contrast(1.06) hue-rotate(-14deg)';
+            const __enraged = it.e.boss && it.e.hp < it.e.maxHp * 0.5;
+            const __drawImg = __enraged ? (tintedSprite(it.e.def.sprite) || __bs) : __bs;
             ctx.globalAlpha = 0.96;
             ctx.translate(it.e.x, it.e.y + bs * 0.22 + Math.sin(performance.now() / 460 + it.e.x * 0.02) * it.e.r * 0.12);
-            drawSkinned(ctx, __bs, bs, bs, __bmode, __bph);
-            ctx.globalAlpha = 1; ctx.filter = 'none';
+            drawSkinned(ctx, __drawImg, bs, bs, __bmode, __bph);
+            ctx.globalAlpha = 1;
             ctx.restore();
           } else if (it.e.kind === 'spike') drawDog(ctx, it.e);
           else drawCat(ctx, it.e);
