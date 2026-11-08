@@ -102,9 +102,9 @@
       s.spawn = s.kind === 'good' ? 0.6 : 0.5;
       const n = s.kind === 'good' ? 2 : 1;
       for (let i = 0; i < n; i++) {
-        const a = g.rng() * Math.PI * 2;
-        const sx = p.x + Math.cos(a) * 320, sy = p.y + Math.sin(a) * 320;
-        const vx = Math.cos(a + Math.PI) * 240, vy = Math.sin(a + Math.PI) * 240;
+        const aim = Math.atan2(p.y - s.y, p.x - s.x) + (g.rng() - 0.5) * 0.7;
+        const sx = s.x + Math.cos(aim) * 26, sy = s.y + Math.sin(aim) * 26;
+        const vx = Math.cos(aim) * 250, vy = Math.sin(aim) * 250;
         g.projectiles.push({
           x: sx, y: sy, vx: vx, vy: vy, r: 10, dmg: 1, from: 'enemy', kind: 'orb',
           life: 3, hit: {}, stageHit: true,

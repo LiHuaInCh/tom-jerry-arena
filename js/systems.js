@@ -807,6 +807,10 @@
           const mr = (mw.orbitR || 78) + 10 + (p.orbitRBonus || 0);
           if (Math.hypot(pr.x - p.x, pr.y - p.y) < mr + 22) {
             pr.dead = true;
+            if (pr.stageHit && g.stage) {
+              g.stage.count++;
+              addText(g, p.x, p.y - 40, (g.stage.kind === 'good' ? '赞美 +1 ' : '降温 +1 ') + g.stage.count + '/' + g.stage.need, g.stage.kind === 'good' ? '#FFD34D' : '#9CD8FF', 16);
+            }
             g.effects.push({ kind: 'ring', x: pr.x, y: pr.y, r: 3, maxR: 26, life: 0.16, max: 0.16, color: '#FFE08A' });
             if (g.rng() < 0.3) sfx(g, 'hit');
             continue;
