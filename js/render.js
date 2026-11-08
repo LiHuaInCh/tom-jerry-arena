@@ -307,6 +307,32 @@
     return true;
   }
 
+  function drawBossBar(ctx, e) {
+    const bs = e.r * 4.2;
+    const bw = Math.max(110, Math.min(260, bs * 0.78));
+    const bh = 9;
+    const bx = e.x - bw / 2;
+    const by = e.y + bs * 0.22 - bs - 16;
+    ctx.save();
+    ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    ctx.font = 'bold 13px "Microsoft YaHei",sans-serif';
+    const label = (e.def.name || 'BOSS') + '  ' + Math.round(Math.max(0, e.hp / e.maxHp * 100)) + '%';
+    ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(42,23,16,.9)';
+    ctx.strokeText(label, e.x, by - 4);
+    ctx.fillStyle = '#FFE9B8'; ctx.fillText(label, e.x, by - 4);
+    ctx.beginPath(); ctx.roundRect(bx - 2, by - 2, bw + 4, bh + 4, 7);
+    ctx.fillStyle = 'rgba(42,23,16,.92)'; ctx.fill();
+    ctx.lineWidth = 1.5; ctx.strokeStyle = '#FFE9B8'; ctx.stroke();
+    const pc = Math.max(0, Math.min(1, e.hp / e.maxHp));
+    if (pc > 0) {
+      ctx.beginPath(); ctx.roundRect(bx, by, Math.max(4, bw * pc), bh, 5);
+      ctx.fillStyle = pc > 0.5 ? '#FF5A3C' : '#FF2E2E'; ctx.fill();
+      ctx.beginPath(); ctx.roundRect(bx, by, Math.max(4, bw * pc), bh * 0.45, 4);
+      ctx.fillStyle = 'rgba(255,255,255,.28)'; ctx.fill();
+    }
+    ctx.restore();
+  }
+
   const __tintCache = {};
   function tintedSprite(src) {
     if (__tintCache[src]) return __tintCache[src];
@@ -1740,6 +1766,7 @@
             drawSkinned(ctx, __drawImg, bs, bs, __bmode, __bph);
             ctx.globalAlpha = 1;
             ctx.restore();
+            if (it.e.boss) drawBossBar(ctx, it.e);
           } else if (it.e.kind === 'spike') drawDog(ctx, it.e);
           else drawCat(ctx, it.e);
         }
