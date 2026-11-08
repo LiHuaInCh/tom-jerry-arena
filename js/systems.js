@@ -1124,6 +1124,7 @@
 
   /* ---------------- 主更新 ---------------- */
   TJ.update = function (g, dt, input) {
+    if (g.emotes && g.emotes.length) { for (const em of g.emotes) em.life -= dt; g.emotes = g.emotes.filter(function (em) { return em.life > 0; }); }
     if (TJ.Missions && TJ.Missions.tick) TJ.Missions.tick(g, dt);
     if (g.over) return;
     dt = Math.min(dt, 0.05);

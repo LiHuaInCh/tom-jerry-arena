@@ -1655,9 +1655,10 @@
           if (__bs) {
             const bs = it.e.r * 4.2;
             ctx.save();
+            if (it.e.boss && it.e.hp < it.e.maxHp * 0.5) ctx.filter = 'saturate(1.55) contrast(1.06) hue-rotate(-14deg)';
             ctx.globalAlpha = 0.96;
             ctx.drawImage(__bs, it.e.x - bs / 2, it.e.y - bs * 0.78 + Math.sin(performance.now() / 460 + it.e.x * 0.02) * it.e.r * 0.12, bs, bs);
-            ctx.globalAlpha = 1;
+            ctx.globalAlpha = 1; ctx.filter = 'none';
             ctx.restore();
           } else if (it.e.kind === 'spike') drawDog(ctx, it.e);
           else drawCat(ctx, it.e);
@@ -1666,6 +1667,15 @@
 
       for (const pr of g.projectiles) drawProjectile(ctx, pr);
       for (const e of g.effects) drawEffect(ctx, e);
+      if (g.emotes) for (const em of g.emotes) {
+        const k = em.life / em.max;
+        ctx.save(); ctx.globalAlpha = Math.min(1, k * 1.8);
+        ctx.fillStyle = 'rgba(255,248,231,.95)'; ctx.strokeStyle = '#3A2418'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.ellipse(em.x, em.y - (1 - k) * 14, 18, 14, 0, 0, TAU); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#3A2418'; ctx.font = '16px "Microsoft YaHei",sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(em.text, em.x, em.y - (1 - k) * 14 + 1);
+        ctx.restore();
+      }
       const __hpR = g.player ? g.player.hp / g.player.maxHp : 1;
       if (g.player && __hpR < 0.3) {
         ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0);
