@@ -284,7 +284,7 @@
         const len = Math.hypot(dx, dy) || 1;
         dx /= len; dy /= len;
         if (g.traps.length >= (ow.maxActive || 4)) g.traps.shift();
-        g.traps.push({ x: p.x + dx * 200, y: p.y + dy * 200, r: ow.triggerR || 46, arm: ow.armTime || 1, life: ow.duration || 12, dmg: (ow.dmg || 10) * st.damage * 2.2, boomR: ow.boomR || 90, icon: ow.iconImg, chase: ow.sub === 'mine' ? { spd: 78, moved: 0, max: 150, range: 190 } : null });
+        g.traps.push({ x: p.x + dx * 200, y: p.y + dy * 200, r: ow.triggerR || 46, arm: ow.armTime || 1, life: ow.duration || 12, dmg: (ow.dmg || 10) * st.damage * 2.2, boomR: ow.boomR || 90, icon: ow.iconImg, chase: ow.sub === 'mine' ? { spd: 92, moved: 0, max: 150, range: 320 } : null });
       }
       for (let i = g.traps.length - 1; i >= 0; i--) {
         const tr = g.traps[i];

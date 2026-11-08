@@ -418,8 +418,8 @@
       }
     }
     ctx.save();
-    ctx.fillStyle = 'rgba(58,36,24,.18)';
-    ctx.beginPath(); ctx.ellipse(ent.x, ent.y + ent.r * 0.95, ent.r * 0.9, ent.r * 0.34, 0, 0, TAU); ctx.fill();
+    if (__QUALITY() !== 'low') { ctx.fillStyle = 'rgba(58,36,24,.18)';
+    ctx.beginPath(); ctx.ellipse(ent.x, ent.y + ent.r * 0.95, ent.r * 0.9, ent.r * 0.34, 0, 0, TAU); ctx.fill(); }
     if (im) {
       const h = ent.r * 3.4;
       const w = h * (im.naturalWidth / im.naturalHeight);

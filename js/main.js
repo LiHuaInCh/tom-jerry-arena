@@ -318,6 +318,7 @@
       var q = QLIST[(QLIST.indexOf(qNow()) + 1) % QLIST.length];
       localStorage.setItem('tj_quality', q);
       qualityBtn.textContent = '画质：' + QNAME[q];
+      location.reload();
     };
     toolsRow.appendChild(qualityBtn);
 
