@@ -802,7 +802,7 @@
   /* ---------------- 角色：狗 ---------------- */
   function drawDog(ctx, e) {
     const r = e.r, def = e.def;
-    const bob = Math.sin(e.walk) * r * 0.03;
+    const bob = Math.sin(e.walk) * r * 0.03 + Math.sin(performance.now() / 430 + e.x * 0.03) * r * 0.035;
     ctx.save();
     ctx.translate(e.x, e.y + bob);
     ctx.fillStyle = 'rgba(70,40,20,0.22)';
