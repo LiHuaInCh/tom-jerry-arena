@@ -1051,3 +1051,7 @@ html, body { overflow: hidden !important; overscroll-behavior: none; }
   #over .stat span { font-size: 9px !important; }
   #over .stat b { font-size: 15px !important; }
 }
+
+.boss-row { flex-direction: column !important; align-items: center !important; gap: 2px !important; padding: 2px 0 !important; }
+.boss-row .boss-name { min-width: 0 !important; font-size: 10.5px !important; text-align: center !important; }
+.boss-row .boss-track { width: 100% !important; height: 8px !important; }

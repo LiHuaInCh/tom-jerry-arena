@@ -83,6 +83,7 @@
     if (e.dead) return;
     e.dead = true;
     if (g.boss === e) g.boss = null;
+    if (e.def && e.def.sprite) g.effects.push({ kind: 'ghost', sprite: e.def.sprite, x: e.x, y: e.y, r: e.r, life: 0.32, max: 0.32 });
     if (e.elite && e.mod === 'split') {
       for (let i = 0; i < 2; i++) {
         const c = spawnEnemy(g, 'kitten', Math.max(1, g.wave - 1));

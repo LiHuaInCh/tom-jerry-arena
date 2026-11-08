@@ -1261,6 +1261,15 @@
         ctx.stroke();
       }
       ctx.restore();
+    } else if (e.kind === 'ghost') {
+      const gk = e.life / e.max;
+      const gimg = orbitImg(e.sprite);
+      if (gimg) {
+        const gs = e.r * 4.2 * (1.25 - 0.25 * gk);
+        ctx.save(); ctx.globalAlpha = gk * 0.75;
+        ctx.drawImage(gimg, e.x - gs / 2, e.y - gs * 0.8, gs, gs);
+        ctx.restore();
+      }
     } else if (e.kind === 'flash') {
       const k = e.life / e.max;
       ctx.save();
