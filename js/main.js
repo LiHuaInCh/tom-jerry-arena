@@ -36,7 +36,7 @@
 
   /* ---------- 布局 ---------- */
   function resize() {
-    renderer.resize(window.innerWidth, window.innerHeight, Math.min((function(){var q=localStorage.getItem('tj_quality')||'high';return q==='low'?1:(q==='mid'?1.25:(window.matchMedia('(pointer: coarse)').matches?1.5:2));})(), window.devicePixelRatio || 1));
+    renderer.resize(window.innerWidth, window.innerHeight, Math.min((function(){var q=localStorage.getItem('tj_quality')||'high';return q==='low'?1:(q==='mid'?1.5:2);})(), window.devicePixelRatio || 1));
   }
   window.addEventListener('resize', resize);
   resize();
@@ -964,7 +964,7 @@
     input.setEnabled(false);
   }
 
-  const BUILD_TAG = '2026-11-08d';
+  const BUILD_TAG = '2026-11-08e';
   function titleLockScroll() {
     const t = document.getElementById('title');
     if (t) {

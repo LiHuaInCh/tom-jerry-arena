@@ -1380,7 +1380,7 @@
       ctx.globalAlpha = 0.9;
       for (const z of zones) {
         const zx = z.x * g.W, zy = z.y * g.H, zw = z.w * g.W, zh = z.h * g.H;
-        const pat = __zoneTile(z.name);
+        const pat = null;
         if (!pat) continue;
         ctx.save(); ctx.beginPath(); ctx.rect(zx, zy, zw, zh); ctx.clip();
         ctx.fillStyle = pat;
@@ -1413,7 +1413,7 @@
       camX = vw >= D.W ? D.W / 2 : clamp(camX, vw / 2, D.W - vw / 2);
       camY = vh >= D.H ? D.H / 2 : clamp(camY, vh / 2, D.H - vh / 2);
 
-      const shake = g.shake;
+      const shake = Math.min(8, (g.shake || 0) * 0.4);
       const sx = (Math.random() - 0.5) * shake, sy = (Math.random() - 0.5) * shake;
 
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
