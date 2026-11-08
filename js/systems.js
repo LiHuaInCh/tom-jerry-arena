@@ -22,6 +22,7 @@
   function pick(g, arr) { return arr[Math.floor(g.rng() * arr.length)]; }
 
   function fire(g, target) {
+    g.player.atkAnimT = 0.12;
     if (D.weapons[g.player.char.weapon].kind === 'orbit') return;
     const p = g.player, w = D.weapons[p.char.weapon], st = g.stats;
     const ang = Math.atan2(target.y - p.y, target.x - p.x);
@@ -195,6 +196,7 @@
     p.moving = ml > 0.05;
 
     p.skillCd = Math.max(0, p.skillCd - dt);
+    if (p.atkAnimT > 0) p.atkAnimT -= dt;
     p.noHealT = Math.max(0, (p.noHealT || 0) - dt);
     if (p.carry && g.holes) {
       for (const h of g.holes) {
@@ -428,6 +430,7 @@
   }
 
   function updateEnemies(g, dt) {
+    for (const e of g.enemies) { if (e.atkAnimT > 0) e.atkAnimT -= dt; if ((e.pending || e.charge) && e.atkAnimT <= 0) e.atkAnimT = 0.15; }
     const p = g.player;
     for (const e of g.enemies) {
       if (e.dead) continue;

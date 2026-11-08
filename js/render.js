@@ -287,6 +287,7 @@
 
     ctx.save();
     ctx.translate(m.x, m.y + bob);
+    if (m.atkAnimT > 0) { const k = Math.min(1, m.atkAnimT / 0.12); ctx.scale(1 + 0.1 * k, 1 - 0.05 * k); }
     ctx.fillStyle = 'rgba(70,40,20,0.22)';
     ellipse(ctx, 2, r * 0.96 - bob, r * 1.05, r * 0.36);
     ctx.fill();
@@ -649,6 +650,7 @@
     const bob = Math.sin(walk) * r * 0.04;
     ctx.save();
     ctx.translate(e.x, e.y + bob);
+    if (e.atkAnimT > 0) { const k = Math.min(1, e.atkAnimT / 0.12); ctx.scale(1 + 0.12 * k, 1 - 0.06 * k); }
 
     if (e.elite) {
       ctx.strokeStyle = e.mod === 'shield' ? '#7FD1FF' : e.mod === 'swift' ? '#FFE08A' : '#FF9BC1';
