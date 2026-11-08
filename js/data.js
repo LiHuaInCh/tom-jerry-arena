@@ -303,7 +303,7 @@
     w.name = pfx[0] + '·' + baseW.name;
     w.color = pfx[1];
     w.kind = SUB_KIND[sub];
-    if (w.kind === 'ranged') { w.range = Math.min(460, Math.round((w.range || 600) * 0.62)); w.dmg = Math.round((w.dmg || 10) * 1.25); }
+    if (w.kind === 'ranged') { w.range = Math.round((w.range || 600) * 0.7); w.dmg = Math.round((w.dmg || 10) * 1.15); }
     w.sub = sub;
     w.label = SUB_LABEL[sub];
     if (sub === 'rapid') { w.cd = Math.round((w.cd || 1) * 0.7 * 100) / 100; }
