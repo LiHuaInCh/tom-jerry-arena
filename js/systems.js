@@ -141,7 +141,7 @@
       ok = dd > 380 && !inObstacle(g, x, y, def.radius + 10);
     }
     if (!ok) return;
-    const late = wave > 10 ? Math.pow(1.025, wave - 10) : 1;
+    const late = wave > 10 ? Math.pow(1.015, wave - 10) : 1;
     const dyn = Math.max(0.85, Math.min(2.0, Math.sqrt((g.dps || 80) / 100)));
     let scale = (def.boss ? (1 + Math.max(0, wave - 1) * 0.07) : (1 + Math.max(0, wave - 1) * 0.12)) * late * dyn;
     if (!def.boss && wave >= 8 && rand(g, 0, 1) < 0.05) scale *= 1.35;
