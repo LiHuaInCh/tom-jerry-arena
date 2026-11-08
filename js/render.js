@@ -287,7 +287,11 @@
 
     ctx.save();
     ctx.translate(m.x, m.y + bob);
-    if (m.atkAnimT > 0) { const k = Math.min(1, m.atkAnimT / 0.12); ctx.scale(1 + 0.1 * k, 1 - 0.05 * k); }
+    if (m.atkAnimT > 0) {
+      const ak = Math.min(1, m.atkAnimT / 0.12);
+      if (ak > 0.55) { const w = (ak - 0.55) / 0.45; ctx.translate(0, r * 0.04 * w); ctx.scale(1 - 0.07 * w, 1 + 0.05 * w); }
+      else { const s = 1 - ak / 0.55; ctx.translate(0, -r * 0.03 * s); ctx.scale(1 + 0.13 * s, 1 - 0.07 * s); }
+    }
     ctx.fillStyle = 'rgba(70,40,20,0.22)';
     ellipse(ctx, 2, r * 0.96 - bob, r * 1.05, r * 0.36);
     ctx.fill();
@@ -650,7 +654,11 @@
     const bob = Math.sin(walk) * r * 0.04;
     ctx.save();
     ctx.translate(e.x, e.y + bob);
-    if (e.atkAnimT > 0) { const k = Math.min(1, e.atkAnimT / 0.12); ctx.scale(1 + 0.12 * k, 1 - 0.06 * k); }
+    if (e.atkAnimT > 0) {
+      const ak = Math.min(1, e.atkAnimT / 0.15);
+      if (ak > 0.55) { const w = (ak - 0.55) / 0.45; ctx.translate(0, r * 0.05 * w); ctx.scale(1 - 0.09 * w, 1 + 0.06 * w); }
+      else { const s = 1 - ak / 0.55; ctx.translate(0, -r * 0.04 * s); ctx.scale(1 + 0.17 * s, 1 - 0.09 * s); }
+    }
 
     if (e.elite) {
       ctx.strokeStyle = e.mod === 'shield' ? '#7FD1FF' : e.mod === 'swift' ? '#FFE08A' : '#FF9BC1';
