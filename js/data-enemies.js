@@ -18,9 +18,9 @@ TJ.DATA_PARTS.enemies = {
     kunkun:  { name: '坤坤杰瑞', hp: 9000, speed: 96, radius: 34, dmg: 24, xp: 150, score: 800, boss: true, sprite: 'assets/enemies/kunkun_big.png' },
     cthulhu: { name: '绷带杰瑞', hp: 11000, speed: 78, radius: 36, dmg: 26, xp: 170, score: 900, boss: true, sprite: 'assets/enemies/cthulhu_big.png' },
     giant:   { name: '巨人僵尸', hp: 16000, speed: 58, radius: 46, dmg: 32, xp: 220, score: 1200, boss: true, sprite: 'assets/enemies/giant_big.png' },
-    security: { name: '保安', hp: 420, speed: 84, radius: 24, dmg: 18, xp: 40, score: 150, sprite: 'assets/enemies/security_cut.png' },
-    spikejr: { name: '斯派克儿子', hp: 160, speed: 130, radius: 16, dmg: 12, xp: 20, score: 80, sprite: 'assets/enemies/spikejr_cut.png' },
-    cowhead: { name: '牛头怪', hp: 520, speed: 104, radius: 26, dmg: 20, xp: 45, score: 170, sprite: 'assets/enemies/cowhead_cut.png' }
+    security: { name: '保安', hp: 420, speed: 84, radius: 24, dmg: 18, xp: 40, score: 150, sprite: 'assets/enemies/security_big.png' },
+    spikejr: { name: '斯派克儿子', hp: 160, speed: 130, radius: 16, dmg: 12, xp: 20, score: 80, sprite: 'assets/enemies/spikejr_big.png' },
+    cowhead: { name: '牛头怪', hp: 520, speed: 104, radius: 26, dmg: 20, xp: 45, score: 170, sprite: 'assets/enemies/cowhead_big.png' }
   }
 TJ.DATA_PARTS.fusions = {
     'fire+fire': { name: '野火', kind: 'crit' },

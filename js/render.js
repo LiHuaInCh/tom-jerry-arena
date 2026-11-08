@@ -1492,7 +1492,7 @@
       if (g.escort) {
         const e = g.escort;
         ctx.save();
-        const esImg = orbitImg('assets/enemies/escort_cut.png');
+        const esImg = orbitImg('assets/enemies/escort_big.png');
         if (esImg) { const ess = 96; ctx.drawImage(esImg, e.x - ess / 2, e.y - ess * 0.9, ess, ess); }
         else { ctx.fillStyle = '#F2D4A8'; ctx.beginPath(); ctx.arc(e.x, e.y, e.r, 0, Math.PI * 2); ctx.fill(); }
         ctx.restore();
@@ -1547,7 +1547,7 @@
         }
       }
       if (g.stage) {
-        const sImg = orbitImg(g.stage.kind === 'good' ? 'assets/enemies/goodjerry_cut.png' : 'assets/enemies/angryjerry_cut.png');
+        const sImg = orbitImg(g.stage.kind === 'good' ? 'assets/enemies/goodjerry_big.png' : 'assets/enemies/angryjerry_big.png');
         if (sImg) {
           const ss = 180;
           ctx.save(); ctx.drawImage(sImg, g.stage.x - ss / 2, g.stage.y - ss * 0.82, ss, ss); ctx.restore();
