@@ -1556,7 +1556,7 @@
         ctx.beginPath(); ctx.arc(bx, by, pw.triggerR || 46, 0, TAU); ctx.stroke();
         ctx.restore();
       }
-      list.sort(function (a, b) { const az = (a.kind === 'enemy' && a.e.def && a.e.def.sprite) ? 100000 : 0; const bz = (b.kind === 'enemy' && b.e.def && b.e.def.sprite) ? 100000 : 0; return (a.y + az) - (b.y + bz); });
+      list.sort(function (a, b) { const az = a.kind === 'player' ? 200000 : ((a.kind === 'enemy' && a.e.def && a.e.def.sprite) ? 100000 : 0); const bz = b.kind === 'player' ? 200000 : ((b.kind === 'enemy' && b.e.def && b.e.def.sprite) ? 100000 : 0); return (a.y + az) - (b.y + bz); });
 
       for (const it of list) {
         if (it.kind === 'fighter') {
