@@ -1779,8 +1779,15 @@
         ctx.save(); ctx.globalAlpha = Math.min(1, k * 1.8);
         ctx.fillStyle = 'rgba(255,248,231,.95)'; ctx.strokeStyle = '#3A2418'; ctx.lineWidth = 2;
         ctx.beginPath(); ctx.ellipse(em.x, em.y - (1 - k) * 14, 18, 14, 0, 0, TAU); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = '#3A2418'; ctx.font = '16px "Microsoft YaHei",sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText(em.text, em.x, em.y - (1 - k) * 14 + 1);
+        const __eimg = em.img ? orbitImg(em.img) : null;
+        if (__eimg) {
+          ctx.beginPath(); ctx.arc(em.x, em.y - (1 - k) * 14, 21, 0, TAU); ctx.fillStyle = '#FFF8E7'; ctx.fill(); ctx.strokeStyle = '#3A2418'; ctx.lineWidth = 2.5; ctx.stroke();
+          ctx.save(); ctx.beginPath(); ctx.arc(em.x, em.y - (1 - k) * 14, 18, 0, TAU); ctx.clip();
+          ctx.drawImage(__eimg, em.x - 18, em.y - (1 - k) * 14 - 18, 36, 36); ctx.restore();
+        } else {
+          ctx.fillStyle = '#3A2418'; ctx.font = '16px "Microsoft YaHei",sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText(em.text || '', em.x, em.y - (1 - k) * 14 + 1);
+        }
         ctx.restore();
       }
       const __hpR = g.player ? g.player.hp / g.player.maxHp : 1;
