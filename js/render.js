@@ -277,6 +277,36 @@
     return c;
   }
 
+  const __PART_IDS = { jerry: 1, swordsman: 1, tuffy: 1 };
+  function drawPartRig(ctx, id, w, h, mode, ph) {
+    if (!__PART_IDS[id]) return false;
+    const head = orbitImg('assets/sprites/' + id + '_head.png');
+    const torso = orbitImg('assets/sprites/' + id + '_torso.png');
+    const legs = orbitImg('assets/sprites/' + id + '_legs.png');
+    if (!head || !torso || !legs) return false;
+    const swing = Math.sin(ph);
+    const lean = mode === 'attack' ? -0.12 : (mode === 'hurt' ? 0.14 : 0);
+    // legs (behind)
+    ctx.save();
+    ctx.translate(0, -h * 0.40);
+    ctx.rotate(swing * 0.16 + lean * 0.3);
+    ctx.drawImage(legs, -w / 2, 0, w, h * 0.40);
+    ctx.restore();
+    // torso
+    ctx.save();
+    ctx.translate(0, -h * 0.30);
+    ctx.rotate(swing * 0.05 + lean);
+    ctx.drawImage(torso, -w / 2, -h * 0.50, w, h * 0.50);
+    ctx.restore();
+    // head
+    ctx.save();
+    ctx.translate(0, -h * 0.58);
+    ctx.rotate(-swing * 0.07 + lean * 1.4);
+    ctx.drawImage(head, -w / 2, -h * 0.42, w, h * 0.42);
+    ctx.restore();
+    return true;
+  }
+
   function drawSkinned(ctx, img, w, h, mode, ph) {
     const N = 7, sh = h / N;
     for (let i = 0; i < N; i++) {
@@ -458,7 +488,9 @@
       ctx.translate(ent.x, ent.y + ent.r * 0.95 + Math.sin(performance.now() / 420 + ent.x * 0.02) * ent.r * 0.05);
       if (flip) ctx.scale(-1, 1);
       if (ent.invisT > 0) ctx.globalAlpha = 0.35;
-      drawSkinned(ctx, im, w, h, ent.atkAnimT > 0 ? 'attack' : (ent.flash > 0 ? 'hurt' : (Math.abs(ent.vx || 0) + Math.abs(ent.vy || 0) > 20 ? 'run' : 'idle')), (ent.walk || 0) * 1.2 + (ent.x || 0) * 0.01);
+      const __mode = ent.atkAnimT > 0 ? 'attack' : (ent.flash > 0 ? 'hurt' : (Math.abs(ent.vx || 0) + Math.abs(ent.vy || 0) > 20 ? 'run' : 'idle'));
+      const __ph = (ent.walk || 0) * 1.2 + (ent.x || 0) * 0.01;
+      if (!drawPartRig(ctx, ent.char && ent.char.id, w, h, __mode, __ph)) drawSkinned(ctx, im, w, h, __mode, __ph);
     } else {
       if (char && char.faction === 'cat' && ent.def) drawCat(ctx, ent); else drawMouse(ctx, ent, char);
     }
