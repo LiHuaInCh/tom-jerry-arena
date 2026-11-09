@@ -1614,7 +1614,7 @@
         const e = g.escort;
         ctx.save();
         const esImg = orbitImg('assets/enemies/escort_big.png');
-        if (esImg) { const ess = 96; ctx.drawImage(esImg, e.x - ess / 2, e.y - ess * 0.9, ess, ess); }
+        if (esImg) { const ess = g.player ? g.player.r * 3.6 : 60; ctx.drawImage(esImg, e.x - ess / 2, e.y - ess * 0.9, ess, ess); }
         else { ctx.fillStyle = '#F2D4A8'; ctx.beginPath(); ctx.arc(e.x, e.y, e.r, 0, Math.PI * 2); ctx.fill(); }
         ctx.restore();
       }
@@ -1774,27 +1774,7 @@
 
       for (const pr of g.projectiles) drawProjectile(ctx, pr);
       for (const e of g.effects) drawEffect(ctx, e);
-      if (g.emotes) for (const em of g.emotes) {
-        const k = em.life / em.max;
-        ctx.save(); ctx.globalAlpha = Math.min(1, k * 1.8);
-        ctx.fillStyle = 'rgba(255,248,231,.95)'; ctx.strokeStyle = '#3A2418'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.ellipse(em.x, em.y - (1 - k) * 14, 18, 14, 0, 0, TAU); ctx.fill(); ctx.stroke();
-        const __eimg = em.img ? orbitImg(em.img) : null;
-        if (__eimg) {
-          const ey = em.y - (1 - k) * 14;
-          ctx.beginPath(); ctx.roundRect(em.x - 24, ey - 24, 48, 48, 10);
-          ctx.fillStyle = '#FFF8E7'; ctx.fill(); ctx.strokeStyle = '#3A2418'; ctx.lineWidth = 2.5; ctx.stroke();
-          ctx.save(); ctx.beginPath(); ctx.roundRect(em.x - 21, ey - 21, 42, 42, 8); ctx.clip();
-          const iw = __eimg.naturalWidth || __eimg.width, ih = __eimg.naturalHeight || __eimg.height;
-          const sc = Math.max(42 / iw, 42 / ih);
-          ctx.drawImage(__eimg, em.x - iw * sc / 2, ey - ih * sc / 2, iw * sc, ih * sc);
-          ctx.restore();
-        } else {
-          ctx.fillStyle = '#3A2418'; ctx.font = '16px "Microsoft YaHei",sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-          ctx.fillText(em.text || '', em.x, em.y - (1 - k) * 14 + 1);
-        }
-        ctx.restore();
-      }
+
       const __hpR = g.player ? g.player.hp / g.player.maxHp : 1;
       if (g.player && __hpR < 0.3) {
         ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0);

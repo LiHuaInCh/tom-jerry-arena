@@ -565,7 +565,6 @@
   }
 
   function showLevelUp() {
-    if (g && g.player) { g.emotes = g.emotes || []; g.emotes.push({ x: g.player.x, y: g.player.y - g.player.r * 1.7, img: 'assets/emotes/good.png', life: 1.0, max: 1.0 }); }
     if (!g) return;
     const missionMode = g.mode !== 'arena' && (g.missionPicks || 0) > 0;
     let choices;
