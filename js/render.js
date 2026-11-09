@@ -1781,9 +1781,14 @@
         ctx.beginPath(); ctx.ellipse(em.x, em.y - (1 - k) * 14, 18, 14, 0, 0, TAU); ctx.fill(); ctx.stroke();
         const __eimg = em.img ? orbitImg(em.img) : null;
         if (__eimg) {
-          ctx.beginPath(); ctx.arc(em.x, em.y - (1 - k) * 14, 21, 0, TAU); ctx.fillStyle = '#FFF8E7'; ctx.fill(); ctx.strokeStyle = '#3A2418'; ctx.lineWidth = 2.5; ctx.stroke();
-          ctx.save(); ctx.beginPath(); ctx.arc(em.x, em.y - (1 - k) * 14, 18, 0, TAU); ctx.clip();
-          ctx.drawImage(__eimg, em.x - 18, em.y - (1 - k) * 14 - 18, 36, 36); ctx.restore();
+          const ey = em.y - (1 - k) * 14;
+          ctx.beginPath(); ctx.roundRect(em.x - 24, ey - 24, 48, 48, 10);
+          ctx.fillStyle = '#FFF8E7'; ctx.fill(); ctx.strokeStyle = '#3A2418'; ctx.lineWidth = 2.5; ctx.stroke();
+          ctx.save(); ctx.beginPath(); ctx.roundRect(em.x - 21, ey - 21, 42, 42, 8); ctx.clip();
+          const iw = __eimg.naturalWidth || __eimg.width, ih = __eimg.naturalHeight || __eimg.height;
+          const sc = Math.max(42 / iw, 42 / ih);
+          ctx.drawImage(__eimg, em.x - iw * sc / 2, ey - ih * sc / 2, iw * sc, ih * sc);
+          ctx.restore();
         } else {
           ctx.fillStyle = '#3A2418'; ctx.font = '16px "Microsoft YaHei",sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
           ctx.fillText(em.text || '', em.x, em.y - (1 - k) * 14 + 1);

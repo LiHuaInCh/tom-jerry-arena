@@ -83,7 +83,7 @@
     if (e.dead) return;
     e.dead = true; /* __emote */
     if (g.boss === e) g.boss = null;
-    if (g.player) { g.emotes = g.emotes || []; g.emotes.push({ x: g.player.x, y: g.player.y - g.player.r * 1.6, img: 'assets/emotes/' + (g.rng() < 0.5 ? 'smug' : (g.rng() < 0.5 ? 'face' : 'catstand')), life: 0.9, max: 0.9 }); }
+    if (g.player && (e.elite || e.boss)) { g.emotes = g.emotes || []; g.emotes.push({ x: g.player.x, y: g.player.y - g.player.r * 1.6, img: 'assets/emotes/' + (g.rng() < 0.5 ? 'smug' : (g.rng() < 0.5 ? 'face' : 'catstand')), life: 0.9, max: 0.9 }); }
     if (e.def && e.def.sprite) g.effects.push({ kind: 'ghost', sprite: e.def.sprite, x: e.x, y: e.y, r: e.r, life: 0.32, max: 0.32 });
     if (e.elite && e.mod === 'split') {
       for (let i = 0; i < 2; i++) {
