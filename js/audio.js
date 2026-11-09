@@ -15,6 +15,7 @@
       master = ctx.createGain();
       master.gain.value = muted ? 0 : 0.55;
       master.connect(ctx.destination);
+      loadSamples();
       const len = ctx.sampleRate * 1;
       noiseBuf = ctx.createBuffer(1, len, ctx.sampleRate);
       const d = noiseBuf.getChannelData(0);
@@ -53,7 +54,7 @@
     s.start(t); s.stop(t + dur + 0.02);
   }
 
-  const SFX = {
+  const SYNTH = {
     shoot() { tone('square', 780, 430, 0.055, 0.05); },
     rocket() { tone('sawtooth', 300, 110, 0.18, 0.08); noise(0.12, 0.05, 900, 1); },
     slash() { noise(0.12, 0.09, 1800, 1.4); tone('triangle', 500, 240, 0.09, 0.05); },
@@ -79,6 +80,35 @@
     wave() { tone('triangle', 660, 660, 0.1, 0.07); tone('triangle', 990, 990, 0.12, 0.07, 0.1); },
     click() { tone('sine', 620, 720, 0.05, 0.05); }
   };
+
+  /* ---------- 采样音效（由背景音乐切片生成） ---------- */
+  const SAMPLES = {};
+  let samplesLoading = false;
+  function loadSamples() {
+    if (samplesLoading || !ctx) return;
+    samplesLoading = true;
+    ['hit', 'kill', 'hurt', 'levelup', 'boss', 'xp'].forEach(function (n) {
+      fetch('assets/audio/sfx_' + n + '.wav').then(function (r) { return r.arrayBuffer(); })
+        .then(function (buf) { return ctx.decodeAudioData(buf); })
+        .then(function (audio) { SAMPLES[n] = audio; })
+        .catch(function () {});
+    });
+  }
+  function playSample(name) {
+    const buf = SAMPLES[name];
+    if (!buf || muted) return false;
+    const s = ctx.createBufferSource();
+    s.buffer = buf;
+    const g = ctx.createGain();
+    g.gain.value = name === 'boss' ? 0.55 : 0.8;
+    s.connect(g); g.connect(master);
+    s.start(ctx.currentTime);
+    return true;
+  }
+  const SFX = {};
+  Object.keys(SYNTH).forEach(function (k) {
+    SFX[k] = function () { if (playSample(k)) return; SYNTH[k](); };
+  });
 
   /* ---------- 背景音乐（程序化循环） ---------- */
   let musicTimer = null, musicStep = 0;
