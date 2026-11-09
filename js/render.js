@@ -1650,22 +1650,26 @@
     for (const tr of (g.traps || [])) drawTrap(ctx, tr, t);
 
       const __ap = g.player, __aw = D.weapons[__ap.char.weapon];
-      if (__aw && __aw.kind === 'aura' && __aw.iconImg) {
-        const __aico = __aw.iconImg ? orbitImg(__aw.iconImg) : null;
-        if (__aico) {
+      if (__aw && __aw.kind === 'aura') {
         const __rad = (__aw.auraR || 90) + (__ap.orbitRBonus || 0);
         const __ready = __ap.auraT == null ? 1 : Math.max(0, Math.min(1, 1 - __ap.auraT / 0.45));
+        const __col = __aw.color || '#FFD34D';
         const __t = performance.now() / 1000;
-        const __sz = __rad * 2 * (1 + 0.04 * __ready);
         ctx.save();
-        ctx.globalAlpha = 0.55 + 0.45 * __ready;
-        ctx.shadowColor = __aw.color || '#FFD34D';
-        ctx.shadowBlur = 12 + 18 * __ready;
-        ctx.translate(__ap.x, __ap.y - __rad * 0.08);
-        ctx.rotate(Math.sin(__t * 0.8) * 0.1);
-        ctx.drawImage(__aico, -__sz / 2, -__sz / 2, __sz, __sz);
-        ctx.restore();
+        ctx.translate(__ap.x, __ap.y - __rad * 0.05);
+        ctx.beginPath(); ctx.arc(0, 0, __rad, 0, Math.PI * 2);
+        if (__ready > 0.95) {
+          ctx.globalAlpha = 0.30; ctx.fillStyle = __col; ctx.globalCompositeOperation = 'lighter'; ctx.fill(); ctx.globalCompositeOperation = 'source-over';
+        } else {
+          ctx.globalAlpha = 0.10; ctx.fillStyle = __col; ctx.fill();
+          ctx.globalAlpha = 0.30 + 0.18 * (1 - __ready); ctx.fillStyle = '#2A1A10'; ctx.fill();
         }
+        ctx.beginPath(); ctx.arc(0, 0, __rad, 0, Math.PI * 2);
+        ctx.globalAlpha = 0.35 + 0.45 * __ready; ctx.strokeStyle = __col; ctx.lineWidth = 3.5; ctx.stroke();
+        ctx.globalAlpha = 0.85;
+        const __aico = orbitImg(__aw.iconImg);
+        if (__aico) { const __is = 44; ctx.drawImage(__aico, -__is / 2, -__is / 2, __is, __is); }
+        ctx.restore();
       }
       if (g.stage) {
         const sImg = orbitImg(g.stage.kind === 'good' ? 'assets/enemies/goodjerry_big.png' : 'assets/enemies/angryjerry_big.png');
