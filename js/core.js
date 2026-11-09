@@ -86,7 +86,7 @@
     const names = { fire: '火', ice: '冰', thunder: '雷', light: '光', dark: '暗' };
     const all = Object.keys(names);
     const two = [];
-    while (two.length < 3 && all.length) two.push(all.splice(Math.floor(g.rng() * all.length), 1)[0]);
+    while (two.length < 2 && all.length) two.push(all.splice(Math.floor(g.rng() * all.length), 1)[0]);
     return two.map(function (e) {
       const lines = ['定位：' + ELEM_TAG[e]];
       if (slot === 1 && g.player.elemSlots[0]) {
@@ -153,7 +153,7 @@
       });
       if (wids.length >= 2) {
         const picks = [];
-        while (picks.length < 3 && wids.length) {
+        while (picks.length < 2 && wids.length) {
           picks.push(wids.splice(Math.floor(g.rng() * wids.length), 1)[0]);
         }
         return picks.map(function (k) {
