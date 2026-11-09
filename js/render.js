@@ -1664,6 +1664,13 @@
           ctx.globalAlpha = 0.10; ctx.fillStyle = __col; ctx.fill();
           ctx.globalAlpha = 0.30 + 0.18 * (1 - __ready); ctx.fillStyle = '#2A1A10'; ctx.fill();
         }
+        const __aico = __aw.iconImg ? orbitImg(__aw.iconImg) : null;
+        if (__aico) {
+          const __is = __rad * 1.75;
+          ctx.globalAlpha = 0.42;
+          ctx.drawImage(__aico, -__is / 2, -__is / 2 - __rad * 0.08, __is, __is);
+          ctx.globalAlpha = 1;
+        }
         ctx.restore();
       }
       if (g.stage) {
