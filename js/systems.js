@@ -145,12 +145,12 @@
     if (!ok) return;
     const late = wave > 10 ? Math.pow(1.015, wave - 10) : 1;
     const dyn = Math.max(0.85, Math.min(2.0, Math.sqrt((g.dps || 80) / 100)));
-    let scale = (def.boss ? (1 + Math.max(0, wave - 1) * 0.07) * (wave < 12 ? 0.72 : 1) : (1 + Math.max(0, wave - 1) * 0.12)) * late * dyn;
+    let scale = (def.boss ? (1 + Math.max(0, wave - 1) * 0.07) * (wave <= 4 ? 0.35 : (wave < 12 ? 0.42 : (wave < 20 ? 0.7 : 1))) : (1 + Math.max(0, wave - 1) * 0.08)) * late * dyn;
     if (!def.boss && wave >= 8 && rand(g, 0, 1) < 0.05) scale *= 1.35;
     const e = {
       id: ++g._eid || (g._eid = 1), kind, def, x, y, vx: 0, vy: 0, r: def.radius,
       hp: Math.round(def.hp * scale), maxHp: Math.round(def.hp * scale),
-      speed: def.speed * (1 + Math.min(0.45, wave * 0.016)) * (wave >= 6 && wave <= 9 ? 1.08 : 1), dmg: def.dmg * Math.min(2.2, 1.85 + Math.max(0, wave - 5) * 0.04) * (1 + wave * 0.032) * (def.boss && wave < 6 ? 0.6 : 1),
+      speed: def.speed * (1 + Math.min(0.45, wave * 0.016)) * (wave >= 6 && wave <= 9 ? 1.08 : 1), dmg: def.dmg * Math.min(2.2, 1.85 + Math.max(0, wave - 5) * 0.04) * (1 + wave * 0.026) * (def.boss && wave < 6 ? 0.5 : 1),
       flash: 0, hitCd: 0, spawnT: 0.35, dead: false, kx: 0, ky: 0,
       armor: Math.min(0.55, (def.armor || 0) + wave * (def.boss ? 0.0035 : 0.0015)),
       state: 'idle', stateT: 0, atkCd: rand(g, 0.6, 1.6) * (wave <= 3 ? 1.2 : 1), charge: null,
@@ -278,14 +278,14 @@
       g.traps = g.traps || [];
       p.depCd = (p.depCd || 0) - dt;
       if (p.depCd <= 0) {
-        p.depCd = ow.cd || 1.2;
+        p.depCd = (ow.cd || 1.2) * 0.85;
         const tgt = nearestEnemy(g, p.x, p.y, 900);
         let dx = tgt ? tgt.x - p.x : Math.cos(p.facing || 0) * 200;
         let dy = tgt ? tgt.y - p.y : Math.sin(p.facing || 0) * 200;
         const len = Math.hypot(dx, dy) || 1;
         dx /= len; dy /= len;
         if (g.traps.length >= (ow.maxActive || 4)) g.traps.shift();
-        g.traps.push({ x: p.x + dx * 200, y: p.y + dy * 200, r: ow.triggerR || 46, arm: ow.armTime || 1, life: ow.duration || 12, dmg: (ow.dmg || 10) * st.damage * 2.2, boomR: ow.boomR || 90, icon: ow.iconImg, chase: ow.sub === 'mine' ? { spd: 92, moved: 0, max: 150, range: 320 } : null });
+        g.traps.push({ x: p.x + dx * 200, y: p.y + dy * 200, r: ow.triggerR || 46, arm: ow.armTime || 1, life: ow.duration || 12, dmg: (ow.dmg || 10) * st.damage * 3.2, boomR: ow.boomR || 90, icon: ow.iconImg, chase: ow.sub === 'mine' ? { spd: 92, moved: 0, max: 150, range: 320 } : null });
       }
       for (let i = g.traps.length - 1; i >= 0; i--) {
         const tr = g.traps[i];
@@ -319,7 +319,7 @@
       p.sumCd = (p.sumCd || 0) - dt;
       if (g.summons.length === 0 && p.sumCd <= 0) {
         p.sumCd = ow.cd || 12;
-        g.summons.push({ x: p.x + 34, y: p.y, life: ow.duration || 8, atkCd: 0, dmg: (ow.dmg || 14) * st.damage, r: 15, spd: 150, icon: ow.iconImg, stationary: !!ow.stationary, range: ow.range || 0, size: ow.stationary ? 56 : 76, range: 96 });
+        g.summons.push({ x: p.x + 34, y: p.y, life: ow.duration || 8, atkCd: 0, dmg: (ow.dmg || 14) * st.damage * 1.7, r: 15, spd: 150, icon: ow.iconImg, stationary: !!ow.stationary, range: ow.range || 0, size: ow.stationary ? 56 : 76, range: 96 });
         g.effects.push({ kind: 'ring', x: p.x + 34, y: p.y, r: 4, maxR: 60, life: 0.3, max: 0.3, color: '#FFD36A' });
       }
       for (let i = g.summons.length - 1; i >= 0; i--) {
@@ -332,7 +332,7 @@
           if (!su.stationary && dd > 42) { su.x += (tg.x - su.x) / dd * su.spd * dt; su.y += (tg.y - su.y) / dd * su.spd * dt; }
           else {
             su.atkCd -= dt;
-            if (su.atkCd <= 0) { su.atkCd = 0.8; damageEnemy(g, tg, su.dmg, false); if (su.stationary) g.effects.push({ kind: 'beam', x: su.x, y: su.y, ang: Math.atan2(tg.y - su.y, tg.x - su.x), len: Math.hypot(tg.x - su.x, tg.y - su.y), life: 0.12, max: 0.12, color: '#9FE7FF' }); else g.effects.push({ kind: 'ring', x: tg.x, y: tg.y, r: 4, maxR: 22, life: 0.16, max: 0.16, color: '#FFD36A' }); }
+            if (su.atkCd <= 0) { su.atkCd = 0.55; damageEnemy(g, tg, su.dmg, false); if (su.stationary) g.effects.push({ kind: 'beam', x: su.x, y: su.y, ang: Math.atan2(tg.y - su.y, tg.x - su.x), len: Math.hypot(tg.x - su.x, tg.y - su.y), life: 0.12, max: 0.12, color: '#9FE7FF' }); else g.effects.push({ kind: 'ring', x: tg.x, y: tg.y, r: 4, maxR: 22, life: 0.16, max: 0.16, color: '#FFD36A' }); }
           }
         } else {
           const pd = Math.hypot(p.x - su.x, p.y - su.y) || 1;
@@ -346,7 +346,7 @@
         p.tetT = 0.35;
         const tt = nearestEnemy(g, p.x, p.y, 280);
         if (tt) {
-          damageEnemy(g, tt, (ow.dmg || 10) * st.damage * 0.55, false);
+          damageEnemy(g, tt, (ow.dmg || 10) * st.damage * 0.9, false);
           g.effects.push({ kind: 'ring', x: tt.x, y: tt.y, r: 6, maxR: 30, life: 0.16, max: 0.16, color: '#9CD8FF' });
         }
       }
@@ -980,7 +980,7 @@
       }
       const ELITE_UNLOCK = [['spikejr',1],['security',1],['cowhead',3],['spike',5],['kunkun',12],['cthulhu',13],['giant',14]];
       const avail = ELITE_UNLOCK.filter(function (x) { return wave >= x[1]; });
-      const ecount = Math.min(5, Math.round((wave >= 15 ? 3 : (wave >= 6 ? 2 : 1)) * ((g.cov && g.cov.elite) || 1)));
+      const ecount = Math.min(5, Math.round((wave >= 16 ? 3 : (wave >= 12 ? 2 : 1)) * ((g.cov && g.cov.elite) || 1)));
       for (let ei = 0; ei < ecount; ei++) {
         const pickE = avail[Math.floor(g.rng() * avail.length)][0];
         const ea2 = g.rng() * Math.PI * 2;
@@ -991,7 +991,7 @@
         g._eliteSpawn = false;
         if (el) {
           el.elite = true; el.boss = false;
-          el.maxHp = Math.round(el.maxHp * (wave <= 3 ? 0.4 : (ei > 0 ? 0.4 : 0.6)));
+          el.maxHp = Math.round(el.maxHp * (wave <= 3 ? 0.3 : (ei > 0 ? 0.35 : 0.45)));
           el.hp = el.maxHp;
           el.armor = Math.min(0.45, (el.armor || 0) + 0.02);
           el.mod = ['shield', 'swift', 'split'][Math.floor(g.rng() * 3)];
@@ -1005,8 +1005,8 @@
     if (g.spawnTimer <= 0 && g.enemies.filter(e => !e.dead).length < 130) {
       const waveNow = Math.max(1, g.wave);
       const pMul = g.pressure > 75 ? 0.7 : (g.pressure > 40 ? 0.85 : 1);
-      const base = Math.max(0.28, 1.35 - waveNow * 0.10);
-      g.spawnTimer = Math.max(0.28, Math.min(1.4, base * ((g.cov && g.cov.spawn) || 1) * pMul * (waveNow >= 3 && waveNow <= 5 ? 0.92 : 1)));
+      const base = Math.max(0.45, 1.5 - waveNow * 0.09);
+      g.spawnTimer = Math.max(0.45, Math.min(1.5, base * ((g.cov && g.cov.spawn) || 1) * pMul * (waveNow >= 3 && waveNow <= 5 ? 0.92 : 1)));
       let n = waveNow <= 2 ? 1 : (1 + (g.rng() < Math.min(0.9, 0.25 + waveNow * 0.07) ? 1 : 0));
       if (waveNow >= 8 && g.rng() < 0.45) n += 1;
       const pool = ['kitten', 'kitten', 'kitten'];
