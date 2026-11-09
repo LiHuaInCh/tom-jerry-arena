@@ -1651,7 +1651,7 @@
 
       const __ap = g.player, __aw = D.weapons[__ap.char.weapon];
       if (__aw && __aw.kind === 'aura') {
-        const __rad = (__aw.auraR || 90) + (__ap.orbitRBonus || 0);
+        const __rad = (__aw.orbitR || __aw.auraR || 90) + (__ap.orbitRBonus || 0);
         const __ready = __ap.auraT == null ? 1 : Math.max(0, Math.min(1, 1 - __ap.auraT / 0.45));
         const __col = __aw.color || '#FFD34D';
         const __t = performance.now() / 1000;
@@ -1659,15 +1659,15 @@
         ctx.translate(__ap.x, __ap.y - __rad * 0.05);
         ctx.beginPath(); ctx.arc(0, 0, __rad, 0, Math.PI * 2);
         if (__ready > 0.95) {
-          ctx.globalAlpha = 0.30; ctx.fillStyle = __col; ctx.globalCompositeOperation = 'lighter'; ctx.fill(); ctx.globalCompositeOperation = 'source-over';
+          ctx.globalAlpha = 0.20; ctx.fillStyle = __col; ctx.fill();
         } else {
           ctx.globalAlpha = 0.10; ctx.fillStyle = __col; ctx.fill();
           ctx.globalAlpha = 0.30 + 0.18 * (1 - __ready); ctx.fillStyle = '#2A1A10'; ctx.fill();
         }
         const __aico = __aw.iconImg ? orbitImg(__aw.iconImg) : null;
         if (__aico) {
-          const __is = __rad * 1.75;
-          ctx.globalAlpha = 0.42;
+          const __is = __rad * 1.98;
+          ctx.globalAlpha = 0.38;
           ctx.drawImage(__aico, -__is / 2, -__is / 2 - __rad * 0.08, __is, __is);
           ctx.globalAlpha = 1;
         }

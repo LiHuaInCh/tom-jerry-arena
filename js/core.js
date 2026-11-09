@@ -161,7 +161,7 @@
     const ORBIT_ONLY = { orbitN: 1, orbitR: 1 };
     const RANGED_ONLY = { multishot: 1, pierce: 1, bounce: 1, velocity: 1, explode: 1, homing: 1, crit: 1, critdmg: 1 };
     const pool = D.upgrades.filter(u => (counts[u.id] || 0) < u.max
-      && !(ORBIT_ONLY[u.id] && wk !== 'orbit')
+      && !(ORBIT_ONLY[u.id] && wk !== 'orbit' && wk !== 'aura')
       && !(RANGED_ONLY[u.id] && wk !== 'ranged'));
     const out = [];
     if (p.subWeapon && p.level >= 9 && (counts.sub_swap || 0) < 1) {
