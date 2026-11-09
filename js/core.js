@@ -31,7 +31,7 @@
       damage: 1, fireRate: 1.3, speed: 1, maxHp: 0, crit: 0.08, critMul: 1.8,
       pierce: 0, multishot: 0, bounce: 0, homing: 0, explode: 0, lifesteal: 0, regen: 0,
       magnet: 78, armor: 0, dashCd: 2.0, dashDamage: 0, skillCdMul: 1, projSpeed: 1, range: 0,
-      shieldMax: 0, luck: 0
+      shieldMax: 0, luck: 0, summonCount: 1, summonDur: 0, summonDmgMul: 1
     };
   }
 
@@ -174,6 +174,14 @@
       ];
       for (const u of subs) if ((counts[u.id] || 0) < u.max) pool.push(u);
     }
+    if (wk === 'summon') {
+      const sumCards = [
+        { id: 'sum_count', name: '召唤增援', desc: '同时存在的召唤物 +1', icon: '援', rarity: 'epic', max: 2 },
+        { id: 'sum_dmg', name: '召唤强化', desc: '召唤物伤害 +30%', icon: '召', rarity: 'rare', max: 3 },
+        { id: 'sum_dur', name: '延长契约', desc: '召唤物持续时间 +4 秒', icon: '久', rarity: 'common', max: 2 }
+      ];
+      for (const u of sumCards) if ((counts[u.id] || 0) < u.max) pool.push(u);
+    }
     const luck = 1 + g.stats.luck;
     while (out.length < 3 && pool.length) {
       let total = 0;
@@ -219,6 +227,15 @@
       if (g.pendingLevels > 0) g.pendingLevels--;
       g.events.push({ type: 'upgrade', id: id });
       return { name: '副武器强化' };
+    }
+    if (id.indexOf('sum_') === 0) {
+      g.upgradeCounts[id] = (g.upgradeCounts[id] || 0) + 1;
+      if (id === 'sum_count') g.stats.summonCount = Math.min(3, (g.stats.summonCount || 1) + 1);
+      else if (id === 'sum_dmg') g.stats.summonDmgMul = (g.stats.summonDmgMul || 1) * 1.3;
+      else if (id === 'sum_dur') g.stats.summonDur = (g.stats.summonDur || 0) + 4;
+      if (g.pendingLevels > 0) g.pendingLevels--;
+      g.events.push({ type: 'upgrade', id: id });
+      return { name: '召唤强化' };
     }
     if (id.indexOf('elem') === 0) {
       const m = id.match(/^elem(\d)_(\w+)$/);

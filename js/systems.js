@@ -317,10 +317,12 @@
     if (ow.kind === 'summon') {
       g.summons = g.summons || [];
       p.sumCd = (p.sumCd || 0) - dt;
-      if (g.summons.length === 0 && p.sumCd <= 0) {
+      const __sumMax = Math.max(1, Math.min(3, st.summonCount || 1));
+      while (g.summons.length < __sumMax && p.sumCd <= 0) {
         p.sumCd = ow.cd || 12;
-        g.summons.push({ x: p.x + 34, y: p.y, life: ow.duration || 8, atkCd: 0, dmg: (ow.dmg || 14) * st.damage * 1.7, r: 15, spd: 150, icon: ow.iconImg, stationary: !!ow.stationary, range: ow.range || 0, size: ow.stationary ? 56 : 76, range: 96 });
+        g.summons.push({ x: p.x + 34, y: p.y, life: (ow.duration || 8) + (st.summonDur || 0), atkCd: 0, r: 15, spd: 150, icon: ow.iconImg, stationary: !!ow.stationary, range: 96, size: ow.stationary ? 56 : 76, w: ow });
         g.effects.push({ kind: 'ring', x: p.x + 34, y: p.y, r: 4, maxR: 60, life: 0.3, max: 0.3, color: '#FFD36A' });
+        if (g.summons.length >= __sumMax) break;
       }
       for (let i = g.summons.length - 1; i >= 0; i--) {
         const su = g.summons[i];
@@ -332,7 +334,7 @@
           if (!su.stationary && dd > 42) { su.x += (tg.x - su.x) / dd * su.spd * dt; su.y += (tg.y - su.y) / dd * su.spd * dt; }
           else {
             su.atkCd -= dt;
-            if (su.atkCd <= 0) { su.atkCd = 0.55; damageEnemy(g, tg, su.dmg, false); if (su.stationary) g.effects.push({ kind: 'beam', x: su.x, y: su.y, ang: Math.atan2(tg.y - su.y, tg.x - su.x), len: Math.hypot(tg.x - su.x, tg.y - su.y), life: 0.12, max: 0.12, color: '#9FE7FF' }); else g.effects.push({ kind: 'ring', x: tg.x, y: tg.y, r: 4, maxR: 22, life: 0.16, max: 0.16, color: '#FFD36A' }); }
+            if (su.atkCd <= 0) { su.atkCd = 0.5 / (st.fireRate || 1); damageEnemy(g, tg, (su.w.dmg || 14) * st.damage * (st.summonDmgMul || 1) * 1.9, false); if (su.stationary) g.effects.push({ kind: 'beam', x: su.x, y: su.y, ang: Math.atan2(tg.y - su.y, tg.x - su.x), len: Math.hypot(tg.x - su.x, tg.y - su.y), life: 0.12, max: 0.12, color: '#9FE7FF' }); else g.effects.push({ kind: 'ring', x: tg.x, y: tg.y, r: 4, maxR: 22, life: 0.16, max: 0.16, color: '#FFD36A' }); }
           }
         } else {
           const pd = Math.hypot(p.x - su.x, p.y - su.y) || 1;
