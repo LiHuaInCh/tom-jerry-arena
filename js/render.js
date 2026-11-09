@@ -1664,11 +1664,6 @@
           ctx.globalAlpha = 0.10; ctx.fillStyle = __col; ctx.fill();
           ctx.globalAlpha = 0.30 + 0.18 * (1 - __ready); ctx.fillStyle = '#2A1A10'; ctx.fill();
         }
-        ctx.beginPath(); ctx.arc(0, 0, __rad, 0, Math.PI * 2);
-        ctx.globalAlpha = 0.35 + 0.45 * __ready; ctx.strokeStyle = __col; ctx.lineWidth = 3.5; ctx.stroke();
-        ctx.globalAlpha = 0.85;
-        const __aico = orbitImg(__aw.iconImg);
-        if (__aico) { const __is = 44; ctx.drawImage(__aico, -__is / 2, -__is / 2, __is, __is); }
         ctx.restore();
       }
       if (g.stage) {
