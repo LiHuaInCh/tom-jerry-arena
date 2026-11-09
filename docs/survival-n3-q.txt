@@ -1,0 +1,23 @@
+chars 57 avgDeathRate 0.90 reach5 0.87 reach10 0.42 reach15 0.12 avgTime 206
+TOP10
+米特 reach10 1 wave 11 kills 809 lvl 21
+布奇 reach10 1 wave 11.5 kills 699 lvl 20
+汤姆 reach10 1 wave 15 kills 601 lvl 21.3
+剑客汤姆 reach10 1 wave 13 kills 523 lvl 20.7
+天使泰菲 reach10 1 wave 11 kills 497 lvl 19.7
+兔八哥 reach10 1 wave 11.7 kills 470 lvl 19.7
+剑客泰菲 reach10 1 wave 13.3 kills 459 lvl 19.3
+航海士杰瑞 reach10 1 wave 10.7 kills 383 lvl 17
+托普斯 reach10 1 wave 10 kills 364 lvl 18
+天使汤姆 reach10 1 wave 10.7 kills 320 lvl 17.3
+BOTTOM10
+表演者•杰瑞 reach10 0 wave 6.7 kills 168 lvl 12
+朵朵 reach10 0 wave 6.3 kills 162 lvl 11
+米可 reach10 0 wave 6.7 kills 160 lvl 11.7
+侦探泰菲 reach10 0 wave 7.3 kills 156 lvl 13.3
+剑客莉莉 reach10 0 wave 7.3 kills 155 lvl 14.3
+天使杰瑞 reach10 0 wave 5.7 kills 143 lvl 10.3
+魔术师 reach10 0 wave 5.7 kills 134 lvl 12.3
+梦游杰瑞 reach10 0 wave 5.3 kills 109 lvl 8.7
+图茨 reach10 0 wave 4.7 kills 90 lvl 12.3
+恶魔泰菲 reach10 0 wave 4.7 kills 89 lvl 10

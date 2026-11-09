@@ -982,7 +982,7 @@
       }
       const ELITE_UNLOCK = [['spikejr',1],['security',1],['cowhead',3],['spike',5],['kunkun',12],['cthulhu',13],['giant',14]];
       const avail = ELITE_UNLOCK.filter(function (x) { return wave >= x[1]; });
-      const ecount = Math.min(5, Math.round((wave >= 20 ? 3 : (wave >= 12 ? 2 : 1)) * ((g.cov && g.cov.elite) || 1)));
+      const ecount = Math.min(6, Math.round((wave >= 20 ? 4 : (wave >= 12 ? 3 : (wave >= 3 ? 3 : (wave >= 2 ? 2 : 1)))) * ((g.cov && g.cov.elite) || 1)));
       for (let ei = 0; ei < ecount; ei++) {
         const pickE = avail[Math.floor(g.rng() * avail.length)][0];
         const ea2 = g.rng() * Math.PI * 2;
@@ -993,7 +993,7 @@
         g._eliteSpawn = false;
         if (el) {
           el.elite = true; el.boss = false;
-          el.maxHp = Math.round(el.maxHp * (wave <= 3 ? 0.3 : (ei > 0 ? 0.35 : 0.45)));
+          el.maxHp = Math.round(el.maxHp * (wave <= 5 ? 0.42 : (ei > 0 ? 0.35 : 0.45)));
           el.hp = el.maxHp;
           el.armor = Math.min(0.45, (el.armor || 0) + 0.02);
           el.mod = ['shield', 'swift', 'split'][Math.floor(g.rng() * 3)];
