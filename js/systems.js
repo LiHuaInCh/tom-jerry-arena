@@ -384,11 +384,11 @@
         } else {
           g.projectiles.push({
             x: p.x, y: p.y, vx: Math.cos(sa) * (sw.speed || 500), vy: Math.sin(sa) * (sw.speed || 500),
-            r: 8, dmg: sw.dmg * st.damage * 0.55 * (st.subDmgMul || 1), from: 'player', kind: sw.proj || 'orb',
+            r: 8, dmg: sw.dmg * st.damage * (st.subDmgMul || 1), from: 'player', kind: sw.proj || 'orb',
             life: 2, hit: {}, color: sw.color || '#BFE9FF',
             splash: sw.splash || 0, explodeOnDeath: !!sw.splash, pierce: sw.pierce || 0, _sub: sw.sub, _icon: sw.iconImg
           });
-          p.subCd = (sw.cd || 1) * 0.7 * (st.subCdMul || 1);
+          p.subCd = (sw.cd || 1) * (st.subCdMul || 1);
           sfx(g, 'shoot');
         }
       }
@@ -397,7 +397,7 @@
       const sw = D.weapons[p.subWeapon];
       if (sw.kind === 'orbit') {
         p.subOrbitA = (p.subOrbitA || 0) + dt * 3.8;
-        const sr = (sw.orbitR || 78) - 26;
+        const sr = (sw.orbitR || 78);
         for (const e of g.enemies) {
           if (e.dead || (e.subOrbitCd || 0) > g.t) continue;
           const ox = p.x + Math.cos(p.subOrbitA) * sr;

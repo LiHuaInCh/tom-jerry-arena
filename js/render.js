@@ -516,7 +516,7 @@
       const sw2 = D.weapons[ent.subWeapon];
       if (sw2 && sw2.kind === 'orbit') {
         ctx.save();
-        drawOrbit(ctx, { x: ent.x, y: ent.y, weapon: ent.subWeapon, orbitA: ent.subOrbitA || 0, orbitBonus: -(sw2.orbitN || 2) + 1, orbitRBonus: -26 });
+        drawOrbit(ctx, { x: ent.x, y: ent.y, weapon: ent.subWeapon, orbitA: ent.subOrbitA || 0, orbitBonus: -(sw2.orbitN || 2) + 1, orbitRBonus: 0 });
         ctx.restore();
       }
     }
@@ -573,7 +573,7 @@
     }
     if (m.weapon && D.weapons[m.weapon] && D.weapons[m.weapon].kind === 'orbit') drawOrbit(ctx, m);
     if (m.subWeapon && D.weapons[m.subWeapon] && D.weapons[m.subWeapon].kind === 'orbit') {
-      drawOrbit(ctx, { x: m.x, y: m.y, weapon: m.subWeapon, orbitA: m.subOrbitA || 0, orbitBonus: -(D.weapons[m.subWeapon].orbitN || 2) + 1, orbitRBonus: -26 });
+      drawOrbit(ctx, { x: m.x, y: m.y, weapon: m.subWeapon, orbitA: m.subOrbitA || 0, orbitBonus: 0, orbitRBonus: -26 });
     }
     const img = getSprite(char.id);
     if (img && img.complete && img.naturalWidth > 0) {
