@@ -443,8 +443,8 @@
       ctx.save();
       ctx.translate(x, y);
       ctx.rotate(a + Math.PI / 2);
-      ctx.shadowColor = w.color || '#FFD34D';
-      ctx.shadowBlur = 8 + Math.min(3, __evoN) * 5;
+      ctx.shadowColor = 'rgba(58,36,24,.30)';
+      ctx.shadowBlur = 4;
       const sub = w.sub;
       const col = w.color || '#FFD34D';
       if (img) {
