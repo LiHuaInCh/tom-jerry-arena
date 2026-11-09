@@ -80,30 +80,6 @@
     click() { tone('sine', 620, 720, 0.05, 0.05); }
   };
 
-  /* ---------- 采样音效（由背景音乐切片生成） ---------- */
-  const SAMPLES = {};
-  let samplesLoading = false;
-  function loadSamples() {
-    if (samplesLoading || !ctx) return;
-    samplesLoading = true;
-    ['hit', 'kill', 'hurt', 'levelup', 'boss', 'xp'].forEach(function (n) {
-      fetch('assets/audio/sfx_' + n + '.wav').then(function (r) { return r.arrayBuffer(); })
-        .then(function (buf) { return ctx.decodeAudioData(buf); })
-        .then(function (audio) { SAMPLES[n] = audio; })
-        .catch(function () {});
-    });
-  }
-  function playSample(name) {
-    const buf = SAMPLES[name];
-    if (!buf || muted) return false;
-    const s = ctx.createBufferSource();
-    s.buffer = buf;
-    const g = ctx.createGain();
-    g.gain.value = name === 'boss' ? 0.55 : 0.8;
-    s.connect(g); g.connect(master);
-    s.start(ctx.currentTime);
-    return true;
-  }
   const SFX = SYNTH;
 
   /* ---------- 背景音乐（程序化循环） ---------- */

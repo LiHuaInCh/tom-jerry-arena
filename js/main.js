@@ -566,7 +566,6 @@
     TJ.Audio.play('levelup');
   }
 
-  let __luGuard = false;
   function showLevelUp(force) {
     if (!g) return;
     if (state === 'levelup' && !force) return;

@@ -306,7 +306,7 @@
     const ORBIT_ONLY = { orbitN: 1, orbitR: 1 };
     const RANGED_ONLY = { multishot: 1, pierce: 1, bounce: 1, velocity: 1, explode: 1, homing: 1, crit: 1, critdmg: 1 };
     const pool = shuffle(g, D.upgrades.filter(u => u.id !== 'infuse1' && u.id !== 'infuse2' && (f.upgradeCounts[u.id] || 0) < u.max
-      && !(ORBIT_ONLY[u.id] && wk !== 'orbit')
+      && !(ORBIT_ONLY[u.id] && !(wk === 'orbit' || (wk === 'aura' && u.id === 'orbitR')))
       && !(RANGED_ONLY[u.id] && wk !== 'ranged')));
     for (const u of pool.slice(0, 3)) {
       out.push({
@@ -429,7 +429,8 @@
 
   /* ---------------- 开火 ---------------- */
   function fireAt(g, f, target) {
-    if (TJ.DATA.weapons[f.weapon].kind === 'orbit') return;
+    const __wk2 = TJ.DATA.weapons[f.weapon].kind;
+    if (__wk2 === 'orbit' || __wk2 === 'aura' || __wk2 === 'deploy' || __wk2 === 'summon' || __wk2 === 'tether') return;
     const w = D.weapons[f.weapon];
     const s = f.stats;
     const lv = f.weaponLv;
@@ -589,6 +590,7 @@
     const wK = D.weapons[f.weapon];
     if (wK && f.alive) {
       if (wK.kind === 'aura') {
+        f.orbitRBonus = f.stats.orbitRBonus || 0;
         f.auraT = (f.auraT || 0) - dt;
         if (f.auraT <= 0) {
           f.auraT = 0.45;
@@ -741,13 +743,13 @@
       const st2 = nearestFighter(g, f, (sw.range || 700) + f.stats.range);
       if (sw.kind === 'orbit') {
         f.subOrbitA = (f.subOrbitA || 0) + dt * 3.8;
-        const sr = (sw.orbitR || 78) - 26;
+        const sr = (sw.orbitR || 78);
         for (const e of g.fighters) {
           if (e === f || !e.alive || (e.subOrbitCd || 0) > g.t) continue;
           const ox = f.x + Math.cos(f.subOrbitA) * sr;
           const oy = f.y + Math.sin(f.subOrbitA) * sr;
           if (Math.hypot(e.x - ox, e.y - oy) < e.r + 14) {
-            damageFighter(g, e, sw.dmg * f.stats.damage * 0.6, f, false);
+            damageFighter(g, e, sw.dmg * f.stats.damage, f, false);
             e.subOrbitCd = g.t + 0.4;
           }
         }
@@ -756,7 +758,7 @@
         f.weapon = f.subWeapon; f.weaponLv = 1; f.fireCd = 0;
         fireAt(g, f, st2);
         f.weapon = oldW; f.weaponLv = oldLv; f.fireCd = oldCd;
-        f.subCd = (sw.cd || 1) * 1.2;
+        f.subCd = (sw.cd || 1);
       }
     }
     if (f.isBot && f.item && (f.hp < f.maxHp * 0.6 || g.rng() < 0.004)) TJ.useItem(g, f);

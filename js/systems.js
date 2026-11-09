@@ -23,7 +23,8 @@
 
   function fire(g, target) {
     g.player.atkAnimT = 0.12;
-    if (D.weapons[g.player.char.weapon].kind === 'orbit') return;
+    const __wk = D.weapons[g.player.char.weapon].kind;
+    if (__wk === 'orbit' || __wk === 'aura' || __wk === 'deploy' || __wk === 'summon' || __wk === 'tether') return;
     const p = g.player, w = D.weapons[p.char.weapon], st = g.stats;
     const ang = Math.atan2(target.y - p.y, target.x - p.x);
     p.aim = ang; p.facing = ang;
@@ -144,12 +145,12 @@
     if (!ok) return;
     const late = wave > 10 ? Math.pow(1.015, wave - 10) : 1;
     const dyn = Math.max(0.85, Math.min(2.0, Math.sqrt((g.dps || 80) / 100)));
-    let scale = (def.boss ? (1 + Math.max(0, wave - 1) * 0.07) : (1 + Math.max(0, wave - 1) * 0.18)) * late * dyn;
+    let scale = (def.boss ? (1 + Math.max(0, wave - 1) * 0.07) * (wave < 12 ? 0.72 : 1) : (1 + Math.max(0, wave - 1) * 0.12)) * late * dyn;
     if (!def.boss && wave >= 8 && rand(g, 0, 1) < 0.05) scale *= 1.35;
     const e = {
       id: ++g._eid || (g._eid = 1), kind, def, x, y, vx: 0, vy: 0, r: def.radius,
       hp: Math.round(def.hp * scale), maxHp: Math.round(def.hp * scale),
-      speed: def.speed * (1 + Math.min(0.45, wave * 0.016)) * (wave >= 6 && wave <= 9 ? 1.08 : 1), dmg: def.dmg * Math.min(2.2, 1.85 + Math.max(0, wave - 5) * 0.04) * (1 + wave * 0.032),
+      speed: def.speed * (1 + Math.min(0.45, wave * 0.016)) * (wave >= 6 && wave <= 9 ? 1.08 : 1), dmg: def.dmg * Math.min(2.2, 1.85 + Math.max(0, wave - 5) * 0.04) * (1 + wave * 0.032) * (def.boss && wave < 6 ? 0.6 : 1),
       flash: 0, hitCd: 0, spawnT: 0.35, dead: false, kx: 0, ky: 0,
       armor: Math.min(0.55, (def.armor || 0) + wave * (def.boss ? 0.0035 : 0.0015)),
       state: 'idle', stateT: 0, atkCd: rand(g, 0.6, 1.6) * (wave <= 3 ? 1.2 : 1), charge: null,
@@ -979,7 +980,7 @@
       }
       const ELITE_UNLOCK = [['spikejr',1],['security',1],['cowhead',3],['spike',5],['kunkun',12],['cthulhu',13],['giant',14]];
       const avail = ELITE_UNLOCK.filter(function (x) { return wave >= x[1]; });
-      const ecount = wave >= 15 ? 3 : (wave >= 4 ? 2 : 1);
+      const ecount = Math.min(5, Math.round((wave >= 15 ? 3 : (wave >= 6 ? 2 : 1)) * ((g.cov && g.cov.elite) || 1)));
       for (let ei = 0; ei < ecount; ei++) {
         const pickE = avail[Math.floor(g.rng() * avail.length)][0];
         const ea2 = g.rng() * Math.PI * 2;
@@ -990,7 +991,7 @@
         g._eliteSpawn = false;
         if (el) {
           el.elite = true; el.boss = false;
-          el.maxHp = Math.round(el.maxHp * (wave <= 3 ? 0.55 : (ei > 0 ? 0.6 : 0.85)));
+          el.maxHp = Math.round(el.maxHp * (wave <= 3 ? 0.4 : (ei > 0 ? 0.4 : 0.6)));
           el.hp = el.maxHp;
           el.armor = Math.min(0.45, (el.armor || 0) + 0.02);
           el.mod = ['shield', 'swift', 'split'][Math.floor(g.rng() * 3)];
