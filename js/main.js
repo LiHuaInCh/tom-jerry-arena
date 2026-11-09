@@ -1266,6 +1266,7 @@
       const k = b.dataset.cov;
       if (covenants.has(k)) { covenants.delete(k); b.classList.remove('on'); }
       else { covenants.add(k); b.classList.add('on'); }
+      try { localStorage.setItem('tj_cov', JSON.stringify(Array.from(covenants))); } catch (e) {}
       TJ.Audio.play('click');
     });
   });
@@ -1343,4 +1344,9 @@
   if (params.get('play') === '1') startRun();
   setTimeout(function () { try { refreshProfile(); } catch (e) {} }, 0);
   setTimeout(function () { try { refreshProfile(); } catch (e) {} }, 600);
+  try {
+    const __savedCov = JSON.parse(localStorage.getItem('tj_cov') || '[]');
+    __savedCov.forEach(function (k) { covenants.add(k); });
+    document.querySelectorAll('.cov').forEach(function (b) { if (covenants.has(b.dataset.cov)) b.classList.add('on'); });
+  } catch (e) {}
 })();

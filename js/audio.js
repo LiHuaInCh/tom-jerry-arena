@@ -210,6 +210,7 @@
     stopMusic,
     setMood,
     setTrack,
+    track() { return bgmSrc; },
     play(name) {
       if (muted) return;
       const fn = SFX[name];
