@@ -1668,7 +1668,7 @@
         if (__aico) {
           const __is = __rad * 1.98;
           ctx.globalAlpha = 0.38;
-          ctx.drawImage(__aico, -__is / 2, -__is / 2 - __rad * 0.08, __is, __is);
+          ctx.drawImage(__aico, -__is / 2, -__is / 2, __is, __is);
           ctx.globalAlpha = 1;
         }
         ctx.restore();
