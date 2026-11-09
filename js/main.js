@@ -566,8 +566,10 @@
     TJ.Audio.play('levelup');
   }
 
-  function showLevelUp() {
+  let __luGuard = false;
+  function showLevelUp(force) {
     if (!g) return;
+    if (state === 'levelup' && !force) return;
     const missionMode = g.mode !== 'arena' && (g.missionPicks || 0) > 0;
     let choices;
     if (missionMode) {

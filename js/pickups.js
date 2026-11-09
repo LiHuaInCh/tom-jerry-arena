@@ -55,7 +55,7 @@
       g.xp -= g.xpNeed;
       g.level++; g.player.level = g.level;
       g.pendingLevels++;
-      g.xpNeed = Math.round(g.xpNeed * 1.20 + 3);
+      g.xpNeed = Math.round(g.xpNeed * 1.34 + 6);
       g.player.hp = Math.min(g.player.maxHp, g.player.hp + 12);
       sfx(g, 'levelup');
       g.effects.push({ kind: 'ring', x: g.player.x, y: g.player.y, r: 10, maxR: 150, life: 0.5, max: 0.5, color: '#FFD34D' });
