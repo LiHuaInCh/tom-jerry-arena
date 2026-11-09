@@ -1,0 +1,31 @@
+chars 18 avgDeathRate 0.94 reach5 0.80 reach10 0.35 reach15 0.06 avgTime 186
+TOP10
+塔拉 reach10 1 wave 10 kills 1163 lvl 22
+布奇 reach10 1 wave 10.3 kills 425 lvl 19.7
+尼宝 reach10 1 wave 10.3 kills 366 lvl 18
+恶魔杰瑞 reach10 0.67 wave 8 kills 720 lvl 20.3
+兔八哥 reach10 0.67 wave 9 kills 419 lvl 16.7
+朝圣者泰菲 reach10 0.67 wave 10 kills 401 lvl 18.7
+剑客杰瑞 reach10 0.33 wave 9 kills 345 lvl 19
+杰瑞 reach10 0.33 wave 9 kills 329 lvl 17.7
+佩克斯 reach10 0.33 wave 9 kills 325 lvl 18
+侍卫汤姆 reach10 0.33 wave 6 kills 227 lvl 13.3
+ALL
+塔拉 reach10 1 wave 10 kills 1163 lvl 22
+布奇 reach10 1 wave 10.3 kills 425 lvl 19.7
+尼宝 reach10 1 wave 10.3 kills 366 lvl 18
+恶魔杰瑞 reach10 0.67 wave 8 kills 720 lvl 20.3
+兔八哥 reach10 0.67 wave 9 kills 419 lvl 16.7
+朝圣者泰菲 reach10 0.67 wave 10 kills 401 lvl 18.7
+剑客杰瑞 reach10 0.33 wave 9 kills 345 lvl 19
+杰瑞 reach10 0.33 wave 9 kills 329 lvl 17.7
+佩克斯 reach10 0.33 wave 9 kills 325 lvl 18
+侍卫汤姆 reach10 0.33 wave 6 kills 227 lvl 13.3
+汤姆 reach10 0 wave 8.3 kills 258 lvl 16.7
+天使杰瑞 reach10 0 wave 7 kills 225 lvl 12.3
+牛仔汤姆 reach10 0 wave 6.7 kills 225 lvl 14.7
+泰菲 reach10 0 wave 5 kills 168 lvl 11.3
+玛丽 reach10 0 wave 6 kills 145 lvl 13
+侦探杰瑞 reach10 0 wave 5 kills 134 lvl 12
+苏蕊 reach10 0 wave 4 kills 85 lvl 8.3
+国王杰瑞 reach10 0 wave 4.3 kills 75 lvl 11
