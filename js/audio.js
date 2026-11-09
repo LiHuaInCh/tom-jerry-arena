@@ -15,7 +15,6 @@
       master = ctx.createGain();
       master.gain.value = muted ? 0 : 0.55;
       master.connect(ctx.destination);
-      loadSamples();
       const len = ctx.sampleRate * 1;
       noiseBuf = ctx.createBuffer(1, len, ctx.sampleRate);
       const d = noiseBuf.getChannelData(0);
@@ -105,10 +104,7 @@
     s.start(ctx.currentTime);
     return true;
   }
-  const SFX = {};
-  Object.keys(SYNTH).forEach(function (k) {
-    SFX[k] = function () { if (playSample(k)) return; SYNTH[k](); };
-  });
+  const SFX = SYNTH;
 
   /* ---------- 背景音乐（程序化循环） ---------- */
   let musicTimer = null, musicStep = 0;
@@ -134,10 +130,21 @@
     if (musicTimer) { clearInterval(musicTimer); musicTimer = null; }
   }
   let bgmEl = null;
+  let bgmSrc = 'assets/audio/bgm.mp3';
+  function setTrack(name) {
+    const src = name === 'psycho' ? 'assets/audio/bgm_psycho.mp3' : 'assets/audio/bgm.mp3';
+    if (src === bgmSrc) return;
+    bgmSrc = src;
+    if (bgmEl) {
+      const playing = !bgmEl.paused;
+      bgmEl.src = src;
+      if (playing) { const p = bgmEl.play(); if (p && p.catch) p.catch(function () {}); }
+    }
+  }
   function startMusic() {
     if (muted) return;
     if (!bgmEl) {
-      bgmEl = new Audio('assets/audio/bgm.mp3');
+      bgmEl = new Audio(bgmSrc);
       bgmEl.loop = true;
       bgmEl.volume = 0.3;
       bgmEl.addEventListener('error', function () { bgmEl = null; startSynth(); });
@@ -202,6 +209,7 @@
     startMusic,
     stopMusic,
     setMood,
+    setTrack,
     play(name) {
       if (muted) return;
       const fn = SFX[name];

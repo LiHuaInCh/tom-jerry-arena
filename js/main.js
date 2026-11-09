@@ -413,12 +413,14 @@
   function startRun() {
     TJ.Audio.unlock();
     g = mode === 'arena' ? TJ.createArenaGame({ charId: selected }) : TJ.createGame({ charId: selected });
+    if (TJ.Audio && TJ.Audio.setTrack) TJ.Audio.setTrack(covenants.has('psycho') ? 'psycho' : 'default');
     if (TJ.Missions && TJ.Missions.recenter) TJ.Missions.recenter(g);
     g.cov = { spawn: 1, elite: 1, noHeal: 0, score: 1, list: [] };
     if (mode !== 'arena') {
       if (covenants.has('horde')) { g.cov.spawn = 0.8; g.cov.score *= 1.2; g.cov.list.push('怪潮'); }
       if (covenants.has('elite')) { g.cov.elite = 2; g.cov.score *= 1.2; g.cov.list.push('精英'); }
       if (covenants.has('noheal')) { g.cov.noHeal = 1; g.cov.score *= 1.3; g.cov.list.push('禁疗'); }
+      if (covenants.has('psycho')) { g.cov.psycho = 1; g.cov.score *= 1.15; g.cov.list.push('精神攻击'); }
     }
     if (TJ.meta) {
       const plv = TJ.meta.charLv(selected) || 1;
