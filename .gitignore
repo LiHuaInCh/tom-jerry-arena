@@ -10,3 +10,6 @@ android/app/build/
 android/local.properties
 android/app/src/main/assets/public/
 *.keystore
+
+apk_*/
+dist/*.apk
