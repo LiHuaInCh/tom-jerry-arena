@@ -28,7 +28,7 @@
 
   function baseStats() {
     return {
-      damage: 1, fireRate: 1.3, speed: 1, maxHp: 0, crit: 0.08, critMul: 1.8,
+      damage: 1.5, fireRate: 1.35, speed: 1, maxHp: 0, crit: 0.08, critMul: 1.8,
       pierce: 0, multishot: 0, bounce: 0, homing: 0, explode: 0, lifesteal: 0, regen: 0,
       magnet: 78, armor: 0, dashCd: 2.0, dashDamage: 0, skillCdMul: 1, projSpeed: 1, range: 0,
       shieldMax: 0, luck: 0, summonCount: 1, summonDur: 0, summonDmgMul: 1
@@ -59,7 +59,7 @@
     const c = D.characters.find(x => x.id === charId) || D.characters[0];
     return {
       char: c, charId: c.id, skill: c.skill, weapon: c.weapon, elemSlots: [null, null], x: D.W / 2, y: D.H / 2, vx: 0, vy: 0,
-      r: c.radius, hp: c.hp, maxHp: c.hp, speed: c.speed,
+      r: c.radius, hp: Math.round(c.hp * 1.35), maxHp: Math.round(c.hp * 1.35), speed: c.speed,
       facing: -Math.PI / 2, aim: -Math.PI / 2,
       fireCd: 0.12, dashCd: 0, dashT: 0, dashX: 1, dashY: 0, dashHits: null, skillCd: 0, hasteT: 0,
       invuln: 1.2, hitFlash: 0, walk: 0, moving: false,
