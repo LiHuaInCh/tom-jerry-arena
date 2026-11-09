@@ -145,12 +145,12 @@
     if (!ok) return;
     const late = wave > 10 ? Math.pow(1.015, wave - 10) : 1;
     const dyn = Math.max(0.85, Math.min(2.0, Math.sqrt((g.dps || 80) / 100)));
-    let scale = (def.boss ? (1 + Math.max(0, wave - 1) * 0.07) * (wave <= 4 ? 0.35 : (wave < 12 ? 0.42 : (wave < 20 ? 0.55 : 1))) : (1 + Math.max(0, wave - 1) * 0.08) * (wave <= 5 ? 1.1 : 1)) * late * dyn;
+    let scale = (def.boss ? (1 + Math.max(0, wave - 1) * 0.07) * (wave <= 4 ? 0.55 : (wave < 12 ? 0.65 : (wave < 20 ? 0.85 : 1))) : (1 + Math.max(0, wave - 1) * 0.12) * (wave <= 5 ? 1.1 : 1)) * late * dyn;
     if (!def.boss && wave >= 8 && rand(g, 0, 1) < 0.05) scale *= 1.35;
     const e = {
       id: ++g._eid || (g._eid = 1), kind, def, x, y, vx: 0, vy: 0, r: def.radius,
       hp: Math.round(def.hp * scale), maxHp: Math.round(def.hp * scale),
-      speed: def.speed * (1 + Math.min(0.45, wave * 0.016)) * (wave >= 6 && wave <= 9 ? 1.08 : 1), dmg: def.dmg * Math.min(2.2, 1.85 + Math.max(0, wave - 5) * 0.04) * (1 + wave * 0.026) * (def.boss && wave < 6 ? 0.5 : 1) * (wave <= 5 ? 1.15 : 1),
+      speed: def.speed * (1 + Math.min(0.45, wave * 0.016)) * (wave >= 6 && wave <= 9 ? 1.08 : 1), dmg: def.dmg * Math.min(2.2, 1.85 + Math.max(0, wave - 5) * 0.04) * (1 + wave * 0.036) * (def.boss && wave < 6 ? 0.6 : 1) * (wave <= 5 ? 1.15 : 1),
       flash: 0, hitCd: 0, spawnT: 0.35, dead: false, kx: 0, ky: 0,
       armor: Math.min(0.55, (def.armor || 0) + wave * (def.boss ? 0.0035 : 0.0015)),
       state: 'idle', stateT: 0, atkCd: rand(g, 0.6, 1.6) * (wave <= 3 ? 1.2 : 1), charge: null,
@@ -390,7 +390,7 @@
             x: p.x, y: p.y, vx: Math.cos(sa) * (sw.speed || 500), vy: Math.sin(sa) * (sw.speed || 500),
             r: 8, dmg: sw.dmg * st.damage * (st.subDmgMul || 1), from: 'player', kind: sw.proj || 'orb',
             life: 2, hit: {}, color: sw.color || '#BFE9FF',
-            splash: sw.splash || 0, explodeOnDeath: !!sw.splash, pierce: sw.pierce || 0, _sub: sw.sub, _icon: sw.iconImg
+            splash: sw.splash || 0, explodeOnDeath: !!sw.splash, pierce: sw.pierce || 0, _sub: sw.sub || 'ranged', _icon: sw.iconImg
           });
           p.subCd = (sw.cd || 1) * (st.subCdMul || 1);
           sfx(g, 'shoot');
@@ -804,7 +804,7 @@
     const p = g.player;
     for (const pr of g.projectiles) {
       if (pr.dead) continue;
-      if (pr.from === 'player' && !pr._sub) { const w0 = D.weapons[p.char.weapon] || {}; pr._sub = w0.sub; pr._icon = w0.iconImg; }
+      if (pr.from === 'player' && !pr._sub && !pr._icon) { const w0 = D.weapons[p.char.weapon] || {}; pr._sub = w0.sub; pr._icon = w0.iconImg; }
       if (pr.from === 'enemy' && !pr.scaled) {
         pr.scaled = true;
         const k = (0.5 + Math.min(0.35, (g.wave || 1) * 0.025)) * rand(g, 0.88, 1.12);
@@ -1007,7 +1007,7 @@
     if (g.spawnTimer <= 0 && g.enemies.filter(e => !e.dead).length < 130) {
       const waveNow = Math.max(1, g.wave);
       const pMul = g.pressure > 75 ? 0.7 : (g.pressure > 40 ? 0.85 : 1);
-      const base = Math.max(0.45, 1.5 - waveNow * 0.09);
+      const base = Math.max(0.4, 1.4 - waveNow * 0.10);
       g.spawnTimer = Math.max(0.42, Math.min(1.5, base * ((g.cov && g.cov.spawn) || 1) * pMul * (waveNow <= 5 ? 0.86 : 1)));
       let n = waveNow <= 2 ? 1 : (1 + (g.rng() < Math.min(0.9, 0.25 + waveNow * 0.07) ? 1 : 0));
       if (waveNow >= 8 && g.rng() < 0.45) n += 1;

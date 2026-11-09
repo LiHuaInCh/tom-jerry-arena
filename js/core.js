@@ -57,7 +57,7 @@
 
   function makePlayer(g, charId) {
     const c = D.characters.find(x => x.id === charId) || D.characters[0];
-    return {
+    const out = {
       char: c, charId: c.id, skill: c.skill, weapon: c.weapon, elemSlots: [null, null], x: D.W / 2, y: D.H / 2, vx: 0, vy: 0,
       r: c.radius, hp: Math.round(c.hp * 1.35), maxHp: Math.round(c.hp * 1.35), speed: c.speed,
       facing: -Math.PI / 2, aim: -Math.PI / 2,
@@ -65,6 +65,13 @@
       invuln: 1.2, hitFlash: 0, walk: 0, moving: false,
       shield: 0, shieldCd: 0, hurtT: 99, level: 1, alive: true, target: null
     };
+    const __w = D.weapons[c.weapon] || {};
+    const __sub = __w.sub || '';
+    const __late = ['summon', 'burn', 'aegis', 'mine', 'tether', 'arc', 'deploy'].indexOf(__sub) >= 0;
+    const __early = ['heavy', 'blade', 'polearm', 'maul'].indexOf(__sub) >= 0;
+    out.profBase = __late ? 0.86 : (__early ? 1.12 : 1.0);
+    out.profGrow = __late ? 0.05 : (__early ? 0.018 : 0.032);
+    return out;
   }
 
   /* ---------------- 事件 / 特效 ---------------- */
@@ -79,7 +86,7 @@
     const names = { fire: '火', ice: '冰', thunder: '雷', light: '光', dark: '暗' };
     const all = Object.keys(names);
     const two = [];
-    while (two.length < 2 && all.length) two.push(all.splice(Math.floor(g.rng() * all.length), 1)[0]);
+    while (two.length < 3 && all.length) two.push(all.splice(Math.floor(g.rng() * all.length), 1)[0]);
     return two.map(function (e) {
       const lines = ['定位：' + ELEM_TAG[e]];
       if (slot === 1 && g.player.elemSlots[0]) {
@@ -146,7 +153,7 @@
       });
       if (wids.length >= 2) {
         const picks = [];
-        while (picks.length < 2 && wids.length) {
+        while (picks.length < 3 && wids.length) {
           picks.push(wids.splice(Math.floor(g.rng() * wids.length), 1)[0]);
         }
         return picks.map(function (k) {
@@ -182,6 +189,13 @@
       ];
       for (const u of sumCards) if ((counts[u.id] || 0) < u.max) pool.push(u);
     }
+    const FILLERS = [
+      { id: 'fill_dmg', name: '武器专精', desc: '伤害 +20%', icon: '精', rarity: 'common' },
+      { id: 'fill_cd', name: '快速装填', desc: '攻速 +15%', icon: '快', rarity: 'common' },
+      { id: 'fill_hp', name: '坚韧', desc: '生命上限 +18 并回复', icon: '韧', rarity: 'common' }
+    ];
+    let __fi = 0;
+    while (pool.length < 3) pool.push(FILLERS[__fi++ % 3]);
     const luck = 1 + g.stats.luck;
     while (out.length < 3 && pool.length) {
       let total = 0;
@@ -227,6 +241,15 @@
       if (g.pendingLevels > 0) g.pendingLevels--;
       g.events.push({ type: 'upgrade', id: id });
       return { name: '副武器强化' };
+    }
+    if (id.indexOf('fill_') === 0) {
+      g.upgradeCounts[id] = (g.upgradeCounts[id] || 0) + 1;
+      if (id === 'fill_dmg') g.stats.damage *= 1.2;
+      else if (id === 'fill_cd') g.stats.fireRate *= 1.15;
+      else if (id === 'fill_hp') { g.stats.maxHp += 18; g.player.maxHp += 18; g.player.hp = Math.min(g.player.maxHp, g.player.hp + 18); }
+      if (g.pendingLevels > 0) g.pendingLevels--;
+      g.events.push({ type: 'upgrade', id: id });
+      return { name: '武器专精' };
     }
     if (id.indexOf('sum_') === 0) {
       g.upgradeCounts[id] = (g.upgradeCounts[id] || 0) + 1;

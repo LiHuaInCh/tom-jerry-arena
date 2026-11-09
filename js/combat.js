@@ -12,6 +12,7 @@
 
   function damageEnemy(g, e, dmg, crit) {
     if (e.dead) return;
+    if (g.player && g.player.profBase) dmg *= g.player.profBase * (1 + (g.player.profGrow || 0) * (g.player.level - 1));
     const __arm = Math.max(0, (e.armor || 0) - (g.stats.pen || 0));
     if (__arm) dmg *= (1 - __arm);
     if (g.stats.stunChance && !e.boss && g.rng() < g.stats.stunChance) e.stunT = 0.35;

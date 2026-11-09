@@ -579,7 +579,7 @@
     }
     if (!missionMode && g._lastChoices && g._lastChoices.length) {
       const filtered = choices.filter(function (c) { return g._lastChoices.indexOf(c.id || c.key) < 0; });
-      if (filtered.length >= 2) choices = filtered;
+      if (filtered.length >= 3) choices = filtered;
     }
     g._lastChoices = choices.map(function (c) { return c.id || c.key; });
     if (!choices.length) { if (missionMode) { g.missionPicks = 0; } else { clearPending(); } return; }
