@@ -261,6 +261,7 @@
     const ow = D.weapons[p.char.weapon];
     const aw = D.weapons[p.char.weapon];
     if (aw && aw.kind === 'aura') {
+    p.orbitRBonus = st.orbitRBonus || 0;
     p.auraT = (p.auraT || 0) - dt;
     if (p.auraT <= 0) {
       p.auraT = 0.45;
