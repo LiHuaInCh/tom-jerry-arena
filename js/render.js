@@ -1702,6 +1702,29 @@
       list.sort(function (a, b) { const az = a.kind === 'player' ? 200000 : ((a.kind === 'enemy' && a.e.def && a.e.def.sprite) ? 100000 : 0); const bz = b.kind === 'player' ? 200000 : ((b.kind === 'enemy' && b.e.def && b.e.def.sprite) ? 100000 : 0); return (a.y + az) - (b.y + bz); });
 
       for (const it of list) {
+        if (it.kind === 'enemy' && it.e.tele) {
+          const te = it.e.tele, pu = 0.35 + 0.25 * Math.sin(performance.now() / 70);
+          ctx.save(); ctx.globalAlpha = pu; ctx.strokeStyle = '#FF4B3A'; ctx.fillStyle = 'rgba(255,75,58,.18)';
+          ctx.lineWidth = 4;
+          if (te.type === 'line' || te.type === 'dash') {
+            const L = te.len || 300;
+            ctx.beginPath(); ctx.moveTo(it.e.x, it.e.y); ctx.lineTo(it.e.x + Math.cos(te.ang) * L, it.e.y + Math.sin(te.ang) * L); ctx.stroke();
+            ctx.beginPath(); ctx.arc(it.e.x, it.e.y, it.e.r * 1.6, 0, Math.PI * 2); ctx.stroke();
+          } else if (te.type === 'ring') {
+            ctx.beginPath(); ctx.arc(it.e.x, it.e.y, te.radius, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          } else if (te.type === 'aoe') {
+            ctx.beginPath(); ctx.arc(te.x, te.y, te.radius, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          } else if (te.type === 'fan') {
+            ctx.beginPath(); ctx.moveTo(it.e.x, it.e.y);
+            ctx.arc(it.e.x, it.e.y, 240, te.ang - 0.55, te.ang + 0.55); ctx.closePath(); ctx.fill(); ctx.stroke();
+          }
+          ctx.restore();
+        }
+        if (it.kind === 'enemy' && it.e.boss && it.e.pending && it.e.pending.kind === 'smashwind') {
+          const pw = it.e.pending, pu2 = 0.35 + 0.25 * Math.sin(performance.now() / 60);
+          ctx.save(); ctx.globalAlpha = pu2; ctx.fillStyle = 'rgba(255,75,58,.22)'; ctx.strokeStyle = '#FF4B3A'; ctx.lineWidth = 4;
+          ctx.beginPath(); ctx.arc(pw.x, pw.y, 150, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); ctx.restore();
+        }
         if (it.kind === 'enemy' && it.e.boss && (it.e.charge || it.e.pending)) {
           const ee = it.e;
           const pulse = 0.45 + 0.25 * Math.sin(performance.now() / 90);

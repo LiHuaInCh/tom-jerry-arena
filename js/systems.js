@@ -145,7 +145,7 @@
     if (!ok) return;
     const late = wave > 10 ? Math.pow(1.015, wave - 10) : 1;
     const dyn = Math.max(0.85, Math.min(2.0, Math.sqrt((g.dps || 80) / 100)));
-    let scale = (def.boss ? (1 + Math.max(0, wave - 1) * 0.07) * (wave <= 4 ? 0.55 : (wave < 12 ? 0.65 : (wave < 20 ? 0.8 : 1))) : (1 + Math.max(0, wave - 1) * 0.12) * (wave <= 5 ? 1.1 : 1)) * late * dyn;
+    let scale = (def.boss ? (1 + Math.max(0, wave - 1) * 0.07) * (wave <= 4 ? 0.55 : (wave < 12 ? 0.65 : (wave < 20 ? 0.65 : 1))) : (1 + Math.max(0, wave - 1) * 0.12) * (wave <= 5 ? 1.1 : 1)) * late * dyn;
     if (!def.boss && wave >= 8 && rand(g, 0, 1) < 0.05) scale *= 1.35;
     const e = {
       id: ++g._eid || (g._eid = 1), kind, def, x, y, vx: 0, vy: 0, r: def.radius,
@@ -433,6 +433,61 @@
     resolveObstacles(g, e, e.r);
   }
 
+  const ELITE_SKILLS = {
+    security: { type: 'line', cd: 3.4, dur: 0.75, len: 460 },
+    cowhead: { type: 'line', cd: 4.2, dur: 0.8, len: 320, pull: true },
+    spikejr: { type: 'dash', cd: 3.0, dur: 0.55, len: 260 },
+    spike: { type: 'ring', cd: 4.5, dur: 0.7, radius: 190 },
+    kunkun: { type: 'fan', cd: 3.8, dur: 0.7 },
+    cthulhu: { type: 'ring', cd: 4.6, dur: 0.8, radius: 170, mind: true },
+    giant: { type: 'aoe', cd: 4.4, dur: 0.9, radius: 130 },
+    qianchang: { type: 'fan', cd: 3.6, dur: 0.65 },
+    angryqc: { type: 'dash', cd: 3.4, dur: 0.6, len: 300 },
+    chenjr: { type: 'aoe', cd: 4.0, dur: 0.8, radius: 120, root: true }
+  };
+  function updateEliteSkill(g, e, dt, d, ux, uy) {
+    const cfg = ELITE_SKILLS[e.kind];
+    if (!cfg) return;
+    const p = g.player;
+    if (e.tele) {
+      e.tele.t -= dt;
+      if (e.tele.t <= 0) { fireEliteSkill(g, e, e.tele); e.tele = null; }
+      return;
+    }
+    e.eliteCd = e.eliteCd == null ? rand(g, 1.0, 2.2) : e.eliteCd - dt;
+    if (e.eliteCd > 0 || d > 520) return;
+    e.eliteCd = cfg.cd * rand(g, 0.9, 1.15);
+    e.tele = { type: cfg.type, t: cfg.dur, dur: cfg.dur, radius: cfg.radius || 0, len: cfg.len || 0, pull: !!cfg.pull, mind: !!cfg.mind, root: !!cfg.root, ang: Math.atan2(p.y - e.y, p.x - e.x), x: p.x, y: p.y };
+    sfx(g, 'charge');
+    addText(g, e.x, e.y - 40, '蓄力！', '#FFB44D', 16);
+  }
+  function fireEliteSkill(g, e, t) {
+    const p = g.player;
+    if (t.type === 'line') {
+      const hit = Math.hypot(p.x - e.x, p.y - e.y) < t.len && Math.abs(Math.atan2(p.y - e.y, p.x - e.x) - t.ang) < 0.35;
+      if (t.pull) {
+        if (hit) { const dd = Math.hypot(p.x - e.x, p.y - e.y) || 1; p.x += (e.x - p.x) / dd * 120; p.y += (e.y - p.y) / dd * 120; hurtPlayer(g, e.dmg * 0.6, e.x, e.y); addText(g, p.x, p.y - 40, '套索！', '#FFD34D', 18); }
+      } else {
+        g.projectiles.push({ x: e.x, y: e.y, vx: Math.cos(t.ang) * 300, vy: Math.sin(t.ang) * 300, r: 9, dmg: e.dmg * 0.7, from: 'enemy', kind: 'orb', life: 2, hit: {}, icon: 'assets/enemies/rocket_cut.png', explodeOnDeath: true, splash: 70 });
+      }
+      g.effects.push({ kind: 'ring', x: e.x, y: e.y, r: 8, maxR: 40, life: 0.2, max: 0.2, color: '#FF8A5C' });
+    } else if (t.type === 'dash') {
+      if (Math.hypot(p.y - e.y, p.x - e.x) < 420) e.charge = { dx: Math.cos(t.ang), dy: Math.sin(t.ang), t: 0.42 };
+    } else if (t.type === 'ring') {
+      g.effects.push({ kind: 'ring', x: e.x, y: e.y, r: 20, maxR: t.radius, life: 0.35, max: 0.35, color: '#FF7A5C' });
+      if (Math.hypot(p.x - e.x, p.y - e.y) < t.radius) { hurtPlayer(g, e.dmg * 0.8, e.x, e.y); if (t.mind) p.reverseT = 1.3; }
+      g.shake = Math.max(g.shake || 0, 6);
+    } else if (t.type === 'aoe') {
+      g.effects.push({ kind: 'ring', x: t.x, y: t.y, r: 16, maxR: t.radius, life: 0.3, max: 0.3, color: '#FF5A3C' });
+      if (Math.hypot(p.x - t.x, p.y - t.y) < t.radius) { hurtPlayer(g, e.dmg, t.x, t.y); if (t.root) p.rootT = 1.2; }
+    } else if (t.type === 'fan') {
+      for (let i = -2; i <= 2; i++) {
+        const a = t.ang + i * 0.22;
+        g.projectiles.push({ x: e.x, y: e.y, vx: Math.cos(a) * 240, vy: Math.sin(a) * 240, r: 7, dmg: e.dmg * 0.45, from: 'enemy', kind: 'orb', life: 2.2, hit: {}, color: '#FFD34D' });
+      }
+    }
+  }
+
   function updateEnemies(g, dt) {
     for (const e of g.enemies) { if (e.atkAnimT > 0) e.atkAnimT -= dt; if ((e.pending || e.charge) && e.atkAnimT <= 0) e.atkAnimT = 0.15; }
     const p = g.player;
@@ -502,6 +557,12 @@
         continue;
       }
 
+      if (e.elite && !e.boss) updateEliteSkill(g, e, dt, d, ux, uy);
+      if (e.boss && ['tom', 'spike', 'kunkun', 'cthulhu', 'giant', 'qianchang', 'angryqc', 'chenjr'].indexOf(e.kind) >= 0) {
+        updateBoss(g, e, dt, d, ux, uy);
+        resolveObstacles(g, e, e.r);
+        continue;
+      }
       switch (e.kind) {
         case 'spitter': {
           const want = 300;
@@ -560,11 +621,6 @@
           }
           break;
         }
-        case 'tom':
-        case 'spike': {
-          updateBoss(g, e, dt, d, ux, uy);
-          break;
-        }
         default: {
           if (e.recoil > 0) {
             e.x -= ux * 150 * dt; e.y -= uy * 150 * dt;
@@ -609,6 +665,13 @@
     const pend = e.pending;
     e.pending = null;
     if (!pend) return;
+    if (pend.kind === 'smashwind') {
+      g.effects.push({ kind: 'ring', x: pend.x, y: pend.y, r: 20, maxR: 150, life: 0.4, max: 0.4, color: '#FF7A5C' });
+      if (Math.hypot(p.x - pend.x, p.y - pend.y) < 150) hurtPlayer(g, e.dmg * 1.1, pend.x, pend.y);
+      g.shake = Math.max(g.shake || 0, 12);
+      addText(g, pend.x, pend.y - 60, '砸地！', '#FF9A5C', 22);
+      return;
+    }
     if (pend.kind === 'wind') {
       e.charge = { t: 0.42, dx: Math.cos(pend.ang), dy: Math.sin(pend.ang) };
       e.state = 'charge';
@@ -742,7 +805,7 @@
     }
     if (e.kind === 'giant') {
       e.smashCd = (e.smashCd == null ? 4 : e.smashCd) - dt;
-      if (e.smashCd <= 0) { e.smashCd = 4.2; g.projectiles.push({ x: e.x, y: e.y, vx: 0, vy: 0, r: 26, grow: 340, maxR: 220, dmg: e.dmg * 1.1, from: 'enemy', kind: 'ring', life: 0.9, hit: {} }); addText(g, e.x, e.y - 80, '砸地！', '#FF9A5C', 22); g.shake = Math.max(g.shake || 0, 10); }
+      if (e.smashCd <= 0) { e.smashCd = 4.2; e.pending = { kind: 'smashwind', t: 0.8, x: p.x, y: p.y }; addText(g, e.x, e.y - 80, '砸地蓄力…', '#FFB44D', 20); }
       e.carCd = (e.carCd == null ? 5 : e.carCd) - dt;
       if (e.carCd <= 0) {
         e.carCd = 5.5;
@@ -982,7 +1045,7 @@
       }
       const ELITE_UNLOCK = [['spikejr',1],['security',1],['cowhead',3],['spike',5],['kunkun',12],['cthulhu',13],['giant',14]];
       const avail = ELITE_UNLOCK.filter(function (x) { return wave >= x[1]; });
-      const ecount = Math.min(6, Math.round((wave >= 20 ? 4 : (wave >= 12 ? 3 : (wave >= 3 ? 3 : (wave >= 2 ? 2 : 1)))) * ((g.cov && g.cov.elite) || 1)));
+      const ecount = Math.min(6, Math.round((wave >= 20 ? 4 : (wave >= 16 ? 3 : (wave >= 12 ? 2 : (wave >= 3 ? 3 : (wave >= 2 ? 2 : 1))))) * ((g.cov && g.cov.elite) || 1)));
       for (let ei = 0; ei < ecount; ei++) {
         const pickE = avail[Math.floor(g.rng() * avail.length)][0];
         const ea2 = g.rng() * Math.PI * 2;
