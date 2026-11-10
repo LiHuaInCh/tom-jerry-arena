@@ -320,7 +320,7 @@
       const __sumMax = Math.max(1, Math.min(5, st.summonCount || 3));
       while (g.summons.length < __sumMax && p.sumCd <= 0) {
         p.sumCd = (ow.cd || 4.0) * (st.summonCdMul || 1);
-        g.summons.push({ x: p.x + 34, y: p.y, life: (ow.duration || 8) + (st.summonDur || 0), atkCd: 0, r: 15, spd: 150, icon: ow.iconImg, stationary: !!ow.stationary, range: 96, size: ow.stationary ? 56 : 76, w: ow });
+        g.summons.push({ x: p.x + 34, y: p.y, life: (ow.duration || 8) + (st.summonDur || 0), atkCd: 0, r: 15, spd: 240, icon: ow.iconImg, stationary: !!ow.stationary, range: 96, size: ow.stationary ? 56 : 76, w: ow });
         g.effects.push({ kind: 'ring', x: p.x + 34, y: p.y, r: 4, maxR: 60, life: 0.3, max: 0.3, color: '#FFD36A' });
         if (g.summons.length >= __sumMax) break;
       }
