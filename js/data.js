@@ -328,7 +328,7 @@
   });
   TJ.DATA.elementNames = { fire: '火', ice: '冰', thunder: '雷', light: '光', dark: '暗' };
   weapons.w_aura_yu = { name: '舞花枪', icon: '花', iconImg: 'assets/weapon-icons/w_c08.png', kind: 'aura', sub: 'burn', label: '持续灼烧', dmg: 26, cd: 0.5, orbitR: 94, auraR: 96, tickCd: 0.45, tickDmg: 40, color: '#F2C14E' };
-  weapons.w_aura_king = { name: '光盾', icon: '盾', iconImg: 'assets/weapon-icons/w_m06.png', kind: 'aura', sub: 'burn', label: '持续灼烧', dmg: 22, cd: 0.5, orbitR: 86, auraR: 96, tickCd: 0.45, tickDmg: 36, color: '#9CD8FF' };
+  weapons.w_aura_king = { name: '光盾', icon: '盾', iconImg: 'assets/weapon-icons/w_m06.png', kind: 'aura', sub: 'aegis', label: '守护光环', dmg: 22, cd: 0.5, orbitR: 86, auraR: 96, tickCd: 0.45, tickDmg: 36, color: '#9CD8FF' };
   characters.forEach(function (c) {
     if (c.name === '如玉') c.weapon = 'w_aura_yu';
     if (c.name === '国王杰瑞') c.weapon = 'w_aura_king';
