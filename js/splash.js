@@ -1,6 +1,9 @@
 (function () {
   var sp = document.getElementById('splash');
   if (!sp) return;
+  var native = !!(window.Capacitor && (window.Capacitor.isNativePlatform ? window.Capacitor.isNativePlatform() : (window.Capacitor.platform && window.Capacitor.platform !== 'web')));
+  if (!native) { sp.remove(); return; }
+  sp.classList.add('show');
   var v = document.getElementById('splashVid');
   var done = false;
   function finish() {

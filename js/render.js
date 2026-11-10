@@ -1799,7 +1799,9 @@
         } else {
           const __bs = it.e.def && it.e.def.sprite ? orbitImg(it.e.def.sprite) : null;
           if (__bs) {
-            const bs = it.e.r * (it.e.boss ? 4.2 : (it.e.elite ? 3.6 : 2.4));
+            const BIG_SPRITE = { spitter: 2, dasher: 2, hunter: 2, bomber: 2, cowhead: 2 };
+            const __bsMult = BIG_SPRITE[it.e.kind] || 1;
+            const bs = it.e.r * (it.e.boss ? 4.2 : (it.e.elite ? 3.6 : 2.4)) * __bsMult;
             const __bmode = it.e.atkAnimT > 0 ? 'attack' : (it.e.flash > 0 ? 'hurt' : (Math.hypot(it.e.vx || 0, it.e.vy || 0) > 15 ? 'run' : 'idle'));
             const __bph = (it.e.walk || 0) * 1.1 + it.e.x * 0.01;
             ctx.save();
