@@ -1801,6 +1801,23 @@
         }
       }
 
+      if (g.player && g.player.link && !g.player.link.dead) {
+        const lp = g.player, lt = g.player.link;
+        const lw2 = D.weapons[lp.char.weapon] || {};
+        const col2 = lw2.color || '#9CD8FF';
+        ctx.save(); ctx.globalAlpha = 0.75; ctx.strokeStyle = col2; ctx.lineWidth = 3; ctx.lineCap = 'round';
+        ctx.shadowColor = col2; ctx.shadowBlur = 10;
+        ctx.beginPath(); ctx.moveTo(lp.x, lp.y - lp.r * 0.2);
+        const seg = 6;
+        for (let i = 1; i <= seg; i++) {
+          const t2 = i / seg;
+          const jx = (Math.random() - 0.5) * 14, jy = (Math.random() - 0.5) * 14;
+          ctx.lineTo(lp.x + (lt.x - lp.x) * t2 + (i < seg ? jx : 0), lp.y - lp.r * 0.2 + (lt.y - lp.y) * t2 + (i < seg ? jy : 0));
+        }
+        ctx.stroke();
+        ctx.beginPath(); ctx.arc(lt.x, lt.y, lt.r + 4, 0, TAU); ctx.globalAlpha = 0.35; ctx.lineWidth = 2; ctx.stroke();
+        ctx.restore();
+      }
       for (const pr of g.projectiles) drawProjectile(ctx, pr);
       for (const e of g.effects) drawEffect(ctx, e);
 

@@ -122,7 +122,10 @@
       g.shake = 18; if (g.boss === e) g.boss = null; sfx(g, 'bossdown');
       g.player.hp = Math.min(g.player.maxHp, g.player.hp + 30);
       g.effects.push({ kind: 'ring', x: e.x, y: e.y, r: 10, maxR: 320, life: 0.6, max: 0.6, color: '#FFD34D' });
-      addText(g, e.x, e.y - 60, 'BOSS 击破！', '#FFD34D', 30);
+      addText(g, e.x, e.y - 60, 'BOSS 击破！3 波后下一只', '#FFD34D', 30);
+      g.nextBossWave = (g.wave || 1) + 3;
+      g.elitePool = g.elitePool || [];
+      if (g.elitePool.indexOf(e.kind) < 0) g.elitePool.push(e.kind);
       if ((g.stats.lifesteal || 0) < 0.02) { g.stats.lifesteal += 0.004; addText(g, g.player.x, g.player.y - 80, '特殊强化：吸血 0.4%', '#FF9AA2', 22); }
     } else {
       sfx(g, 'kill');

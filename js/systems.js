@@ -402,13 +402,14 @@
           p.subCd = (sw.cd || 1) * (st.subCdMul || 1); sfx(g, 'shoot');
         } else if (sw.kind === 'chain' || sw.kind === 'tether') {
           let cur = subTarget, dmg2 = sw.dmg * st.damage * (st.subDmgMul || 1) * (sw.kind === 'tether' ? 0.9 : 1), hit2 = {};
+          const pts2 = [{ x: p.x, y: p.y }];
           for (let i = 0; i < (sw.kind === 'tether' ? 1 : (sw.jumps || 3)) && cur; i++) {
-            hit2[cur.id] = 1; damageEnemy(g, cur, dmg2, false); dmg2 *= 0.82;
+            hit2[cur.id] = 1; pts2.push({ x: cur.x, y: cur.y }); damageEnemy(g, cur, dmg2, false); dmg2 *= 0.82;
             let nxt = null, nd = 280;
             for (const e of g.enemies) { if (e.dead || hit2[e.id]) continue; const dd = Math.hypot(e.x - cur.x, e.y - cur.y); if (dd < nd) { nd = dd; nxt = e; } }
             cur = nxt;
           }
-          g.effects.push({ kind: 'ring', x: subTarget.x, y: subTarget.y, r: 8, maxR: 60, life: 0.22, max: 0.22, color: sw.color || '#9CD8FF' });
+          g.effects.push({ kind: 'chain', pts: pts2, life: 0.26, max: 0.26, color: sw.color || '#9CD8FF' });
           p.subCd = (sw.cd || 1) * (st.subCdMul || 1); sfx(g, 'eshoot');
         } else if (sw.kind === 'summon' || sw.kind === 'deploy') {
           const R2 = sw.boomR || sw.auraR || 100;
@@ -426,6 +427,21 @@
           sfx(g, 'shoot');
         }
       }
+    }
+    {
+      const lw = D.weapons[p.char.weapon];
+      const swL = p.subWeapon ? D.weapons[p.subWeapon] : null;
+      const lk = (lw && (lw.kind === 'chain' || lw.kind === 'tether')) ? lw : ((swL && (swL.kind === 'chain' || swL.kind === 'tether')) ? swL : null);
+      if (lk) {
+        p.link = nearestEnemy(g, p.x, p.y, (lk.range || 400) + st.range);
+        if (p.link) {
+          p.linkTick = (p.linkTick || 0) - dt;
+          if (p.linkTick <= 0) {
+            p.linkTick = 0.4;
+            damageEnemy(g, p.link, (lk.dmg || 10) * st.damage * (st.subDmgMul || 1) * 0.35, false);
+          }
+        }
+      } else p.link = null;
     }
     if (p.subWeapon) {
       const sw = D.weapons[p.subWeapon];
@@ -741,14 +757,21 @@
 
   function updateBoss(g, e, dt, d, ux, uy) {
     const p = g.player;
-    e.atkCd -= dt;
+    if (!e.enraged && e.hp < e.maxHp * 0.5) {
+      e.enraged = true; e.speed *= 1.35;
+      addText(g, e.x, e.y - 90, '狂暴！', '#FF4B3A', 26);
+      g.effects.push({ kind: 'ring', x: e.x, y: e.y, r: 20, maxR: 220, life: 0.5, max: 0.5, color: '#FF4B3A' });
+      g.shake = Math.max(g.shake || 0, 12); sfx(g, 'boss');
+    }
+    const cm = e.enraged ? 0.65 : 1;
+    e.atkCd -= dt * (e.enraged ? 1.7 : 1);
     if (e.kind === 'qianchang') {
       const qf = e.hp / e.maxHp;
       if (!e.summoned && qf < 0.66) { e.summoned = 1; summonAdds(g, e, 2); addText(g, e.x, e.y - 70, '音符随从！', '#FFD34D', 20); }
       if (e.summoned === 1 && qf < 0.33) { e.summoned = 2; summonAdds(g, e, 3); }
       e.noteCd = (e.noteCd == null ? 4 : e.noteCd) - dt;
       if (e.noteCd <= 0) {
-        e.noteCd = 4.2;
+        e.noteCd = 4.2 * cm;
         const an = Math.atan2(p.y - e.y, p.x - e.x);
         for (let i = -1; i <= 1; i++) {
           const aa = an + i * 0.22;
@@ -756,7 +779,7 @@
         }
       }
       if (e.atkCd <= 0) {
-        e.atkCd = 3.4;
+        e.atkCd = 3.4 * cm;
         g.projectiles.push({ x: e.x, y: e.y, vx: 0, vy: 0, r: 24, grow: 380, maxR: 300, dmg: e.dmg * 0.9, from: 'enemy', kind: 'ring', life: 1.1, hit: {} });
         addText(g, e.x, e.y - 60, '人才能量！', '#FFD34D', 20);
         g.shake = Math.max(g.shake || 0, 8);
@@ -767,8 +790,8 @@
     if (e.kind === 'angryqc') {
       if (!e.enraged && e.hp / e.maxHp < 0.5) { e.enraged = true; e.speed *= 1.35; addText(g, e.x, e.y - 70, '彻底不甘心！', '#FF4B3A', 22); }
       e.burnCd = (e.burnCd == null ? 2 : e.burnCd) - dt;
-      if (e.burnCd <= 0) { e.burnCd = 2.4; g.projectiles.push({ x: e.x, y: e.y, vx: 0, vy: 0, r: 18, grow: 120, maxR: 96, dmg: e.dmg * 0.45, from: 'enemy', kind: 'ring', life: 1.0, hit: {} }); }
-      if (e.atkCd <= 0 && d > 90) { e.atkCd = 3.0; e.charge = { dx: ux, dy: uy, t: 0.55 }; addText(g, e.x, e.y - 60, '不甘心！', '#FF7A5C', 20); }
+      if (e.burnCd <= 0) { e.burnCd = 2.4 * cm; g.projectiles.push({ x: e.x, y: e.y, vx: 0, vy: 0, r: 18, grow: 120, maxR: 96, dmg: e.dmg * 0.45, from: 'enemy', kind: 'ring', life: 1.0, hit: {} }); }
+      if (e.atkCd <= 0 && d > 90) { e.atkCd = 3.0 * cm; e.charge = { dx: ux, dy: uy, t: 0.55 }; addText(g, e.x, e.y - 60, '不甘心！', '#FF7A5C', 20); }
       if (d > 220) { e.x += ux * e.speed * dt; e.y += uy * e.speed * dt; }
       return;
     }
@@ -776,14 +799,14 @@
       e.hp = Math.min(e.maxHp, e.hp + e.maxHp * 0.004 * dt);
       e.sproutCd = (e.sproutCd == null ? 3 : e.sproutCd) - dt;
       if (e.sproutCd <= 0) {
-        e.sproutCd = 5.5;
+        e.sproutCd = 5.5 * cm;
         for (let i = 0; i < 3; i++) {
           const aa = g.rng() * Math.PI * 2, rr = 70 + g.rng() * 90;
           g.projectiles.push({ x: e.x + Math.cos(aa) * rr, y: e.y + Math.sin(aa) * rr, vx: 0, vy: 0, r: 14, grow: 0, maxR: 40, dmg: e.dmg * 0.4, from: 'enemy', kind: 'ring', life: 3.0, hit: {}, color: '#8FBF6A' });
         }
       }
       if (e.atkCd <= 0) {
-        e.atkCd = 3.6;
+        e.atkCd = 3.6 * cm;
         if (d < 300) { p.rootT = Math.max(p.rootT || 0, 1.1); addText(g, p.x, p.y - 50, '根须缠绕！', '#8FBF6A', 18); }
         g.projectiles.push({ x: e.x, y: e.y, vx: 0, vy: 0, r: 20, grow: 300, maxR: 220, dmg: e.dmg * 0.8, from: 'enemy', kind: 'ring', life: 0.9, hit: {} });
         g.shake = Math.max(g.shake || 0, 6);
@@ -812,10 +835,10 @@
 
     if (e.kind === 'kunkun') {
       e.dashCd = (e.dashCd == null ? 3 : e.dashCd) - dt;
-      if (e.dashCd <= 0 && d > 90) { e.dashCd = 3.2; e.charge = { dx: ux, dy: uy, t: 0.5 }; addText(g, e.x, e.y - 60, '坤坤冲刺！', '#FFD34D', 20); }
+      if (e.dashCd <= 0 && d > 90) { e.dashCd = 3.2 * cm; e.charge = { dx: ux, dy: uy, t: 0.5 }; addText(g, e.x, e.y - 60, '坤坤冲刺！', '#FFD34D', 20); }
       e.featCd = (e.featCd == null ? 4 : e.featCd) - dt;
       if (e.featCd <= 0) {
-        e.featCd = 4.5;
+        e.featCd = 4.5 * cm;
         for (let i = 0; i < 6; i++) {
           const aa = i / 6 * Math.PI * 2;
           g.projectiles.push({ x: e.x, y: e.y, vx: Math.cos(aa) * 220, vy: Math.sin(aa) * 220, r: 7, dmg: e.dmg * 0.5, from: 'enemy', kind: 'orb', life: 2.0, hit: {}, color: '#FFD34D' });
@@ -826,19 +849,19 @@
     }
     if (e.kind === 'cthulhu') {
       e.tentCd = (e.tentCd == null ? 3.5 : e.tentCd) - dt;
-      if (e.tentCd <= 0) { e.tentCd = 3.6; g.projectiles.push({ x: e.x, y: e.y, vx: 0, vy: 0, r: 22, grow: 300, maxR: 240, dmg: e.dmg * 0.8, from: 'enemy', kind: 'ring', life: 1.0, hit: {} }); addText(g, e.x, e.y - 60, '触手拍击！', '#9CD8FF', 20); }
+      if (e.tentCd <= 0) { e.tentCd = 3.6 * cm; g.projectiles.push({ x: e.x, y: e.y, vx: 0, vy: 0, r: 22, grow: 300, maxR: 240, dmg: e.dmg * 0.8, from: 'enemy', kind: 'ring', life: 1.0, hit: {} }); addText(g, e.x, e.y - 60, '触手拍击！', '#9CD8FF', 20); }
       e.mindCd = (e.mindCd == null ? 9 : e.mindCd) - dt;
-      if (e.mindCd <= 0) { e.mindCd = 9; p.reverseT = 1.4; addText(g, p.x, p.y - 50, '精神污染！', '#B9A7FF', 20); }
+      if (e.mindCd <= 0) { e.mindCd = 9 * cm; p.reverseT = 1.4; addText(g, p.x, p.y - 50, '精神污染！', '#B9A7FF', 20); }
       if (!e.summoned && e.hp / e.maxHp < 0.66) { e.summoned = 1; summonAdds(g, e, 2); }
       if (d > 220) { e.x += ux * e.speed * dt; e.y += uy * e.speed * dt; }
       return;
     }
     if (e.kind === 'giant') {
       e.smashCd = (e.smashCd == null ? 4 : e.smashCd) - dt;
-      if (e.smashCd <= 0) { e.smashCd = 4.2; e.pending = { kind: 'smashwind', t: 0.8, x: p.x, y: p.y }; addText(g, e.x, e.y - 80, '砸地蓄力…', '#FFB44D', 20); }
+      if (e.smashCd <= 0) { e.smashCd = 4.2 * cm; e.pending = { kind: 'smashwind', t: 0.8, x: p.x, y: p.y }; addText(g, e.x, e.y - 80, '砸地蓄力…', '#FFB44D', 20); }
       e.carCd = (e.carCd == null ? 5 : e.carCd) - dt;
       if (e.carCd <= 0) {
-        e.carCd = 5.5;
+        e.carCd = 5.5 * cm;
         const an = Math.atan2(p.y - e.y, p.x - e.x);
         for (let i = -1; i <= 1; i++) {
           const aa = an + i * 0.2;
@@ -1058,23 +1081,24 @@
       g.hitTaken = false;
     }
       g.events.push({ type: 'wave', wave });
-      const BOSS_SCHED = { 3: ['kunkun'], 6: ['cthulhu'], 9: ['giant'], 12: ['qianchang'], 15: ['angryqc'], 18: ['chenjr'] };
-      const NEW_BOSS = ['qianchang', 'angryqc', 'chenjr'];
-      
-      const BOSS_NAME = { kunkun: '坤坤杰瑞', cthulhu: '绷带杰瑞', giant: '巨人僵尸', tom: '汤姆', spike: '斯派克', bigboss: '鼠王', qianchang: '浅唱', angryqc: '不甘心的浅唱', chenjr: '陈佳嵘' };
-      let bossList = BOSS_SCHED[wave] || (wave >= 21 ? NEW_BOSS.slice() : null);
-      if (bossList) {
-        bossList.forEach(function (kind, bi) {
-          const ang = (bi / bossList.length) * Math.PI * 2;
-          const bx = clamp(g.W / 2 + Math.cos(ang) * (bossList.length > 1 ? 220 : 0), 160, g.W - 160);
-          const by = clamp(g.H / 2 + Math.sin(ang) * (bossList.length > 1 ? 220 : 0), 160, g.H - 160);
-          const bb = spawnEnemy(g, kind, wave, bx, by);
-          if (bb) { bb.boss = true; g.boss = g.boss || bb; addText(g, bx, by - 80, (BOSS_NAME[kind] || 'BOSS') + ' 降临！', '#FF7A5C', 28); }
-        });
-        g.shake = 16;
+      const BOSS_ORDER = ['kunkun', 'cthulhu', 'giant', 'qianchang', 'angryqc', 'chenjr'];
+      const BOSS_NAME = { kunkun: '坤坤杰瑞', cthulhu: '绷带杰瑞', giant: '巨人僵尸', qianchang: '浅唱', angryqc: '不甘心的浅唱', chenjr: '陈佳嵘' };
+      if (g.nextBossWave == null) g.nextBossWave = 3;
+      if (!g.boss && wave >= g.nextBossWave) {
+        const kind = BOSS_ORDER[(g.bossIdx || 0) % BOSS_ORDER.length];
+        g.bossIdx = (g.bossIdx || 0) + 1;
+        const bx = clamp(g.player.x + 260, 180, g.W - 180);
+        const by = clamp(g.player.y - 120, 180, g.H - 180);
+        const bb = spawnEnemy(g, kind, wave, bx, by);
+        if (bb) {
+          bb.boss = true; g.boss = bb; g.nextBossWave = null;
+          addText(g, bx, by - 80, (BOSS_NAME[kind] || 'BOSS') + ' 降临！', '#FF7A5C', 28);
+          g.shake = 16;
+        }
       }
       const ELITE_UNLOCK = [['spikejr',1],['security',1],['cowhead',3],['spike',5],['kunkun',12],['cthulhu',13],['giant',14]];
-      const avail = ELITE_UNLOCK.filter(function (x) { return wave >= x[1]; });
+      let avail = ELITE_UNLOCK.filter(function (x) { return wave >= x[1]; });
+      (g.elitePool || []).forEach(function (k) { if (!avail.some(function (a) { return a[0] === k; })) avail.push([k, 0]); });
       const ecount = Math.min(6, Math.round((wave >= 20 ? 4 : (wave >= 16 ? 3 : (wave >= 12 ? 2 : (wave >= 3 ? 3 : (wave >= 2 ? 2 : 1))))) * ((g.cov && g.cov.elite) || 1)));
       for (let ei = 0; ei < ecount; ei++) {
         const pickE = avail[Math.floor(g.rng() * avail.length)][0];
