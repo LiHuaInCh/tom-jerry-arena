@@ -530,7 +530,7 @@
     } else if (t.type === 'fan') {
       for (let i = -2; i <= 2; i++) {
         const a = t.ang + i * 0.22;
-        g.projectiles.push({ x: e.x, y: e.y, vx: Math.cos(a) * 240, vy: Math.sin(a) * 240, r: 7, dmg: e.dmg * 0.45, from: 'enemy', kind: 'orb', life: 2.2, hit: {}, color: '#FFD34D' });
+        g.projectiles.push({ x: e.x, y: e.y, vx: Math.cos(a) * 240, vy: Math.sin(a) * 240, r: e.kind === 'kunkun' ? 10 : 7, dmg: e.dmg * 0.45, from: 'enemy', kind: 'orb', life: 2.2, hit: {}, icon: e.kind === 'kunkun' ? 'assets/enemies/basketball_cut.png' : undefined, color: '#FFD34D' });
       }
     }
   }
