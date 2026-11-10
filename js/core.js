@@ -38,8 +38,10 @@
   /* ---------------- 创建对局 ---------------- */
   TJ.createGame = function (opts) {
     opts = opts || {};
+    const __seed = opts.seed == null ? (Date.now() & 0x7fffffff) : opts.seed;
+    opts = opts || {};
     const g = {
-      rng: mulberry32(opts.seed == null ? (Date.now() & 0x7fffffff) : opts.seed),
+      rng: mulberry32(__seed),
       W: D.W, H: D.H, t: 0, elapsed: 0, over: false,
       player: null, enemies: [], projectiles: [], pickups: [], particles: [],
       texts: [], effects: [], obstacles: D.obstacles.map(o => Object.assign({}, o)),
@@ -47,7 +49,7 @@
       level: 1, xp: 0, xpNeed: 8, pendingLevels: 0,
       kills: 0, score: 0, wave: 0, spawnTimer: 1.0, boss: null, shake: 0, revived: false,
       bossIdx: 0, nextBossWave: 3, elitePool: [], finalBoss: false,
-      events: [], cam: { x: D.W / 2, y: D.H / 2 }, seed: opts.seed
+      events: [], cam: { x: D.W / 2, y: D.H / 2 }, seed: __seed
     };
     TJ.Missions.init(g);
     g.player = makePlayer(g, opts.charId);

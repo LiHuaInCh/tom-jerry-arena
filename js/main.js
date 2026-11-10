@@ -26,6 +26,14 @@
   let best = 0;
   try { best = parseInt(localStorage.getItem('tj_best') || '0', 10) || 0; } catch (e) {}
   let auto = params.get('auto') === '1';
+  let pendingSeed = params.get('seed') != null ? (parseInt(params.get('seed'), 10) || null) : null;
+  let dailyMode = false;
+  function dayKey() { var d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
+  function hash32(s) { var h = 2166136261; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+  function dailySeed() { return hash32('TJ-DAILY-' + dayKey()); }
+  function dailyChar() { var list = D.characters; return list[hash32('TJ-CHAR-' + dayKey()) % list.length].id; }
+  function seedText(seed, cid) { return '#TJ-' + (seed >>> 0).toString(36).toUpperCase() + '-' + (cid || selected); }
+  function dailyBest() { try { return parseInt(localStorage.getItem('tj_daily_' + dayKey()) || '0', 10) || 0; } catch (e) { return 0; } }
   let arenaBest = 0;
   try { arenaBest = parseInt(localStorage.getItem('tj_arena_best') || '0', 10) || 0; } catch (e) {}
   const god = params.get('god') === '1';
@@ -263,6 +271,52 @@
       ovn.addEventListener('click', function (e) { if (e.target === ovn) close(); });
     }
     nbtn.onclick = openNews;
+    var dbtn = document.createElement('button');
+    dbtn.className = 'guide-btn';
+    dbtn.type = 'button';
+    dbtn.textContent = '每日挑战';
+    toolsRow.appendChild(dbtn);
+    dbtn.onclick = function () {
+      var seed = dailySeed(), cid = dailyChar();
+      var ch = D.characters.filter(function (c) { return c.id === cid; })[0] || D.characters[0];
+      var w = D.weapons[ch.weapon] || {};
+      var best = dailyBest();
+      var ovd = document.createElement('div');
+      ovd.className = 'guide-modal on';
+      ovd.innerHTML = '<div class="guide-box"><div class="guide-head">每日挑战 · ' + dayKey() +
+        '<button class="guide-close">×</button></div><div class="guide-body">' +
+        '<h4>今日固定</h4><ul>' +
+        '<li>角色：' + ch.name + '（' + (w.label || '') + '）</li>' +
+        '<li>种子：<b>#TJ-' + (seed >>> 0).toString(36).toUpperCase() + '</b></li>' +
+        '<li>今日最佳：' + best + '</li>' +
+        '<li>与全服玩家同一套刷怪 / 掉落 / 升级随机</li>' +
+        '</ul><button class="guide-btn" id="dailyGo" style="margin-top:8px">开始挑战</button>' +
+        '<p class="muted" style="margin-top:8px">分享种子给朋友：链接后加 ?seed=' + seed + '&char=' + cid + '</p>' +
+        '</div></div>';
+      document.body.appendChild(ovd);
+      ovd.querySelector('.guide-close').onclick = function () { ovd.remove(); };
+      ovd.querySelector('#dailyGo').onclick = function () {
+        ovd.remove();
+        mode = 'survival';
+        covenants.clear();
+        startRun({ seed: seed, charId: cid, daily: true });
+      };
+    };
+    var sbtn = document.createElement('button');
+    sbtn.className = 'guide-btn';
+    sbtn.type = 'button';
+    sbtn.textContent = '种子对战';
+    toolsRow.appendChild(sbtn);
+    sbtn.onclick = function () {
+      var raw = prompt('输入种子（数字，或 #TJ-XXXX-角色）', '');
+      if (!raw) return;
+      var num = 0;
+      var mt = raw.match(/TJ-([0-9A-Z]+)/i);
+      if (mt) num = parseInt(mt[1], 36);
+      else num = parseInt(raw, 10);
+      if (!num || isNaN(num)) { alert('种子无效'); return; }
+      startRun({ seed: num >>> 0 });
+    };
     (function autoNews() {
       if (params.get('play')) return;
       var seen = '';
@@ -474,9 +528,15 @@
   }
 
   /* ---------- 开局 ---------- */
-  function startRun() {
+  function startRun(opts) {
+    opts = opts || {};
+    if (opts.charId) selected = opts.charId;
+    dailyMode = !!opts.daily;
     TJ.Audio.unlock();
-    g = mode === 'arena' ? TJ.createArenaGame({ charId: selected }) : TJ.createGame({ charId: selected });
+    var __seed = opts.seed != null ? opts.seed : pendingSeed;
+    pendingSeed = null;
+    g = mode === 'arena' ? TJ.createArenaGame({ charId: selected }) : TJ.createGame({ charId: selected, seed: __seed == null ? undefined : __seed });
+    g.daily = dailyMode;
     if (TJ.Audio && TJ.Audio.setTrack) TJ.Audio.setTrack(covenants.has('psycho') ? 'psycho' : 'default');
     if (TJ.Missions && TJ.Missions.recenter) TJ.Missions.recenter(g);
     g.cov = { spawn: 1, elite: 1, noHeal: 0, score: 1, list: [] };
@@ -1032,6 +1092,21 @@
       '<div class="stat"><span>到达波次</span><b>' + g.wave + '</b></div>' +
       '<div class="stat"><span>击倒猫咪</span><b>' + g.kills + '</b></div>' +
       '<div class="stat"><span>角色等级</span><b>' + g.level + '</b></div>';
+    var __st = seedText(g.seed || 0, selected);
+    var __db = dailyBest();
+    if (g.daily && (g.score || 0) > __db) {
+      __db = g.score || 0;
+      try { localStorage.setItem('tj_daily_' + dayKey(), String(__db)); } catch (e) {}
+    }
+    $('overStats').innerHTML += '<div class="stat wide"><span>' + (g.daily ? '每日挑战' : '本局种子') + '</span><b style="font-size:12px">' + __st + (g.daily ? ' · 今日最佳 ' + __db : '') + '</b></div>' +
+      '<button id="seedCopy" class="btn ghost" style="margin-top:8px">复制种子链接</button>';
+    setTimeout(function () {
+      var scb = document.getElementById('seedCopy');
+      if (scb) scb.onclick = function () {
+        var link = location.origin + location.pathname + '?seed=' + (g.seed || 0) + '&char=' + selected;
+        try { navigator.clipboard.writeText(link); scb.textContent = '已复制'; } catch (e) { prompt('复制种子链接', link); }
+      };
+    }, 0);
     $('over').classList.remove('hidden');
     state = 'over';
   }
