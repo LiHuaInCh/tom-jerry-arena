@@ -46,7 +46,7 @@
       stats: baseStats(), upgradeCounts: {},
       level: 1, xp: 0, xpNeed: 8, pendingLevels: 0,
       kills: 0, score: 0, wave: 0, spawnTimer: 1.0, boss: null, shake: 0, revived: false,
-      bossIdx: 0, nextBossWave: 3, elitePool: [],
+      bossIdx: 0, nextBossWave: 3, elitePool: [], finalBoss: false,
       events: [], cam: { x: D.W / 2, y: D.H / 2 }, seed: opts.seed
     };
     TJ.Missions.init(g);

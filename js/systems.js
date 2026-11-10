@@ -1085,21 +1085,33 @@
       const BOSS_NAME = { kunkun: '坤坤杰瑞', cthulhu: '绷带杰瑞', giant: '巨人僵尸', qianchang: '浅唱', angryqc: '不甘心的浅唱', chenjr: '陈佳嵘' };
       if (g.nextBossWave == null) g.nextBossWave = 3;
       if (!g.boss && wave >= g.nextBossWave) {
-        const kind = BOSS_ORDER[(g.bossIdx || 0) % BOSS_ORDER.length];
-        g.bossIdx = (g.bossIdx || 0) + 1;
-        const bx = clamp(g.player.x + 260, 180, g.W - 180);
-        const by = clamp(g.player.y - 120, 180, g.H - 180);
-        const bb = spawnEnemy(g, kind, wave, bx, by);
-        if (bb) {
-          bb.boss = true; g.boss = bb; g.nextBossWave = null;
-          addText(g, bx, by - 80, (BOSS_NAME[kind] || 'BOSS') + ' 降临！', '#FF7A5C', 28);
-          g.shake = 16;
+        if (g.finalBoss) {
+          const trio = ['qianchang', 'angryqc', 'chenjr'];
+          trio.forEach(function (kind, ti) {
+            const ang2 = -Math.PI / 2 + ti * Math.PI * 2 / 3;
+            const tx = clamp(g.player.x + Math.cos(ang2) * 300, 180, g.W - 180);
+            const ty = clamp(g.player.y + Math.sin(ang2) * 300, 180, g.H - 180);
+            const tb = spawnEnemy(g, kind, wave, tx, ty);
+            if (tb) { tb.boss = true; g.boss = g.boss || tb; addText(g, tx, ty - 80, (BOSS_NAME[kind] || 'BOSS') + ' 降临！', '#FF7A5C', 24); }
+          });
+          g.nextBossWave = null; g.shake = 18;
+        } else {
+          const kind = BOSS_ORDER[(g.bossIdx || 0) % BOSS_ORDER.length];
+          g.bossIdx = (g.bossIdx || 0) + 1;
+          const bx = clamp(g.player.x + 260, 180, g.W - 180);
+          const by = clamp(g.player.y - 120, 180, g.H - 180);
+          const bb = spawnEnemy(g, kind, wave, bx, by);
+          if (bb) {
+            bb.boss = true; g.boss = bb; g.nextBossWave = null;
+            addText(g, bx, by - 80, (BOSS_NAME[kind] || 'BOSS') + ' 降临！', '#FF7A5C', 28);
+            g.shake = 16;
+          }
         }
       }
       const ELITE_UNLOCK = [['spikejr',1],['security',1],['cowhead',3],['spike',5],['kunkun',12],['cthulhu',13],['giant',14]];
       let avail = ELITE_UNLOCK.filter(function (x) { return wave >= x[1]; });
       (g.elitePool || []).forEach(function (k) { if (!avail.some(function (a) { return a[0] === k; })) avail.push([k, 0]); });
-      const ecount = Math.min(6, Math.round((wave >= 20 ? 4 : (wave >= 16 ? 3 : (wave >= 12 ? 2 : (wave >= 3 ? 3 : (wave >= 2 ? 2 : 1))))) * ((g.cov && g.cov.elite) || 1)));
+      const ecount = Math.min(6, Math.round((wave >= 20 ? 4 : (wave >= 3 ? 3 : (wave >= 2 ? 2 : 1))) * ((g.cov && g.cov.elite) || 1)));
       for (let ei = 0; ei < ecount; ei++) {
         const pickE = avail[Math.floor(g.rng() * avail.length)][0];
         const ea2 = g.rng() * Math.PI * 2;
