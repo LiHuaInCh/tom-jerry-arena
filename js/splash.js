@@ -5,11 +5,14 @@
   if (!native) { sp.remove(); return; }
   sp.classList.add('show');
   var v = document.getElementById('splashVid');
+  var vb = document.getElementById('splashBg');
+  if (vb) { var pb = vb.play(); if (pb && pb.catch) pb.catch(function () {}); }
   var done = false;
   function finish() {
     if (done) return;
     done = true;
     sp.classList.add('gone');
+    if (vb) vb.pause();
     setTimeout(function () { if (sp.parentNode) sp.parentNode.removeChild(sp); }, 700);
   }
   if (location.search.indexOf('play=1') >= 0) { sp.remove(); return; }

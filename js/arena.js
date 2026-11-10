@@ -741,7 +741,44 @@
       const sw = TJ.DATA.weapons[f.subWeapon];
       f.subCd = Math.max(0, (f.subCd || 0) - dt);
       const st2 = nearestFighter(g, f, (sw.range || 700) + f.stats.range);
-      if (sw.kind === 'orbit') {
+      if (sw.kind === 'aura') {
+        if (f.subCd <= 0) {
+          f.subCd = sw.cd || 1;
+          const R2 = sw.auraR || 90;
+          for (const o of g.fighters) {
+            if (o === f || !o.alive) continue;
+            if (Math.hypot(o.x - f.x, o.y - f.y) < R2 + o.r) damageFighter(g, o, (sw.dmg || 16) * f.stats.damage * 0.85, f);
+          }
+          g.effects.push({ kind: 'ring', x: f.x, y: f.y, r: 10, maxR: R2, life: 0.3, max: 0.3, color: sw.color || '#FFD34D' });
+        }
+      } else if (sw.kind === 'tether') {
+        if (st2 && f.subCd <= 0) {
+          f.subCd = 0.4;
+          damageFighter(g, st2, (sw.dmg || 12) * f.stats.damage * 0.8, f);
+          g.effects.push({ kind: 'beam', x: f.x, y: f.y, ang: Math.atan2(st2.y - f.y, st2.x - f.x), len: Math.hypot(st2.x - f.x, st2.y - f.y), life: 0.16, max: 0.16, color: sw.color || '#9CD8FF' });
+        }
+      } else if (sw.kind === 'summon') {
+        f.subSumActive = Math.max(0, (f.subSumActive || 0) - dt);
+        if (f.subCd <= 0 && st2) { f.subCd = sw.cd || 4; f.subSumActive = sw.duration || 5; }
+        if (f.subSumActive > 0) {
+          f.subSumHit = (f.subSumHit || 0) - dt;
+          if (f.subSumHit <= 0) {
+            f.subSumHit = 0.6;
+            const t3 = nearestFighter(g, f, 260);
+            if (t3) { damageFighter(g, t3, (sw.dmg || 12) * f.stats.damage * 0.9, f); g.effects.push({ kind: 'ring', x: t3.x, y: t3.y, r: 4, maxR: 22, life: 0.16, max: 0.16, color: '#FFD36A' }); }
+          }
+        }
+      } else if (sw.kind === 'deploy') {
+        if (st2 && f.subCd <= 0) {
+          f.subCd = sw.cd || 1.2;
+          const R3 = sw.boomR || 90;
+          for (const o of g.fighters) {
+            if (o === f || !o.alive) continue;
+            if (Math.hypot(o.x - st2.x, o.y - st2.y) < R3 + o.r) damageFighter(g, o, (sw.dmg || 16) * f.stats.damage * 1.6, f);
+          }
+          g.effects.push({ kind: 'ring', x: st2.x, y: st2.y, r: 10, maxR: R3, life: 0.3, max: 0.3, color: '#FFB44D' });
+        }
+      } else if (sw.kind === 'orbit') {
         f.subOrbitA = (f.subOrbitA || 0) + dt * 3.8;
         const sr = (sw.orbitR || 78);
         for (const e of g.fighters) {
