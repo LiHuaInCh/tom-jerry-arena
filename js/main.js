@@ -48,7 +48,7 @@
     if (rec.frames.length > 0 && lastRecInp && mx === lastRecInp.moveX && my === lastRecInp.moveY && dash === lastRecInp.dash) return;
     lastRecInp = { moveX: mx, moveY: my, dash: dash };
     rec.frames.push([recFrame, mx, my, dash ? 1 : 0]);
-    if (rec.frames.length > 60000) rec.frames.splice(1, 20000);
+    if (rec.frames.length > 12000) rec.frames.splice(1, 4000);
   }
   function replayInputAt(f) {
     if (!replayData) return { moveX: 0, moveY: 0, dash: false };
@@ -58,6 +58,61 @@
     }
     return { moveX: replayLastInp.moveX, moveY: replayLastInp.moveY, dash: replayLastInp.dash };
   }
+  function loadReplays() {
+    try { var a = JSON.parse(localStorage.getItem('tj_replays') || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; }
+  }
+  function persistReplays(list) {
+    for (var n = list.length; n > 0; n--) {
+      try { localStorage.setItem('tj_replays', JSON.stringify(list.slice(0, n))); return list.slice(0, n); } catch (e) {}
+    }
+    try { localStorage.removeItem('tj_replays'); } catch (e) {}
+    return [];
+  }
+  function addReplay(r) {
+    if (!r) return;
+    r.id = r.id || (Date.now() + '-' + Math.floor(Math.random() * 9999));
+    r.createdAt = r.createdAt || Date.now();
+    var list = loadReplays();
+    list.unshift(r);
+    if (list.length > 8) list = list.slice(0, 8);
+    persistReplays(list);
+    try { localStorage.setItem('tj_replay', JSON.stringify(r)); } catch (e) {}
+  }
+  function openReplayList() {
+    var list = loadReplays();
+    var ov = document.createElement('div');
+    ov.className = 'guide-modal on';
+    var rows = list.length ? list.map(function (r, i) {
+      var ch = D.characters.filter(function (c) { return c.id === r.char; })[0];
+      var d = r.createdAt || r.date || 0;
+      var ds = d ? new Date(d) : null;
+      var when = ds ? (ds.getMonth() + 1) + '/' + ds.getDate() + ' ' + ds.getHours() + ':' + ('0' + ds.getMinutes()).slice(-2) : '';
+      return '<div class="rp-row" data-i="' + i + '">' +
+        '<div class="rp-main"><b>' + (ch ? ch.name : r.char) + '</b><span>' + when + ' · ' + (r.wave || 0) + ' 波 · ' + (r.score || 0) + ' 分</span></div>' +
+        '<button class="guide-btn rp-play">播放</button><button class="guide-btn rp-del">删除</button></div>';
+    }).join('') : '<p class="muted">还没有保存的回放，打完一局会自动存到最近 8 局。</p>';
+    ov.innerHTML = '<div class="guide-box"><div class="guide-head">回放列表<button class="guide-close">×</button></div><div class="guide-body">' +
+      rows + (list.length ? '<button class="guide-btn" id="rpClear" style="margin-top:10px">清空全部</button>' : '') + '</div></div>';
+    document.body.appendChild(ov);
+    ov.querySelector('.guide-close').onclick = function () { ov.remove(); };
+    ov.querySelectorAll('.rp-row').forEach(function (row) {
+      var i = Number(row.dataset.i);
+      row.querySelector('.rp-play').onclick = function () { ov.remove(); startRun({ replay: list[i] }); };
+      row.querySelector('.rp-del').onclick = function () {
+        var cur = loadReplays().filter(function (x) { return x.id !== list[i].id; });
+        persistReplays(cur);
+        ov.remove(); openReplayList();
+      };
+    });
+    var clr = ov.querySelector('#rpClear');
+    if (clr) clr.onclick = function () {
+      if (!confirm('清空全部回放？')) return;
+      persistReplays([]);
+      try { localStorage.removeItem('tj_replay'); } catch (e) {}
+      ov.remove(); openReplayList();
+    };
+  }
+
   function applyReplaySnapshot() {
     if (!replayData || !replayData.snapshot) return;
     var st = replayData.snapshot.stats;
@@ -268,7 +323,7 @@
     nbtn.type = 'button';
     nbtn.textContent = '更新公告';
     toolsRow.appendChild(nbtn);
-    var NEWS_VER = '1.4.9';
+    var NEWS_VER = '1.4.10';
     var NEWS = [
       ['启动与画面', [
         'APK 启动动画：模糊背景铺满 + 完整画面居中，点视频里的「开始游戏」即可跳过',
@@ -288,7 +343,7 @@
       ]],
       ['确定性 / 回放', [
         '每局都有种子，结算可复制种子链接',
-        '结算新增「回放本局」，重演移动、技能与升级选择',
+        '回放列表保存最近 8 局，可播放 / 删除 / 清空，重演移动、技能与升级选择',
         '每日挑战：固定种子 + 固定角色，全服同一套随机'
       ]],
       ['武器', [
@@ -354,15 +409,7 @@
     rbtn.type = 'button';
     rbtn.textContent = '回放';
     toolsRow.appendChild(rbtn);
-    rbtn.onclick = function () {
-      var raw = '';
-      try { raw = localStorage.getItem('tj_replay') || ''; } catch (e) {}
-      if (!raw) { alert('还没有可回放的记录'); return; }
-      try {
-        var rp = JSON.parse(raw);
-        startRun({ replay: rp });
-      } catch (e) { alert('回放数据损坏'); }
-    };
+    rbtn.onclick = openReplayList;
     sbtn.onclick = function () {
       var raw = prompt('输入种子（数字，或 #TJ-XXXX-角色）', '');
       if (!raw) return;
@@ -598,7 +645,7 @@
       replayData = null;
     }
     TJ.Audio.unlock();
-    var __seed = opts.seed != null ? opts.seed : pendingSeed;
+    var __seed = opts.replay ? (opts.replay.seed >>> 0) : (opts.seed != null ? opts.seed : pendingSeed);
     pendingSeed = null;
     g = mode === 'arena' ? TJ.createArenaGame({ charId: selected }) : TJ.createGame({ charId: selected, seed: __seed == null ? undefined : __seed });
     g.daily = dailyMode;
@@ -1171,7 +1218,7 @@
     if (TJ.Audio && TJ.Audio.setMood) TJ.Audio.setMood('over');
     if (!replayMode && rec && g && g.mode !== 'arena') {
       rec.score = g.score || 0; rec.elapsed = g.elapsed || 0; rec.wave = g.wave || 0; rec.kills = g.kills || 0; rec.date = Date.now();
-      try { localStorage.setItem('tj_replay', JSON.stringify(rec)); } catch (e) {}
+      addReplay(rec);
     }
     if (g && !g.__metaDone && TJ.meta && !replayMode) {
       g.__metaDone = true;
@@ -1241,7 +1288,7 @@
         if (__acts) __acts.insertBefore(__rpb, __acts.firstChild);
         __rpb.onclick = function () {
           try {
-            var __rp = JSON.parse(localStorage.getItem('tj_replay') || 'null');
+            var __rp = rec || JSON.parse(localStorage.getItem('tj_replay') || 'null');
             if (!__rp) return;
             $('over').classList.add('hidden');
             startRun({ replay: __rp });
