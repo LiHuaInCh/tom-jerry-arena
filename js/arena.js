@@ -169,7 +169,7 @@
     v.hp -= dmg;
     v.invuln = Math.max(v.invuln, 0.12);
     v.hitFlash = 0.16;
-    H.addText(g, v.x + rand(g, -8, 8), v.y - v.r - 8, Math.round(dmg), crit ? '#FFD34D' : '#FFFFFF', crit ? 22 : 16);
+    if (!TJ.hideDamageText) H.addText(g, v.x + rand(g, -8, 8), v.y - v.r - 8, Math.round(dmg), crit ? '#FFD34D' : '#FFFFFF', crit ? 22 : 16);
     H.burst(g, v.x, v.y, crit ? '#FFD34D' : '#FFB4A2', crit ? 7 : 3, 140, 3);
     if (attacker && attacker !== v) {
       if (v.hp <= 0) killFighter(g, v, attacker);

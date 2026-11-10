@@ -58,7 +58,7 @@
     g.dmgDealt = (g.dmgDealt || 0) + dmg;
     e.hp -= dmg;
     e.flash = 0.09;
-    addText(g, e.x + rand(g, -8, 8), e.y - e.r - 6, Math.round(dmg), crit ? '#FFD34D' : (pslots[0] ? ({ fire: '#FF7A3C', ice: '#7FD1FF', thunder: '#C9A7FF', light: '#FFE08A', dark: '#B98CFF' }[pslots[0]] || '#FFFFFF') : '#FFFFFF'), crit ? 24 : 17);
+    if (!TJ.hideDamageText) addText(g, e.x + rand(g, -8, 8), e.y - e.r - 6, Math.round(dmg), crit ? '#FFD34D' : (pslots[0] ? ({ fire: '#FF7A3C', ice: '#7FD1FF', thunder: '#C9A7FF', light: '#FFE08A', dark: '#B98CFF' }[pslots[0]] || '#FFFFFF') : '#FFFFFF'), crit ? 24 : 17);
     burst(g, e.x, e.y, crit ? '#FFD34D' : '#FFB4A2', crit ? 8 : 4, 150, 3);
     if (e.boss && e.hp > 0) {
       e.phase = e.phase || 1;

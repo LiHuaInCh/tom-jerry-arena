@@ -26,15 +26,7 @@
   let best = 0;
   try { best = parseInt(localStorage.getItem('tj_best') || '0', 10) || 0; } catch (e) {}
   let auto = params.get('auto') === '1';
-  let pendingSeed = params.get('seed') != null ? (parseInt(params.get('seed'), 10) || null) : null;
-  let dailyMode = false;
-  try { localStorage.removeItem('tj_replays'); localStorage.removeItem('tj_replay'); } catch (e) {}
-  function dayKey() { var d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
-  function hash32(s) { var h = 2166136261; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
-  function dailySeed() { return hash32('TJ-DAILY-' + dayKey()); }
-  function dailyChar() { var list = D.characters; return list[hash32('TJ-CHAR-' + dayKey()) % list.length].id; }
-  function seedText(seed, cid) { return '#TJ-' + (seed >>> 0).toString(36).toUpperCase() + '-' + (cid || selected); }
-  function dailyBest() { try { return parseInt(localStorage.getItem('tj_daily_' + dayKey()) || '0', 10) || 0; } catch (e) { return 0; } }
+  try { TJ.hideDamageText = localStorage.getItem('tj_dmgtext') === '0'; } catch (e) { TJ.hideDamageText = false; }
   let arenaBest = 0;
   try { arenaBest = parseInt(localStorage.getItem('tj_arena_best') || '0', 10) || 0; } catch (e) {}
   let god = params.get('god') === '1';
@@ -45,7 +37,7 @@
 
   /* ---------- 布局 ---------- */
   function resize() {
-    renderer.resize(window.innerWidth, window.innerHeight, Math.min((function(){var q=localStorage.getItem('tj_quality')||'high';return q==='low'?1.5:(q==='mid'?2.5:3);})(), window.devicePixelRatio || 1));
+    renderer.resize(window.innerWidth, window.innerHeight, Math.min(window.devicePixelRatio || 1, 3));
   }
   window.addEventListener('resize', resize);
   resize();
@@ -232,7 +224,7 @@
     nbtn.type = 'button';
     nbtn.textContent = '更新公告';
     toolsRow.appendChild(nbtn);
-    var NEWS_VER = '1.4.11';
+    var NEWS_VER = '1.4.12';
     var NEWS = [
       ['启动与画面', [
         'APK 启动动画：模糊背景铺满 + 完整画面居中，点视频里的「开始游戏」即可跳过',
@@ -249,10 +241,6 @@
         '六种普通怪全部换新立绘：兔子杰瑞、奶猫杰瑞、天使莱特宁、陈佳嵘车、牢侍卫、自爆怪',
         '天使莱特宁 / 陈佳嵘车 / 牢侍卫 / 自爆怪 / 牛头怪 局内体型 ×2',
         '所有敌人基础血量 ×2.5'
-      ]],
-      ['种子与每日挑战', [
-        '每局都有随机种子，结算可复制种子链接',
-        '每日挑战：固定种子 + 固定角色，全服面对同一套刷怪与掉落'
       ]],
       ['武器', [
         '远程武器攻速减半、射程降为 65%',
@@ -276,52 +264,6 @@
       ovn.addEventListener('click', function (e) { if (e.target === ovn) close(); });
     }
     nbtn.onclick = openNews;
-    var dbtn = document.createElement('button');
-    dbtn.className = 'guide-btn';
-    dbtn.type = 'button';
-    dbtn.textContent = '每日挑战';
-    toolsRow.appendChild(dbtn);
-    dbtn.onclick = function () {
-      var seed = dailySeed(), cid = dailyChar();
-      var ch = D.characters.filter(function (c) { return c.id === cid; })[0] || D.characters[0];
-      var w = D.weapons[ch.weapon] || {};
-      var best = dailyBest();
-      var ovd = document.createElement('div');
-      ovd.className = 'guide-modal on';
-      ovd.innerHTML = '<div class="guide-box"><div class="guide-head">每日挑战 · ' + dayKey() +
-        '<button class="guide-close">×</button></div><div class="guide-body">' +
-        '<h4>今日固定</h4><ul>' +
-        '<li>角色：' + ch.name + '（' + (w.label || '') + '）</li>' +
-        '<li>种子：<b>#TJ-' + (seed >>> 0).toString(36).toUpperCase() + '</b></li>' +
-        '<li>今日最佳：' + best + '</li>' +
-        '<li>与全服玩家同一套刷怪 / 掉落 / 升级随机</li>' +
-        '</ul><button class="guide-btn" id="dailyGo" style="margin-top:8px">开始挑战</button>' +
-        '<p class="muted" style="margin-top:8px">分享种子给朋友：链接后加 ?seed=' + seed + '&char=' + cid + '</p>' +
-        '</div></div>';
-      document.body.appendChild(ovd);
-      ovd.querySelector('.guide-close').onclick = function () { ovd.remove(); };
-      ovd.querySelector('#dailyGo').onclick = function () {
-        ovd.remove();
-        mode = 'survival';
-        covenants.clear();
-        startRun({ seed: seed, charId: cid, daily: true });
-      };
-    };
-    var sbtn = document.createElement('button');
-    sbtn.className = 'guide-btn';
-    sbtn.type = 'button';
-    sbtn.textContent = '同种子挑战';
-    toolsRow.appendChild(sbtn);
-    sbtn.onclick = function () {
-      var raw = prompt('输入同种子挑战码（数字，或 #TJ-XXXX-角色）', '');
-      if (!raw) return;
-      var num = 0;
-      var mt = raw.match(/TJ-([0-9A-Z]+)/i);
-      if (mt) num = parseInt(mt[1], 36);
-      else num = parseInt(raw, 10);
-      if (!num || isNaN(num)) { alert('种子无效'); return; }
-      startRun({ seed: num >>> 0 });
-    };
     (function autoNews() {
       if (params.get('play')) return;
       var seen = '';
@@ -351,7 +293,6 @@
       document.body.appendChild(ov);
       var ta = ov.querySelector('#saveText');
       ta.value = mode === 'export' ? raw : '';
-      var fnote = document.createElement('div');
       ov.querySelector('.guide-close').onclick = function () { ov.remove(); };
       if (mode === 'export') {
         var cp = ov.querySelector('#saveCopy');
@@ -403,26 +344,13 @@
       ov.innerHTML = '<div class="guide-box"><div class="guide-head">设置<button class="guide-close">×</button></div><div class="guide-body" id="setBody"></div></div>';
       document.body.appendChild(ov);
       var body = ov.querySelector('#setBody');
-      [btn, nbtn, dbtn, sbtn, mbtn, qualityBtn, fpsBtn, codexBtn, liveBtn, expBtn, impBtn, copyBtn].forEach(function (b) {
+      [btn, nbtn, mbtn, dmgBtn, codexBtn, liveBtn, expBtn, impBtn, copyBtn].forEach(function (b) {
         var row = document.createElement('button');
         row.className = 'set-row';
         row.textContent = b.textContent;
-        if (b === fpsBtn) row.id = 'fpsRow';
         row.onclick = function () { ov.remove(); b.click(); };
         body.appendChild(row);
       });
-      var fnote = document.createElement('div');
-      fnote.className = 'set-note'; fnote.id = 'fpsNow';
-      fnote.textContent = '实测绘制帧率：' + (window.__drawFps || '--') + ' FPS';
-      body.appendChild(fnote);
-      var fiv = setInterval(function () {
-        var el2 = document.getElementById('fpsNow');
-        if (!el2) { clearInterval(fiv); return; }
-        el2.textContent = '实测绘制帧率：' + (window.__drawFps || '--') + ' FPS（上限 ' + fNow() + '）';
-        var fr = document.getElementById('fpsRow');
-        if (fr) fr.textContent = '帧率：' + fNow() + ' · 实测 ' + (window.__drawFps || '--') + ' FPS';
-      }, 600);
-      ov.querySelector('.guide-close').onclick = function () { clearInterval(fiv); ov.remove(); };
       ov.querySelector('.guide-close').onclick = function () { ov.remove(); };
     };
 
@@ -435,31 +363,16 @@
     };
     toolsRow.appendChild(copyBtn);
 
-    var qualityBtn = document.createElement('button');
-    qualityBtn.className = 'guide-btn'; qualityBtn.type = 'button';
-    var QLIST = ['high', 'mid', 'low'], QNAME = { high: '高', mid: '中', low: '低' };
-    function qNow() { return localStorage.getItem('tj_quality') || 'high'; }
-    qualityBtn.textContent = '画质：' + QNAME[qNow()];
-    qualityBtn.onclick = function () {
-      var q = QLIST[(QLIST.indexOf(qNow()) + 1) % QLIST.length];
-      localStorage.setItem('tj_quality', q);
-      qualityBtn.textContent = '画质：' + QNAME[q];
-      location.reload();
+    var dmgBtn = document.createElement('button');
+    dmgBtn.className = 'guide-btn'; dmgBtn.type = 'button';
+    function dmgLabel() { return '伤害文字：' + (TJ.hideDamageText ? '关' : '开'); }
+    dmgBtn.textContent = dmgLabel();
+    dmgBtn.onclick = function () {
+      TJ.hideDamageText = !TJ.hideDamageText;
+      try { localStorage.setItem('tj_dmgtext', TJ.hideDamageText ? '0' : '1'); } catch (e) {}
+      dmgBtn.textContent = dmgLabel();
     };
-    toolsRow.appendChild(qualityBtn);
-
-    var fpsBtn = document.createElement('button');
-    fpsBtn.className = 'guide-btn'; fpsBtn.type = 'button';
-    var FLIST = [30, 45, 60];
-    function fNow() { return parseInt(localStorage.getItem('tj_fps') || '60', 10); }
-    fpsBtn.textContent = '帧率：' + fNow();
-    fpsBtn.onclick = function () {
-      var f = FLIST[(FLIST.indexOf(fNow()) + 1) % FLIST.length];
-      localStorage.setItem('tj_fps', String(f));
-      fpsBtn.textContent = '帧率：' + f;
-    };
-    toolsRow.appendChild(fpsBtn);
-
+    toolsRow.appendChild(dmgBtn);
     var codexBtn = document.createElement('button');
     codexBtn.className = 'guide-btn'; codexBtn.type = 'button';
     codexBtn.textContent = '武器图鉴';
@@ -547,15 +460,9 @@
   }
 
   /* ---------- 开局 ---------- */
-  function startRun(opts) {
-    opts = opts || {};
-    if (opts.charId) selected = opts.charId;
-    dailyMode = !!opts.daily;
+  function startRun() {
     TJ.Audio.unlock();
-    var __seed = opts.seed != null ? opts.seed : pendingSeed;
-    pendingSeed = null;
-    g = mode === 'arena' ? TJ.createArenaGame({ charId: selected }) : TJ.createGame({ charId: selected, seed: __seed == null ? undefined : __seed });
-    g.daily = dailyMode;
+    g = mode === 'arena' ? TJ.createArenaGame({ charId: selected }) : TJ.createGame({ charId: selected });
     if (TJ.Audio && TJ.Audio.setTrack) TJ.Audio.setTrack(covenants.has('psycho') ? 'psycho' : 'default');
     if (TJ.Missions && TJ.Missions.recenter) TJ.Missions.recenter(g);
     g.cov = { spawn: 1, elite: 1, noHeal: 0, score: 1, list: [] };
@@ -1111,21 +1018,6 @@
       '<div class="stat"><span>到达波次</span><b>' + g.wave + '</b></div>' +
       '<div class="stat"><span>击倒猫咪</span><b>' + g.kills + '</b></div>' +
       '<div class="stat"><span>角色等级</span><b>' + g.level + '</b></div>';
-    var __st = seedText(g.seed || 0, selected);
-    var __db = dailyBest();
-    if (g.daily && (g.score || 0) > __db) {
-      __db = g.score || 0;
-      try { localStorage.setItem('tj_daily_' + dayKey(), String(__db)); } catch (e) {}
-    }
-    $('overStats').innerHTML += '<div class="stat wide"><span>' + (g.daily ? '每日挑战' : '本局种子') + '</span><b style="font-size:12px">' + __st + (g.daily ? ' · 今日最佳 ' + __db : '') + '</b></div>' +
-      '<button id="seedCopy" class="btn ghost" style="margin-top:8px">复制同种子挑战链接</button>';
-    setTimeout(function () {
-      var scb = document.getElementById('seedCopy');
-      if (scb) scb.onclick = function () {
-        var link = location.origin + location.pathname + '?seed=' + (g.seed || 0) + '&char=' + selected;
-        try { navigator.clipboard.writeText(link); scb.textContent = '已复制'; } catch (e) { prompt('复制同种子挑战链接', link); }
-      };
-    }, 0);
     $('over').classList.remove('hidden');
     state = 'over';
   }
@@ -1138,7 +1030,7 @@
     input.setEnabled(false);
   }
 
-  const BUILD_TAG = '2026-11-11g';
+  const BUILD_TAG = '2026-11-11h';
   function titleLockScroll() {
     const t = document.getElementById('title');
     if (t) {
@@ -1323,7 +1215,7 @@
   let __lastDraw = 0;
   function frame(now) {
     const __coarse = window.matchMedia('(pointer: coarse)').matches;
-    const __fps = parseInt(localStorage.getItem('tj_fps') || '60', 10);
+    const __fps = 60;
     if (__lastDraw && now - __lastDraw < 1000 / __fps - 1.5) { requestAnimationFrame(frame); return; }
     __lastDraw = now;
     window.__drawN = (window.__drawN || 0) + 1;
