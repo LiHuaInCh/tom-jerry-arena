@@ -1117,3 +1117,11 @@ html.native #splash { display: flex; }
   .lu-box { max-height: 86vh; max-height: 86dvh; }
   .set-row { padding: 9px 12px; font-size: 13px; }
 }
+
+#over .modal { position: relative; }
+#over .modal-actions {
+  position: sticky; bottom: -2px; z-index: 3;
+  margin-top: 10px; padding: 10px 0 4px;
+  background: linear-gradient(180deg, rgba(255,248,231,0), #FFF8E7 28%);
+}
+#pause .modal-actions { position: sticky; bottom: 0; background: #FFF8E7; padding-top: 8px; z-index: 3; }
