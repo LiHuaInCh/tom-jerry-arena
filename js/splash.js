@@ -2,7 +2,9 @@
   var sp = document.getElementById('splash');
   if (!sp) return;
   var native = document.documentElement.classList.contains('native');
-  if (!native) { sp.remove(); return; }
+  var pending = false;
+  try { pending = localStorage.getItem('tj_pending') === '1'; } catch (e) {}
+  if (!native || pending) { sp.remove(); return; }
   var v = document.getElementById('splashVid');
   var vb = document.getElementById('splashBg');
   if (vb) { var pb = vb.play(); if (pb && pb.catch) pb.catch(function () {}); }
