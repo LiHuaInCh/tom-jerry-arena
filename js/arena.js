@@ -277,7 +277,7 @@
       const others = shuffle(g, Object.keys(TJ.DATA.weapons).filter(function (k) { return k !== f.weapon; }));
       const cards = others.slice(0, 2).map(function (k) {
         const w = TJ.DATA.weapons[k];
-        return { key: 'sub:' + k, kind: 'sub', icon: '副', iconImg: w.iconImg, name: '副武器 · ' + w.name, desc: '完整强度 · 自动攻击 · 独立冷却', rarity: 'epic', stack: '' };
+        return { key: 'sub:' + k, kind: 'sub', icon: '副', iconImg: w.iconImg, name: '副武器 · ' + w.name, desc: '自动攻击 · 独立冷却', rarity: 'epic', stack: '' };
       });
       if (cards.length === 2) return cards;
     }

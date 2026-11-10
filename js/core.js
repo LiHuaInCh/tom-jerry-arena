@@ -164,7 +164,7 @@
         return picks.map(function (k) {
           const w = D.weapons[k];
           const KC = { ranged:'远程', orbit:'环绕', aura:'光环', chain:'连锁', beam:'光束', deploy:'布置', summon:'召唤', tether:'连锁' };
-          return { id: 'sub_' + k, name: '副武器 · ' + w.name, desc: (KC[w.kind] || '') + (w.label ? ' · ' + w.label : '') + ' — 完整强度 · 自动攻击 · 独立冷却', icon: '副', rarity: 'epic' };
+          return { id: 'sub_' + k, name: '副武器 · ' + w.name, desc: (KC[w.kind] || '') + (w.label ? ' · ' + w.label : '') + ' — 自动攻击 · 独立冷却', icon: '副', rarity: 'epic' };
         });
       }
     }
