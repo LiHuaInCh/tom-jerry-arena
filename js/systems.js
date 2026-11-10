@@ -842,7 +842,7 @@
         e.featCd = 4.5 * cm;
         for (let i = 0; i < 6; i++) {
           const aa = i / 6 * Math.PI * 2;
-          g.projectiles.push({ x: e.x, y: e.y, vx: Math.cos(aa) * 220, vy: Math.sin(aa) * 220, r: 7, dmg: e.dmg * 0.5, from: 'enemy', kind: 'orb', life: 2.0, hit: {}, color: '#FFD34D' });
+          g.projectiles.push({ x: e.x, y: e.y, vx: Math.cos(aa) * 220, vy: Math.sin(aa) * 220, r: 10, dmg: e.dmg * 0.5, from: 'enemy', kind: 'orb', life: 2.0, hit: {}, icon: 'assets/enemies/basketball_cut.png' });
         }
       }
       if (d > 200) { e.x += ux * e.speed * dt; e.y += uy * e.speed * dt; }
