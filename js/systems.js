@@ -385,6 +385,36 @@
         const sa = Math.atan2(subTarget.y - p.y, subTarget.x - p.x);
         if (sw.kind === 'orbit') {
           p.subOrbitA = (p.subOrbitA || 0) + dt;
+        } else if (sw.kind === 'aura') {
+          const R = sw.auraR || 90;
+          for (const e of g.enemies) if (!e.dead && Math.hypot(e.x - p.x, e.y - p.y) < R + e.r) damageEnemy(g, e, sw.dmg * st.damage * (st.subDmgMul || 1) * 0.9, false);
+          g.effects.push({ kind: 'ring', x: p.x, y: p.y, r: 12, maxR: R, life: 0.3, max: 0.3, color: sw.color || '#FFD34D' });
+          p.subCd = (sw.cd || 1) * (st.subCdMul || 1); sfx(g, 'slash');
+        } else if (sw.kind === 'beam') {
+          const L = sw.range || 500, hw = (sw.width || 20) / 2;
+          for (const e of g.enemies) {
+            if (e.dead) continue;
+            const ex = e.x - p.x, ey = e.y - p.y, t2 = ex * Math.cos(sa) + ey * Math.sin(sa);
+            if (t2 < 0 || t2 > L) continue;
+            if (Math.hypot(ex - Math.cos(sa) * t2, ey - Math.sin(sa) * t2) <= hw + e.r) damageEnemy(g, e, sw.dmg * st.damage * (st.subDmgMul || 1), false);
+          }
+          g.effects.push({ kind: 'beam', x: p.x, y: p.y, ang: sa, len: L, life: 0.18, max: 0.18, color: sw.color || '#FFD34D' });
+          p.subCd = (sw.cd || 1) * (st.subCdMul || 1); sfx(g, 'shoot');
+        } else if (sw.kind === 'chain' || sw.kind === 'tether') {
+          let cur = subTarget, dmg2 = sw.dmg * st.damage * (st.subDmgMul || 1) * (sw.kind === 'tether' ? 0.9 : 1), hit2 = {};
+          for (let i = 0; i < (sw.kind === 'tether' ? 1 : (sw.jumps || 3)) && cur; i++) {
+            hit2[cur.id] = 1; damageEnemy(g, cur, dmg2, false); dmg2 *= 0.82;
+            let nxt = null, nd = 280;
+            for (const e of g.enemies) { if (e.dead || hit2[e.id]) continue; const dd = Math.hypot(e.x - cur.x, e.y - cur.y); if (dd < nd) { nd = dd; nxt = e; } }
+            cur = nxt;
+          }
+          g.effects.push({ kind: 'ring', x: subTarget.x, y: subTarget.y, r: 8, maxR: 60, life: 0.22, max: 0.22, color: sw.color || '#9CD8FF' });
+          p.subCd = (sw.cd || 1) * (st.subCdMul || 1); sfx(g, 'eshoot');
+        } else if (sw.kind === 'summon' || sw.kind === 'deploy') {
+          const R2 = sw.boomR || sw.auraR || 100;
+          for (const e of g.enemies) if (!e.dead && Math.hypot(e.x - subTarget.x, e.y - subTarget.y) < R2 + e.r) damageEnemy(g, e, sw.dmg * st.damage * (st.subDmgMul || 1) * 1.2, false);
+          g.effects.push({ kind: 'ring', x: subTarget.x, y: subTarget.y, r: 10, maxR: R2, life: 0.3, max: 0.3, color: sw.color || '#FFB44D' });
+          p.subCd = (sw.cd || 1) * (st.subCdMul || 1); sfx(g, 'explode');
         } else {
           g.projectiles.push({
             x: p.x, y: p.y, vx: Math.cos(sa) * (sw.speed || 500), vy: Math.sin(sa) * (sw.speed || 500),

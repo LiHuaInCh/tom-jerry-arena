@@ -180,6 +180,17 @@
     try { bgmEl.volume = conf.v; bgmEl.playbackRate = conf.r; } catch (e) {}
   }
 
+  function __pauseAll() { try { if (bgmEl) bgmEl.pause(); if (ctx && ctx.state === 'running') ctx.suspend(); } catch (e) {} }
+  function __resumeAll() { try { if (ctx && ctx.state === 'suspended') ctx.resume(); if (!muted) startMusic(); } catch (e) {} }
+  document.addEventListener('visibilitychange', function () { if (document.hidden) __pauseAll(); else __resumeAll(); });
+  window.addEventListener('pagehide', __pauseAll);
+  window.addEventListener('blur', function () { if (document.hidden) __pauseAll(); });
+  if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
+    try {
+      window.Capacitor.Plugins.App.addListener('pause', __pauseAll);
+      window.Capacitor.Plugins.App.addListener('resume', __resumeAll);
+    } catch (e) {}
+  }
   TJ.Audio = {
     unlock() { ensure(); },
     startMusic,

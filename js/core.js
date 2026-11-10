@@ -148,8 +148,12 @@
       return pool.slice(0, 3);
     }
     if ((p.level === 3 || p.level === 6) && !p.subWeapon) {
-      const wids = Object.keys(D.weapons).filter(function (k) {
-        return k !== p.char.weapon && (D.weapons[k].kind === 'ranged' || D.weapons[k].kind === 'orbit');
+      const __mk = D.weapons[p.char.weapon].kind;
+      let wids = Object.keys(D.weapons).filter(function (k) {
+        return k !== p.char.weapon && D.weapons[k].kind === __mk && D.weapons[k].iconImg !== D.weapons[p.char.weapon].iconImg;
+      });
+      if (!wids.length) wids = Object.keys(D.weapons).filter(function (k) {
+        return k !== p.char.weapon && D.weapons[k].kind === 'ranged';
       });
       if (wids.length >= 2) {
         const picks = [];
@@ -224,8 +228,12 @@
     }
     if (id === 'sub_swap') {
       const p = g.player;
-      const pool = Object.keys(D.weapons).filter(function (k) {
-        return k !== p.subWeapon && k !== p.char.weapon && (D.weapons[k].kind === 'ranged' || D.weapons[k].kind === 'orbit');
+      const __mk2 = D.weapons[p.char.weapon].kind;
+      let pool = Object.keys(D.weapons).filter(function (k) {
+        return k !== p.subWeapon && k !== p.char.weapon && D.weapons[k].kind === __mk2 && D.weapons[k].iconImg !== D.weapons[p.char.weapon].iconImg && D.weapons[k].iconImg !== D.weapons[p.subWeapon].iconImg;
+      });
+      if (!pool.length) pool = Object.keys(D.weapons).filter(function (k) {
+        return k !== p.subWeapon && k !== p.char.weapon && D.weapons[k].kind === 'ranged';
       });
       if (pool.length) p.subWeapon = pool[Math.floor(g.rng() * pool.length)];
       p.subCd = 0.5;
