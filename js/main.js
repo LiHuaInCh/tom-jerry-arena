@@ -642,7 +642,7 @@
       if (g.player.hp <= 2) return;
       g.player.hp -= Math.floor(g.player.hp / 2);
       TJ.Audio.play('click');
-      showLevelUp();
+      showLevelUp(true);
     };
     if (!(choices.length && (choices[0].kind === 'evo_main' || choices[0].kind === 'evo_sub'))) wrap.appendChild(rf);
     $('levelup').classList.remove('hidden');
