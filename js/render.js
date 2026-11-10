@@ -1579,7 +1579,9 @@
     function draw(g, t) {
       let zoomMul = 1.05;
       try { const z = localStorage.getItem('tj_zoom'); if (z) zoomMul = parseFloat(z); } catch (e) {}
-      const zoom = clamp(Math.min(cw, ch) / 560, 0.56, 1.15) * 0.9;
+      let view2 = false;
+      try { view2 = localStorage.getItem('tj_view2') === '1'; } catch (e) {}
+      const zoom = clamp(Math.min(cw, ch) / 560, 0.56, 1.15) * 0.9 * (view2 ? 0.5 : 1);
       const vw = cw / zoom, vh = ch / zoom;
       let camX = g.cam.x, camY = g.cam.y;
       camX = vw >= D.W ? D.W / 2 : clamp(camX, vw / 2, D.W - vw / 2);

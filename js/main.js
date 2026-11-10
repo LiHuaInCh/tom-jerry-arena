@@ -1378,6 +1378,22 @@
   $('quitBtn').addEventListener('click', endRun);
   $('resumeBtn').addEventListener('click', resumeGame);
   $('pauseBtn').addEventListener('click', pauseGame);
+  (function initPauseZoom() {
+    var zb = $('pauseZoom');
+    if (!zb) return;
+    function label() {
+      var v2 = '0';
+      try { v2 = localStorage.getItem('tj_view2') || '0'; } catch (e) {}
+      zb.textContent = v2 === '1' ? '视角：2×' : '视角：1×';
+    }
+    zb.addEventListener('click', function () {
+      var v2 = '0';
+      try { v2 = localStorage.getItem('tj_view2') || '0'; } catch (e) {}
+      try { localStorage.setItem('tj_view2', v2 === '1' ? '0' : '1'); } catch (e) {}
+      label();
+    });
+    label();
+  })();
   $('muteBtn').addEventListener('click', function () {
     TJ.Audio.toggle();
     updateMute();
