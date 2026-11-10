@@ -318,12 +318,13 @@
     if (ow.kind === 'summon') {
       g.summons = g.summons || [];
       p.sumCd = (p.sumCd || 0) - dt;
-      const __sumMax = Math.max(1, Math.min(5, st.summonCount || 3));
-      while (g.summons.length < __sumMax && p.sumCd <= 0) {
+      const __sumMax = Math.max(1, st.summonCount || 3);
+      const __mainCount = g.summons.filter(function (x) { return !x.sub; }).length;
+      while (__mainCount < __sumMax && p.sumCd <= 0) {
         p.sumCd = (ow.cd || 4.0) * (st.summonCdMul || 1);
         g.summons.push({ x: p.x + 34, y: p.y, life: (ow.duration || 8) + (st.summonDur || 0), atkCd: 0, r: 15, spd: 240, icon: ow.iconImg, stationary: !!ow.stationary, range: 96, size: ow.stationary ? 56 : 76, w: ow });
         g.effects.push({ kind: 'ring', x: p.x + 34, y: p.y, r: 4, maxR: 60, life: 0.3, max: 0.3, color: '#FFD36A' });
-        if (g.summons.length >= __sumMax) break;
+        break;
       }
       }
     if (ow.kind === 'tether') {
@@ -416,11 +417,13 @@
           p.subCd = (sw.cd || 1) * (st.subCdMul || 1); sfx(g, 'eshoot');
         } else if (sw.kind === 'summon') {
           g.summons = g.summons || [];
-          if (g.summons.length < 5) {
-            g.summons.push({ x: p.x + 30, y: p.y, life: Math.min(5, sw.duration || 5), atkCd: 0, r: 15, spd: 240, icon: sw.iconImg, stationary: !!sw.stationary, range: 96, size: sw.stationary ? 56 : 76, w: sw, sub: true });
+          const __subMax = Math.max(1, st.summonCount || 3);
+          const __subCount = g.summons.filter(function (x) { return !!x.sub; }).length;
+          if (__subCount < __subMax) {
+            g.summons.push({ x: p.x + 30, y: p.y, life: (sw.duration || 10) + (st.summonDur || 0), atkCd: 0, r: 15, spd: 240, icon: sw.iconImg, stationary: !!sw.stationary, range: 96, size: sw.stationary ? 56 : 76, w: sw, sub: true });
             g.effects.push({ kind: 'ring', x: p.x + 30, y: p.y, r: 4, maxR: 60, life: 0.3, max: 0.3, color: '#FFD36A' });
           }
-          p.subCd = (sw.cd || 4) * (st.subCdMul || 1); sfx(g, 'shield');
+          p.subCd = (sw.cd || 4) * (st.summonCdMul || 1); sfx(g, 'shield');
         } else if (sw.kind === 'deploy') {
           const R2 = sw.boomR || sw.auraR || 100;
           for (const e of g.enemies) if (!e.dead && Math.hypot(e.x - subTarget.x, e.y - subTarget.y) < R2 + e.r) damageEnemy(g, e, sw.dmg * st.damage * (st.subDmgMul || 1) * 1.2, false);
