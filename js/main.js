@@ -28,98 +28,7 @@
   let auto = params.get('auto') === '1';
   let pendingSeed = params.get('seed') != null ? (parseInt(params.get('seed'), 10) || null) : null;
   let dailyMode = false;
-  let rec = null, replayData = null, replayMode = false;
-  let recFrame = 0, replayIdx = 0, replayChoiceIdx = 0, replayElemIdx = 0, lastRecInp = { moveX: 0, moveY: 0, dash: false };
-  let replayLastInp = { moveX: 0, moveY: 0, dash: false };
-  function replaySnapshot() {
-    var st = g.stats, p = g.player;
-    return {
-      stats: { damage: st.damage, fireRate: st.fireRate, speed: st.speed, armor: st.armor, crit: st.crit, critMul: st.critMul,
-        magnet: st.magnet, xpMul: st.xpMul, range: st.range, pierce: st.pierce, bounce: st.bounce, multishot: st.multishot,
-        homing: st.homing, explode: st.explode, summonCount: st.summonCount, summonDur: st.summonDur, summonDmgMul: st.summonDmgMul,
-        summonCdMul: st.summonCdMul, orbitBonus: st.orbitBonus, orbitRBonus: st.orbitRBonus, subDmgMul: st.subDmgMul, subCdMul: st.subCdMul,
-        skillCdMul: st.skillCdMul, regen: st.regen, lifesteal: st.lifesteal, projSpeed: st.projSpeed },
-      hp: p.hp, maxHp: p.maxHp, weapon: p.char.weapon
-    };
-  }
-  function recordInput(inp) {
-    if (!rec) return;
-    var mx = Math.round((inp.moveX || 0) * 1000) / 1000, my = Math.round((inp.moveY || 0) * 1000) / 1000, dash = !!inp.dash;
-    if (rec.frames.length > 0 && lastRecInp && mx === lastRecInp.moveX && my === lastRecInp.moveY && dash === lastRecInp.dash) return;
-    lastRecInp = { moveX: mx, moveY: my, dash: dash };
-    rec.frames.push([recFrame, mx, my, dash ? 1 : 0]);
-    if (rec.frames.length > 12000) rec.frames.splice(1, 4000);
-  }
-  function replayInputAt(f) {
-    if (!replayData) return { moveX: 0, moveY: 0, dash: false };
-    while (replayIdx < replayData.frames.length && replayData.frames[replayIdx][0] <= f) {
-      var e = replayData.frames[replayIdx++];
-      replayLastInp = { moveX: e[1], moveY: e[2], dash: !!e[3] };
-    }
-    return { moveX: replayLastInp.moveX, moveY: replayLastInp.moveY, dash: replayLastInp.dash };
-  }
-  function loadReplays() {
-    try { var a = JSON.parse(localStorage.getItem('tj_replays') || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; }
-  }
-  function persistReplays(list) {
-    for (var n = list.length; n > 0; n--) {
-      try { localStorage.setItem('tj_replays', JSON.stringify(list.slice(0, n))); return list.slice(0, n); } catch (e) {}
-    }
-    try { localStorage.removeItem('tj_replays'); } catch (e) {}
-    return [];
-  }
-  function addReplay(r) {
-    if (!r) return;
-    r.id = r.id || (Date.now() + '-' + Math.floor(Math.random() * 9999));
-    r.createdAt = r.createdAt || Date.now();
-    var list = loadReplays();
-    list.unshift(r);
-    if (list.length > 8) list = list.slice(0, 8);
-    persistReplays(list);
-    try { localStorage.setItem('tj_replay', JSON.stringify(r)); } catch (e) {}
-  }
-  function openReplayList() {
-    var list = loadReplays();
-    var ov = document.createElement('div');
-    ov.className = 'guide-modal on';
-    var rows = list.length ? list.map(function (r, i) {
-      var ch = D.characters.filter(function (c) { return c.id === r.char; })[0];
-      var d = r.createdAt || r.date || 0;
-      var ds = d ? new Date(d) : null;
-      var when = ds ? (ds.getMonth() + 1) + '/' + ds.getDate() + ' ' + ds.getHours() + ':' + ('0' + ds.getMinutes()).slice(-2) : '';
-      return '<div class="rp-row" data-i="' + i + '">' +
-        '<div class="rp-main"><b>' + (ch ? ch.name : r.char) + '</b><span>' + when + ' · ' + (r.wave || 0) + ' 波 · ' + (r.score || 0) + ' 分</span></div>' +
-        '<button class="guide-btn rp-play">播放</button><button class="guide-btn rp-del">删除</button></div>';
-    }).join('') : '<p class="muted">还没有保存的回放，打完一局会自动存到最近 8 局。</p>';
-    ov.innerHTML = '<div class="guide-box"><div class="guide-head">回放列表<button class="guide-close">×</button></div><div class="guide-body">' +
-      rows + (list.length ? '<button class="guide-btn" id="rpClear" style="margin-top:10px">清空全部</button>' : '') + '</div></div>';
-    document.body.appendChild(ov);
-    ov.querySelector('.guide-close').onclick = function () { ov.remove(); };
-    ov.querySelectorAll('.rp-row').forEach(function (row) {
-      var i = Number(row.dataset.i);
-      row.querySelector('.rp-play').onclick = function () { ov.remove(); startRun({ replay: list[i] }); };
-      row.querySelector('.rp-del').onclick = function () {
-        var cur = loadReplays().filter(function (x) { return x.id !== list[i].id; });
-        persistReplays(cur);
-        ov.remove(); openReplayList();
-      };
-    });
-    var clr = ov.querySelector('#rpClear');
-    if (clr) clr.onclick = function () {
-      if (!confirm('清空全部回放？')) return;
-      persistReplays([]);
-      try { localStorage.removeItem('tj_replay'); } catch (e) {}
-      ov.remove(); openReplayList();
-    };
-  }
-
-  function applyReplaySnapshot() {
-    if (!replayData || !replayData.snapshot) return;
-    var st = replayData.snapshot.stats;
-    for (var k in st) if (st[k] != null) g.stats[k] = st[k];
-    g.player.maxHp = replayData.snapshot.maxHp;
-    g.player.hp = replayData.snapshot.hp;
-  }
+  try { localStorage.removeItem('tj_replays'); localStorage.removeItem('tj_replay'); } catch (e) {}
   function dayKey() { var d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
   function hash32(s) { var h = 2166136261; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
   function dailySeed() { return hash32('TJ-DAILY-' + dayKey()); }
@@ -323,7 +232,7 @@
     nbtn.type = 'button';
     nbtn.textContent = '更新公告';
     toolsRow.appendChild(nbtn);
-    var NEWS_VER = '1.4.10';
+    var NEWS_VER = '1.4.11';
     var NEWS = [
       ['启动与画面', [
         'APK 启动动画：模糊背景铺满 + 完整画面居中，点视频里的「开始游戏」即可跳过',
@@ -341,10 +250,9 @@
         '天使莱特宁 / 陈佳嵘车 / 牢侍卫 / 自爆怪 / 牛头怪 局内体型 ×2',
         '所有敌人基础血量 ×2.5'
       ]],
-      ['确定性 / 回放', [
-        '每局都有种子，结算可复制种子链接',
-        '回放列表保存最近 8 局，可播放 / 删除 / 清空，重演移动、技能与升级选择',
-        '每日挑战：固定种子 + 固定角色，全服同一套随机'
+      ['种子与每日挑战', [
+        '每局都有随机种子，结算可复制种子链接',
+        '每日挑战：固定种子 + 固定角色，全服面对同一套刷怪与掉落'
       ]],
       ['武器', [
         '远程武器攻速减半、射程降为 65%',
@@ -404,12 +312,6 @@
     sbtn.type = 'button';
     sbtn.textContent = '种子对战';
     toolsRow.appendChild(sbtn);
-    var rbtn = document.createElement('button');
-    rbtn.className = 'guide-btn';
-    rbtn.type = 'button';
-    rbtn.textContent = '回放';
-    toolsRow.appendChild(rbtn);
-    rbtn.onclick = openReplayList;
     sbtn.onclick = function () {
       var raw = prompt('输入种子（数字，或 #TJ-XXXX-角色）', '');
       if (!raw) return;
@@ -635,17 +537,8 @@
     opts = opts || {};
     if (opts.charId) selected = opts.charId;
     dailyMode = !!opts.daily;
-    if (opts.replay) {
-      replayData = opts.replay;
-      selected = replayData.char;
-      mode = replayData.mode || 'survival';
-      god = !!replayData.god;
-      dailyMode = false;
-    } else {
-      replayData = null;
-    }
     TJ.Audio.unlock();
-    var __seed = opts.replay ? (opts.replay.seed >>> 0) : (opts.seed != null ? opts.seed : pendingSeed);
+    var __seed = opts.seed != null ? opts.seed : pendingSeed;
     pendingSeed = null;
     g = mode === 'arena' ? TJ.createArenaGame({ charId: selected }) : TJ.createGame({ charId: selected, seed: __seed == null ? undefined : __seed });
     g.daily = dailyMode;
@@ -701,20 +594,6 @@
       g.player.maxHp = 1e9;
       g.player.hp = 1e9;
     }
-    if (opts.replay && replayData) {
-      replayMode = true; rec = null; g.daily = false;
-      if (replayData.cov) g.cov = replayData.cov;
-      applyReplaySnapshot();
-      recFrame = 0; replayIdx = 0; replayChoiceIdx = 0; replayElemIdx = 0;
-      window.__tjReplayMode = true;
-    } else {
-      replayMode = false; recFrame = 0; lastRecInp = { moveX: 0, moveY: 0, dash: false };
-      rec = mode === 'arena' ? null : {
-        v: 1, seed: g.seed, char: selected, mode: mode, god: god, cov: g.cov,
-        snapshot: replaySnapshot(), frames: [], choices: [], elements: [], score: 0, elapsed: 0
-      };
-      window.__tjReplayMode = false;
-    }
     state = 'playing';
     overShown = false; overTimer = 0; acc = 0; last = performance.now();
     $('title').classList.add('hidden');
@@ -727,7 +606,7 @@
     $('feed').innerHTML = '';
     $('respawn').classList.add('hidden');
     input.setEnabled(true);
-    if (TJ.meta && !replayMode) { TJ.meta.addUse(selected); refreshProfile(); }
+    if (TJ.meta) { TJ.meta.addUse(selected); refreshProfile(); }
     $('pName').textContent = g.player.char.name;
     $('avatar').src = portraitSrc(g.player.char.id);
   const sk = g.player.skill;
@@ -770,43 +649,6 @@
     if (!g) return;
     if (g.mode === 'arena') g.player.pendingLevels = 0;
     else g.pendingLevels = 0;
-  }
-
-  function replayResolvePending() {
-    if (!replayData) { if (g) g.pendingLevels = 0; return; }
-    var guard2 = 0;
-    while ((pendingCount() > 0 || (g.missions && g.missionPicks > 0)) && guard2++ < 40) {
-      var cards = null;
-      var key = replayData.choices[replayChoiceIdx] || null;
-      if (key === '__refresh') {
-        replayChoiceIdx++;
-        if (g.player.hp > 2) g.player.hp -= Math.floor(g.player.hp / 2);
-        cards = TJ.getUpgradeChoices(g);
-        key = replayData.choices[replayChoiceIdx] || null;
-      }
-      if (key && String(key).indexOf('m_') === 0) {
-        applyMissionPick(key);
-        if (g.missionPicks > 0) g.missionPicks--;
-        replayChoiceIdx++;
-        continue;
-      }
-      if (key === 'infuse1' || key === 'infuse2') {
-        TJ.applyUpgrade(g, key);
-        replayChoiceIdx++;
-        var slot2 = key === 'infuse1' ? 0 : 1;
-        var ev = replayData.elements[replayElemIdx++] || {};
-        g.player.elemSlots[slot2] = ev.el || 'fire';
-        continue;
-      }
-      if (!cards) cards = TJ.getUpgradeChoices(g);
-      if (!cards || !cards.length) { g.pendingLevels = 0; break; }
-      if (pendingCount() <= 0 && !(g.missionPicks > 0)) break;
-      var pick = null;
-      for (var ci = 0; ci < cards.length; ci++) if ((cards[ci].key || cards[ci].id) === key) { pick = cards[ci]; break; }
-      if (!pick) pick = cards[0];
-      TJ.applyUpgrade(g, pick.key || pick.id);
-      replayChoiceIdx++;
-    }
   }
 
   function autoPickOne() {
@@ -937,7 +779,6 @@
   }
 
   function choose(key) {
-    if (rec && !replayMode) rec.choices.push(key);
     if (String(key).indexOf('m_') === 0) {
       applyMissionPick(key);
       if (g.missionPicks > 0) g.missionPicks--;
@@ -1148,7 +989,6 @@
     ov.querySelectorAll('.ep-btn').forEach(function (b) {
       b.addEventListener('click', function () {
         if (g && g.player && g.player.elemSlots) g.player.elemSlots[slot] = b.dataset.el;
-        if (rec && !replayMode) rec.elements.push({ slot: slot, el: b.dataset.el });
         ov.classList.remove('on');
       });
     });
@@ -1216,11 +1056,7 @@
 
   function showOver() {
     if (TJ.Audio && TJ.Audio.setMood) TJ.Audio.setMood('over');
-    if (!replayMode && rec && g && g.mode !== 'arena') {
-      rec.score = g.score || 0; rec.elapsed = g.elapsed || 0; rec.wave = g.wave || 0; rec.kills = g.kills || 0; rec.date = Date.now();
-      addReplay(rec);
-    }
-    if (g && !g.__metaDone && TJ.meta && !replayMode) {
+    if (g && !g.__metaDone && TJ.meta) {
       g.__metaDone = true;
       TJ.meta.addRun({ id: g.player.char.id, score: g.score || 0, kills: g.kills || 0, win: mode === 'arena' ? g.winner === g.player : false, cov: !!(g.cov && g.cov.list.length) });
       refreshProfile();
@@ -1276,26 +1112,6 @@
         try { navigator.clipboard.writeText(link); scb.textContent = '已复制'; } catch (e) { prompt('复制种子链接', link); }
       };
     }, 0);
-    if (replayMode) $('overTitle').textContent = '回放结束';
-    if (!replayMode) {
-      var __oldRb = document.getElementById('replayBtn'); if (__oldRb) __oldRb.remove();
-      var __raw = '';
-      try { __raw = localStorage.getItem('tj_replay') || ''; } catch (e) {}
-      if (__raw) {
-        var __rpb = document.createElement('button');
-        __rpb.id = 'replayBtn'; __rpb.className = 'btn ghost'; __rpb.style.marginTop = '8px'; __rpb.textContent = '回放本局';
-        var __acts = $('over').querySelector('.modal-actions');
-        if (__acts) __acts.insertBefore(__rpb, __acts.firstChild);
-        __rpb.onclick = function () {
-          try {
-            var __rp = rec || JSON.parse(localStorage.getItem('tj_replay') || 'null');
-            if (!__rp) return;
-            $('over').classList.add('hidden');
-            startRun({ replay: __rp });
-          } catch (e) {}
-        };
-      }
-    }
     $('over').classList.remove('hidden');
     state = 'over';
   }
@@ -1497,7 +1313,6 @@
     if (__lastDraw && now - __lastDraw < 1000 / __fps - 1.5) { requestAnimationFrame(frame); return; }
     __lastDraw = now;
     window.__tjState = state;
-    window.__tjReplay = replayMode;
     var sb = document.getElementById('setBtn');
     if (sb) sb.style.display = state === 'title' ? 'inline-block' : 'none';
     var mhEl = document.getElementById('missionHud');
@@ -1522,18 +1337,12 @@
           acc -= 1 / 60; guard++;
           const step = (1 / 60) * slow;
           if (g.mode === 'arena') TJ.updateArena(g, step, auto ? arenaAI(g) : input.sample());
-          else {
-            const __inp = replayMode ? replayInputAt(recFrame) : (auto ? aiInput(g) : input.sample());
-            if (!replayMode) recordInput(__inp);
-            TJ.update(g, step, __inp);
-          }
-          recFrame++;
+          else TJ.update(g, step, auto ? aiInput(g) : input.sample());
           drainEvents();
-          if (replayMode) replayResolvePending();
-          else if (pendingCount() > 0) { acc = 0; break; }
+          if (pendingCount() > 0) { acc = 0; break; }
         }
-        if (!replayMode && pendingCount() > 0) maybeLevelUp();
-        if (!replayMode && g.missions && g.missionPicks > 0 && state === 'playing') showLevelUp();
+        if (pendingCount() > 0) maybeLevelUp();
+        if (g.missions && g.missionPicks > 0 && state === 'playing') showLevelUp();
         if (g.missions) {
           const el = $('missionHud');
           if (el) el.innerHTML = g.missions.filter(function (m) { return m.active; }).map(function (m) {
