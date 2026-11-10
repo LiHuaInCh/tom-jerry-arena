@@ -1104,8 +1104,16 @@ html.native #splash { display: flex; }
   .credit { font-size: 9px; }
 }
 
-@media (min-width: 761px) {
-  .char-card .c-title, .char-card .c-perk { display: none; }
-  .char-card { gap: 1px; }
-}
+.char-card .c-title, .char-card .c-perk { display: none; }
+.char-card { gap: 1px; }
 
+
+.set-note { margin-top: 10px; font-size: 11px; color: #8A6A52; text-align: center; }
+@media (max-width: 760px) {
+  .guide-box { max-height: 86vh; max-height: 86dvh; }
+  .guide-body { min-height: 0; -webkit-overflow-scrolling: touch; }
+  .guide-head { flex: 0 0 auto; }
+  #pause .modal, #over .modal { max-height: 86vh; max-height: 86dvh; overflow-y: auto; }
+  .lu-box { max-height: 86vh; max-height: 86dvh; }
+  .set-row { padding: 9px 12px; font-size: 13px; }
+}

@@ -45,7 +45,7 @@
 
   /* ---------- 布局 ---------- */
   function resize() {
-    renderer.resize(window.innerWidth, window.innerHeight, Math.min((function(){var q=localStorage.getItem('tj_quality')||'high';return q==='low'?1:(q==='mid'?1.5:2);})(), window.devicePixelRatio || 1));
+    renderer.resize(window.innerWidth, window.innerHeight, Math.min((function(){var q=localStorage.getItem('tj_quality')||'high';return q==='low'?1.5:(q==='mid'?2.5:3);})(), window.devicePixelRatio || 1));
   }
   window.addEventListener('resize', resize);
   resize();
@@ -351,6 +351,7 @@
       document.body.appendChild(ov);
       var ta = ov.querySelector('#saveText');
       ta.value = mode === 'export' ? raw : '';
+      var fnote = document.createElement('div');
       ov.querySelector('.guide-close').onclick = function () { ov.remove(); };
       if (mode === 'export') {
         var cp = ov.querySelector('#saveCopy');
@@ -406,9 +407,22 @@
         var row = document.createElement('button');
         row.className = 'set-row';
         row.textContent = b.textContent;
+        if (b === fpsBtn) row.id = 'fpsRow';
         row.onclick = function () { ov.remove(); b.click(); };
         body.appendChild(row);
       });
+      var fnote = document.createElement('div');
+      fnote.className = 'set-note'; fnote.id = 'fpsNow';
+      fnote.textContent = '实测绘制帧率：' + (window.__drawFps || '--') + ' FPS';
+      body.appendChild(fnote);
+      var fiv = setInterval(function () {
+        var el2 = document.getElementById('fpsNow');
+        if (!el2) { clearInterval(fiv); return; }
+        el2.textContent = '实测绘制帧率：' + (window.__drawFps || '--') + ' FPS（上限 ' + fNow() + '）';
+        var fr = document.getElementById('fpsRow');
+        if (fr) fr.textContent = '帧率：' + fNow() + ' · 实测 ' + (window.__drawFps || '--') + ' FPS';
+      }, 600);
+      ov.querySelector('.guide-close').onclick = function () { clearInterval(fiv); ov.remove(); };
       ov.querySelector('.guide-close').onclick = function () { ov.remove(); };
     };
 
@@ -1124,7 +1138,7 @@
     input.setEnabled(false);
   }
 
-  const BUILD_TAG = '2026-11-11e';
+  const BUILD_TAG = '2026-11-11f';
   function titleLockScroll() {
     const t = document.getElementById('title');
     if (t) {
@@ -1312,6 +1326,9 @@
     const __fps = parseInt(localStorage.getItem('tj_fps') || '60', 10);
     if (__lastDraw && now - __lastDraw < 1000 / __fps - 1.5) { requestAnimationFrame(frame); return; }
     __lastDraw = now;
+    window.__drawN = (window.__drawN || 0) + 1;
+    if (!window.__drawT) window.__drawT = now;
+    if (now - window.__drawT > 1000) { window.__drawFps = Math.round(window.__drawN * 1000 / (now - window.__drawT)); window.__drawN = 0; window.__drawT = now; }
     window.__tjState = state;
     var sb = document.getElementById('setBtn');
     if (sb) sb.style.display = state === 'title' ? 'inline-block' : 'none';

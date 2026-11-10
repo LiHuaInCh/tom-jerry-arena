@@ -1467,6 +1467,7 @@
   /* ---------------- 主渲染器 ---------------- */
   TJ.Renderer = function (canvas) {
     const ctx = canvas.getContext('2d');
+    try { ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high'; } catch (e) {}
     const largeMap = D.W > 3000;
     const bg = largeMap ? null : buildBackground();
     let floorPattern = null;
