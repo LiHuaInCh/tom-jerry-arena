@@ -142,11 +142,10 @@
     if (p.level >= 7 && !p.elemSlots[0]) return elemChoices(g, 0);
     if (p.level >= 14 && p.elemSlots[0] && !p.elemSlots[1]) return elemChoices(g, 1);
     if (p.level % 4 === 0) {
-      const pool = evoChoices(g).slice();
-      if (p.subWeapon) pool.push.apply(pool, subEvoChoices());
-      else pool.push({ id: 'evo_generic_dmg', name: '武器专精', desc: '武器伤害 +25%', icon: '专', rarity: 'epic', kind: 'evo_main' });
-      for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(g.rng() * (i + 1)); const t = pool[i]; pool[i] = pool[j]; pool[j] = t; }
-      return pool.slice(0, 3);
+      const mainEvo = evoChoices(g).slice(0, 2);
+      const extras = p.subWeapon ? subEvoChoices() : [{ id: 'evo_generic_dmg', name: '武器专精', desc: '武器伤害 +25%', icon: '专', rarity: 'epic', kind: 'evo_main' }];
+      for (let i = extras.length - 1; i > 0; i--) { const j = Math.floor(g.rng() * (i + 1)); const t = extras[i]; extras[i] = extras[j]; extras[j] = t; }
+      return mainEvo.concat(extras.slice(0, 1));
     }
     if ((p.level === 3 || p.level === 6) && !p.subWeapon) {
       const __mk = D.weapons[p.char.weapon].kind;
