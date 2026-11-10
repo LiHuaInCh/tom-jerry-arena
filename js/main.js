@@ -980,7 +980,7 @@
     input.setEnabled(false);
   }
 
-  const BUILD_TAG = '2026-11-10c';
+  const BUILD_TAG = '2026-11-11a';
   function titleLockScroll() {
     const t = document.getElementById('title');
     if (t) {
