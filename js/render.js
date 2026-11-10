@@ -1277,7 +1277,22 @@
       ctx.bezierCurveTo(7, -11, 12, -2, 0, 6);
       ctx.fill();
       ctx.strokeStyle = '#B33B4A'; ctx.lineWidth = 1.5; ctx.stroke();
+    } else if (pk.kind === 'cheese') {
+      const ch = orbitImg('assets/enemies/cheese_cut.png');
+      if (ch) { ctx.drawImage(ch, -16, -12, 32, 24); ctx.restore(); return; }
+      ctx.fillStyle = '#F2C33C';
+      ctx.beginPath(); ctx.moveTo(-8, 6); ctx.lineTo(8, 6); ctx.lineTo(8, -2); ctx.lineTo(2, -2); ctx.lineTo(2, -6); ctx.lineTo(-8, -6); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#A87A12'; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.fillStyle = '#D9A521';
+      ellipse(ctx, -2, 2, 2.2, 2.2); ctx.fill();
+      ellipse(ctx, 4, 3, 1.6, 1.6); ctx.fill();
     } else {
+      ctx.fillStyle = '#F2C33C';
+      ctx.beginPath(); ctx.moveTo(-8, 6); ctx.lineTo(8, 6); ctx.lineTo(8, -2); ctx.lineTo(2, -2); ctx.lineTo(2, -6); ctx.lineTo(-8, -6); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#A87A12'; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.fillStyle = '#D9A521';
+      ellipse(ctx, -2, 2, 2.2, 2.2); ctx.fill();
+      ellipse(ctx, 4, 3, 1.6, 1.6); ctx.fill();
       ctx.fillStyle = '#F2C33C';
       ctx.beginPath(); ctx.moveTo(-8, 6); ctx.lineTo(8, 6); ctx.lineTo(8, -2); ctx.lineTo(2, -2); ctx.lineTo(2, -6); ctx.lineTo(-8, -6); ctx.closePath(); ctx.fill();
       ctx.strokeStyle = '#A87A12'; ctx.lineWidth = 1.5; ctx.stroke();
@@ -1784,7 +1799,7 @@
         } else {
           const __bs = it.e.def && it.e.def.sprite ? orbitImg(it.e.def.sprite) : null;
           if (__bs) {
-            const bs = it.e.r * 4.2;
+            const bs = it.e.r * (it.e.boss ? 4.2 : (it.e.elite ? 3.6 : 2.4));
             const __bmode = it.e.atkAnimT > 0 ? 'attack' : (it.e.flash > 0 ? 'hurt' : (Math.hypot(it.e.vx || 0, it.e.vy || 0) > 15 ? 'run' : 'idle'));
             const __bph = (it.e.walk || 0) * 1.1 + it.e.x * 0.01;
             ctx.save();
