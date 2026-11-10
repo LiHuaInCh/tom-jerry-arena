@@ -310,10 +310,10 @@
     var sbtn = document.createElement('button');
     sbtn.className = 'guide-btn';
     sbtn.type = 'button';
-    sbtn.textContent = '种子对战';
+    sbtn.textContent = '同种子挑战';
     toolsRow.appendChild(sbtn);
     sbtn.onclick = function () {
-      var raw = prompt('输入种子（数字，或 #TJ-XXXX-角色）', '');
+      var raw = prompt('输入同种子挑战码（数字，或 #TJ-XXXX-角色）', '');
       if (!raw) return;
       var num = 0;
       var mt = raw.match(/TJ-([0-9A-Z]+)/i);
@@ -1104,12 +1104,12 @@
       try { localStorage.setItem('tj_daily_' + dayKey(), String(__db)); } catch (e) {}
     }
     $('overStats').innerHTML += '<div class="stat wide"><span>' + (g.daily ? '每日挑战' : '本局种子') + '</span><b style="font-size:12px">' + __st + (g.daily ? ' · 今日最佳 ' + __db : '') + '</b></div>' +
-      '<button id="seedCopy" class="btn ghost" style="margin-top:8px">复制种子链接</button>';
+      '<button id="seedCopy" class="btn ghost" style="margin-top:8px">复制同种子挑战链接</button>';
     setTimeout(function () {
       var scb = document.getElementById('seedCopy');
       if (scb) scb.onclick = function () {
         var link = location.origin + location.pathname + '?seed=' + (g.seed || 0) + '&char=' + selected;
-        try { navigator.clipboard.writeText(link); scb.textContent = '已复制'; } catch (e) { prompt('复制种子链接', link); }
+        try { navigator.clipboard.writeText(link); scb.textContent = '已复制'; } catch (e) { prompt('复制同种子挑战链接', link); }
       };
     }, 0);
     $('over').classList.remove('hidden');
