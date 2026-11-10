@@ -270,7 +270,7 @@
       if (seen !== NEWS_VER) setTimeout(openNews, 900);
     })();
     var mbtn = document.createElement('button');
-    mbtn.id = 'muteBtn';
+    mbtn.id = 'titleMuteBtn';
     mbtn.className = 'guide-btn';
     mbtn.type = 'button';
     mbtn.textContent = TJ.Audio && TJ.Audio.isMuted() ? '音效：关' : '音效：开';
@@ -1384,7 +1384,10 @@
   });
 
   function updateMute() {
-    $('muteBtn').textContent = '音效：' + (TJ.Audio.isMuted() ? '关' : '开');
+    var pb = $('muteBtn');
+    if (pb) pb.textContent = '音效：' + (TJ.Audio.isMuted() ? '关' : '开');
+    var tb = document.getElementById('titleMuteBtn');
+    if (tb) tb.textContent = TJ.Audio.isMuted() ? '音效：关' : '音效：开';
   }
 
   window.addEventListener('keydown', function (e) {

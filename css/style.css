@@ -621,14 +621,14 @@ button { font-family: inherit; }
   width: 108px; height: 108px; border-radius: 18px; object-fit: cover;
   border: 3px solid #3A2418; background: #F2E2C6; flex: none;
 }
-.cm-title #cmName { font-size: 26px; font-weight: 900; color: #3A2418; letter-spacing: .04em; }
+.cm-title #cmName { font-size: 22px; font-weight: 900; color: #3A2418; letter-spacing: .04em; }
 .cm-title #cmSub { font-size: 12px; color: #8A6A52; margin-top: 2px; }
 .cm-tags { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
 .cm-tags span {
   font-size: 11px; font-weight: 800; color: #7A4A2E;
   background: #F2E2C6; border-radius: 999px; padding: 3px 10px;
 }
-.cm-desc { font-size: 13px; line-height: 1.7; color: #6B4A33; margin: 14px 0 10px; }
+.cm-desc { font-size: 12px; line-height: 1.6; color: #6B4A33; margin: 10px 0 8px; }
 .cm-bars { display: grid; gap: 7px; margin-bottom: 14px; }
 .cm-bar { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #8A6A52; }
 .cm-bar span { width: 30px; flex: none; }
@@ -640,7 +640,7 @@ button { font-family: inherit; }
   display: flex; gap: 10px; align-items: center;
   background: #F7EBD6; border: 2px solid #E3CBA8; border-radius: 14px; padding: 8px 10px;
 }
-.cm-kit img { width: 42px; height: 42px; border-radius: 10px; object-fit: contain; background: #FFF8E7; }
+.cm-kit img { width: 36px; height: 36px; border-radius: 10px; object-fit: contain; background: #FFF8E7; }
 .cm-kit b { display: block; font-size: 14px; color: #3A2418; }
 .cm-kit span { display: block; font-size: 11px; color: #8A6A52; margin-top: 2px; line-height: 1.4; }
 @media (max-width: 560px) {
@@ -1093,4 +1093,18 @@ html.native #splash { display: flex; }
   .char-card { padding: 11px 9px 10px; }
   .char-card .portrait { width: 92px; height: 92px; }
   .profile { margin-top: 6px; }
+}
+
+@media (min-width: 761px) {
+  .logo { font-size: clamp(36px, 5.2vw, 60px); }
+  .logo-en { margin-top: 2px; }
+  .tagline { margin-top: 5px; font-size: 12.5px; }
+  .title-inner { gap: 9px; padding-bottom: 6px; }
+  .char-grid { max-height: 360px; }
+  .credit { font-size: 9px; }
+}
+
+@media (min-width: 761px) {
+  .char-card .c-title, .char-card .c-perk { display: none; }
+  .char-card { gap: 1px; }
 }
