@@ -57,16 +57,21 @@
 
     if (w.kind === 'beam') {
       const len = w.range + st.range;
-      const half = (w.width || 24) / 2;
+      const half = (w.width || 24) / 2 * (st.beamWidthMul || 1);
+      const dmg0 = w.dmg * st.damage;
       const dx = Math.cos(ang), dy = Math.sin(ang);
       for (const e of g.enemies) {
         if (e.dead) continue;
         const ex = e.x - p.x, ey = e.y - p.y;
         const t = ex * dx + ey * dy;
         if (t < 0 || t > len) continue;
-        if (Math.hypot(ex - dx * t, ey - dy * t) <= half + e.r) damageEnemy(g, e, w.dmg * st.damage, false);
+        if (Math.hypot(ex - dx * t, ey - dy * t) <= half + e.r) damageEnemy(g, e, dmg0, false);
       }
       g.effects.push({ kind: 'beam', x: p.x, y: p.y, ang: ang, len: len, life: 0.18, max: 0.18, color: w.color });
+      if (st.beamPulse) {
+        g.beams = g.beams || [];
+        g.beams.push({ t: 0.18, x: p.x, y: p.y, ang: ang, len: len, half: half, dmg: dmg0 * 0.8, color: w.color, life: 0.18 });
+      }
       sfx(g, 'shoot');
       p.fireCd = w.cd / st.fireRate;
       return;
@@ -948,6 +953,25 @@
     }
   }
 
+  function updateBeams(g, dt) {
+    if (!g.beams || !g.beams.length) return;
+    for (const b of g.beams) {
+      b.t -= dt;
+      if (b.t > 0) continue;
+      const dx = Math.cos(b.ang), dy = Math.sin(b.ang);
+      for (const e of g.enemies) {
+        if (e.dead) continue;
+        const ex = e.x - b.x, ey = e.y - b.y;
+        const t = ex * dx + ey * dy;
+        if (t < 0 || t > b.len) continue;
+        if (Math.hypot(ex - dx * t, ey - dy * t) <= b.half + e.r) damageEnemy(g, e, b.dmg, false);
+      }
+      g.effects.push({ kind: 'beam', x: b.x, y: b.y, ang: b.ang, len: b.len, life: 0.18, max: 0.18, color: b.color });
+      b.done = true;
+    }
+    g.beams = g.beams.filter(function (b) { return !b.done; });
+  }
+
   function updateProjectiles(g, dt) {
     const p = g.player;
     for (const pr of g.projectiles) {
@@ -1312,6 +1336,7 @@
     updatePlayer(g, dt, input || {});
     updateEnemies(g, dt);
     updateProjectiles(g, dt);
+    updateBeams(g, dt);
     updatePickups(g, dt);
     updateEffects(g, dt);
     director(g, dt);
