@@ -1830,8 +1830,10 @@
         }
       }
 
-      if (g.player && g.player.link && !g.player.link.dead) {
-        const lp = g.player, lt = g.player.link;
+      const __links = (g.player && (g.player.links && g.player.links.length ? g.player.links : (g.player.link ? [g.player.link] : []))) || [];
+      for (const lt of __links) {
+        if (!lt || lt.dead) continue;
+        const lp = g.player;
         const lw2 = D.weapons[lp.char.weapon] || {};
         const col2 = lw2.color || '#9CD8FF';
         ctx.save(); ctx.globalAlpha = 0.75; ctx.strokeStyle = col2; ctx.lineWidth = 3; ctx.lineCap = 'round';

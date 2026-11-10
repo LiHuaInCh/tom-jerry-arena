@@ -72,22 +72,34 @@
       return;
     }
     if (w.kind === 'chain') {
-      let cur = target, dmg = w.dmg * st.damage;
-      const hit = {}, pts = [{ x: p.x, y: p.y }];
-      for (let i = 0; i < (w.jumps || 3) && cur; i++) {
-        hit[cur.id] = 1;
-        pts.push({ x: cur.x, y: cur.y });
-        damageEnemy(g, cur, dmg, false);
-        dmg *= 0.82;
-        let nxt = null, nd = 300;
+      const arcs = 1 + (st.chainExtra || 0);
+      const used = {};
+      for (let a = 0; a < arcs; a++) {
+        let start = null, sd = 1e9;
         for (const e of g.enemies) {
-          if (e.dead || hit[e.id]) continue;
-          const d = Math.hypot(e.x - cur.x, e.y - cur.y);
-          if (d < nd) { nd = d; nxt = e; }
+          if (e.dead || used[e.id]) continue;
+          const dd = Math.hypot(e.x - p.x, e.y - p.y);
+          if (dd < sd) { sd = dd; start = e; }
         }
-        cur = nxt;
+        if (!start) break;
+        used[start.id] = 1;
+        let cur = start, dmg = w.dmg * st.damage;
+        const hit = {}, pts = [{ x: p.x, y: p.y }];
+        for (let i = 0; i < (w.jumps || 3) + (st.chainJumps || 0) && cur; i++) {
+          hit[cur.id] = 1;
+          pts.push({ x: cur.x, y: cur.y });
+          damageEnemy(g, cur, dmg, false);
+          dmg *= 0.82;
+          let nxt = null, nd = 300;
+          for (const e of g.enemies) {
+            if (e.dead || hit[e.id]) continue;
+            const d = Math.hypot(e.x - cur.x, e.y - cur.y);
+            if (d < nd) { nd = d; nxt = e; }
+          }
+          cur = nxt;
+        }
+        g.effects.push({ kind: 'chain', pts: pts, life: 0.24, max: 0.24, color: w.color });
       }
-      g.effects.push({ kind: 'chain', pts: pts, life: 0.24, max: 0.24, color: w.color });
       sfx(g, 'shoot');
       p.fireCd = w.cd / st.fireRate;
       return;
@@ -446,12 +458,19 @@
       const swL = p.subWeapon ? D.weapons[p.subWeapon] : null;
       const lk = (lw && (lw.kind === 'chain' || lw.kind === 'tether')) ? lw : ((swL && (swL.kind === 'chain' || swL.kind === 'tether')) ? swL : null);
       if (lk) {
-        p.link = nearestEnemy(g, p.x, p.y, (lk.range || 400) + st.range);
-        if (p.link) {
+        const __ln = 1 + (st.linkExtra || 0);
+        const __cands = g.enemies.filter(function (e) { return !e.dead; })
+          .map(function (e) { return { e: e, d: Math.hypot(e.x - p.x, e.y - p.y) }; })
+          .filter(function (o) { return o.d < (lk.range || 400) + st.range; })
+          .sort(function (a, b) { return a.d - b.d; })
+          .slice(0, __ln).map(function (o) { return o.e; });
+        p.links = __cands;
+        p.link = __cands[0] || null;
+        if (__cands.length) {
           p.linkTick = (p.linkTick || 0) - dt;
           if (p.linkTick <= 0) {
             p.linkTick = 0.4;
-            damageEnemy(g, p.link, (lk.dmg || 10) * st.damage * (st.subDmgMul || 1) * 0.35, false);
+            for (const __le of __cands) damageEnemy(g, __le, (lk.dmg || 10) * st.damage * (st.subDmgMul || 1) * 0.35, false);
           }
         }
       } else p.link = null;
