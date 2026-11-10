@@ -402,7 +402,7 @@
       ov.innerHTML = '<div class="guide-box"><div class="guide-head">设置<button class="guide-close">×</button></div><div class="guide-body" id="setBody"></div></div>';
       document.body.appendChild(ov);
       var body = ov.querySelector('#setBody');
-      [btn, mbtn, qualityBtn, fpsBtn, codexBtn, liveBtn, expBtn, impBtn, copyBtn].forEach(function (b) {
+      [btn, nbtn, dbtn, sbtn, mbtn, qualityBtn, fpsBtn, codexBtn, liveBtn, expBtn, impBtn, copyBtn].forEach(function (b) {
         var row = document.createElement('button');
         row.className = 'set-row';
         row.textContent = b.textContent;
@@ -1124,7 +1124,7 @@
     input.setEnabled(false);
   }
 
-  const BUILD_TAG = '2026-11-11d';
+  const BUILD_TAG = '2026-11-11e';
   function titleLockScroll() {
     const t = document.getElementById('title');
     if (t) {
