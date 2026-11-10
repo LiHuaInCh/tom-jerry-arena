@@ -313,8 +313,11 @@
     if (sub === 'summon') { w.kind = 'summon'; w.cd = 4.0; w.duration = 10; w.dmg = Math.round((w.dmg || 14) * 1.15); if (c.id === 'm09') { w.stationary = true; w.range = 96; w.duration = 10; } }
     if (sub === 'mine') { w.duration = 12; w.triggerR = 46; w.armTime = 1.2; w.maxActive = 4; w.boomR = 90; }
     if (sub === 'spike') { w.duration = 12; w.triggerR = 40; w.armTime = 0.8; w.maxActive = 4; }
-    if (sub === 'aegis') { w.selfDR = 0.08; }
+    if (sub === 'aegis') { w.selfDR = 0.08; w.auraR = 96; w.tickCd = 0.45; w.tickDmg = Math.round((w.dmg || 10) * 1.6); }
     if (sub === 'burn') { w.auraR = 96; w.tickCd = 0.45; w.tickDmg = Math.round((w.dmg || 10) * 1.6); }
+    const KIND_DMG_MUL = { ranged: 2.2, beam: 3.0, chain: 1.7, tether: 1.4, orbit: 0.62, summon: 0.62, deploy: 0.9 };
+    if (w.kind === 'aura') { w.dmg = Math.round((w.dmg || 10) * 0.9); w.tickDmg = Math.round((w.tickDmg || 10) * 0.9); }
+    else if (KIND_DMG_MUL[w.kind]) w.dmg = Math.max(1, Math.round((w.dmg || 10) * KIND_DMG_MUL[w.kind]));
   });
   const TOP_NERF = ['c16', 'knightcat'];
   characters.forEach(function (c) {

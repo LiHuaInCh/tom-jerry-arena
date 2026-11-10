@@ -145,12 +145,13 @@
     if (!ok) return;
     const late = wave > 10 ? Math.pow(1.015, wave - 10) : 1;
     const dyn = Math.max(0.85, Math.min(2.0, Math.sqrt((g.dps || 80) / 100)));
-    let scale = (def.boss ? (1 + Math.max(0, wave - 1) * 0.07) * (wave <= 4 ? 0.55 : (wave < 12 ? 0.65 : (wave < 20 ? 0.65 : 1))) : (1 + Math.max(0, wave - 1) * 0.12) * (wave <= 5 ? 1.1 : 1)) * late * dyn;
+    let scale = (def.boss ? (1 + Math.max(0, wave - 1) * 0.07) * (wave <= 4 ? 0.6 : (wave < 12 ? 0.7 : (wave < 20 ? 0.7 : 1.05))) : (1 + Math.max(0, wave - 1) * 0.14) * (wave <= 5 ? 1.1 : 1)) * late * dyn;
+    if (!def.boss && wave >= 6 && wave <= 11) scale *= 1.12;
     if (!def.boss && wave >= 8 && rand(g, 0, 1) < 0.05) scale *= 1.35;
     const e = {
       id: ++g._eid || (g._eid = 1), kind, def, x, y, vx: 0, vy: 0, r: def.radius,
       hp: Math.round(def.hp * scale), maxHp: Math.round(def.hp * scale),
-      speed: def.speed * (1 + Math.min(0.45, wave * 0.016)) * (wave >= 6 && wave <= 9 ? 1.08 : 1), dmg: def.dmg * Math.min(2.2, 1.85 + Math.max(0, wave - 5) * 0.04) * (1 + wave * 0.04) * (def.boss && wave < 6 ? 0.6 : 1) * (wave <= 5 ? 1.15 : 1),
+      speed: def.speed * (1 + Math.min(0.45, wave * 0.016)) * (wave >= 6 && wave <= 9 ? 1.08 : 1), dmg: def.dmg * Math.min(2.2, 1.85 + Math.max(0, wave - 5) * 0.04) * (1 + wave * 0.043) * (def.boss && wave < 6 ? 0.6 : 1) * (wave <= 5 ? 1.15 : 1),
       flash: 0, hitCd: 0, spawnT: 0.35, dead: false, kx: 0, ky: 0,
       armor: Math.min(0.55, (def.armor || 0) + wave * (def.boss ? 0.0035 : 0.0015)),
       state: 'idle', stateT: 0, atkCd: rand(g, 0.6, 1.6) * (wave <= 3 ? 1.2 : 1), charge: null,
