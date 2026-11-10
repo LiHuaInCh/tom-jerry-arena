@@ -1688,6 +1688,18 @@
         }
         ctx.restore();
       }
+      const __swAura = __ap.subWeapon ? D.weapons[__ap.subWeapon] : null;
+      if (__swAura && __swAura.kind === 'aura') {
+        const __srad = __swAura.auraR || 90;
+        const __scol = __swAura.color || '#9CD8FF';
+        ctx.save();
+        ctx.translate(__ap.x, __ap.y - __srad * 0.05);
+        ctx.beginPath(); ctx.arc(0, 0, __srad, 0, Math.PI * 2);
+        ctx.globalAlpha = 0.14; ctx.fillStyle = __scol; ctx.fill();
+        const __sico = __swAura.iconImg ? orbitImg(__swAura.iconImg) : null;
+        if (__sico) { const __ss = __srad * 1.5; ctx.globalAlpha = 0.3; ctx.drawImage(__sico, -__ss / 2, -__ss / 2, __ss, __ss); }
+        ctx.restore(); /* __swAura */
+      }
       if (g.stage) {
         const sImg = orbitImg(g.stage.kind === 'good' ? 'assets/enemies/goodjerry_big.png' : 'assets/enemies/angryjerry_big.png');
         if (sImg) {
