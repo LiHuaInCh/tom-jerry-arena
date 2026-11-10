@@ -84,6 +84,7 @@
         for (const e of g.enemies) {
           if (e.dead || used[e.id]) continue;
           const dd = Math.hypot(e.x - p.x, e.y - p.y);
+          if (dd > (w.range || 600) + st.range) continue;
           if (dd < sd) { sd = dd; start = e; }
         }
         if (!start) break;
@@ -478,7 +479,7 @@
             for (const __le of __cands) damageEnemy(g, __le, (lk.dmg || 10) * st.damage * (st.subDmgMul || 1) * 0.35, false);
           }
         }
-      } else p.link = null;
+      } else { p.link = null; p.links = []; }
     }
     if (p.subWeapon) {
       const sw = D.weapons[p.subWeapon];
@@ -1156,7 +1157,7 @@
       const BOSS_ORDER = ['kunkun', 'cthulhu', 'giant', 'qianchang', 'angryqc', 'chenjr'];
       const BOSS_NAME = { kunkun: '坤坤杰瑞', cthulhu: '绷带杰瑞', giant: '巨人僵尸', qianchang: '浅唱', angryqc: '不甘心的浅唱', chenjr: '陈佳嵘' };
       if (g.nextBossWave == null) g.nextBossWave = 3;
-      if (!g.boss && wave >= g.nextBossWave) {
+      if (!g.enemies.some(function (e) { return e.boss && !e.dead; }) && wave >= g.nextBossWave) {
         if (g.finalBoss) {
           const trio = ['qianchang', 'angryqc', 'chenjr'];
           trio.forEach(function (kind, ti) {

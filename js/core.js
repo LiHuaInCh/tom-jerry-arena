@@ -188,7 +188,7 @@
     }
     if (wk === 'summon') {
       const sumCards = [
-        { id: 'sum_count', name: '召唤增援', desc: '同时存在的召唤物 +1', icon: '援', rarity: 'epic', max: 2 },
+        { id: 'sum_count', name: '召唤增援', desc: '同时存在的召唤物 +1', icon: '援', rarity: 'epic', max: 4 },
         { id: 'sum_dmg', name: '召唤强化', desc: '召唤物伤害 +30%', icon: '召', rarity: 'rare', max: 3 },
         { id: 'sum_dur', name: '延长契约', desc: '召唤物持续时间 +4 秒', icon: '久', rarity: 'common', max: 2 },
         { id: 'sum_cd', name: '召唤急速', desc: '召唤冷却 -20%', icon: '急', rarity: 'rare', max: 3 }
@@ -263,7 +263,7 @@
     }
     if (id.indexOf('sum_') === 0) {
       g.upgradeCounts[id] = (g.upgradeCounts[id] || 0) + 1;
-      if (id === 'sum_count') g.stats.summonCount = Math.min(3, (g.stats.summonCount || 1) + 1);
+      if (id === 'sum_count') g.stats.summonCount = Math.min(7, (g.stats.summonCount || 3) + 1);
       else if (id === 'sum_dmg') g.stats.summonDmgMul = (g.stats.summonDmgMul || 1) * 1.3;
       else if (id === 'sum_dur') g.stats.summonDur = (g.stats.summonDur || 0) + 4;
       else if (id === 'sum_cd') g.stats.summonCdMul = (g.stats.summonCdMul || 1) * 0.8;
