@@ -372,6 +372,7 @@
       ov.innerHTML = '<div class="guide-box"><div class="guide-head">设置<button class="guide-close">×</button></div><div class="guide-body" id="setBody"></div></div>';
       document.body.appendChild(ov);
       var body = ov.querySelector('#setBody');
+      body.classList.add('settings-grid');
       [btn, nbtn, mbtn, dmgBtn, fxBtn, codexBtn, liveBtn, expBtn, impBtn, copyBtn].forEach(function (b) {
         var row = document.createElement('button');
         row.className = 'set-row';
@@ -1072,13 +1073,60 @@
   function openCodex() {
     let ov = document.getElementById('codexOverlay');
     if (!ov) { ov = document.createElement('div'); ov.id = 'codexOverlay'; ov.className = 'codex-overlay'; document.body.appendChild(ov); }
-    const KC = { ranged: '远程', orbit: '环绕', aura: '光环', chain: '连锁', tether: '连锁', beam: '光束', deploy: '布置', summon: '召唤' };
-    const items = D.characters.map(function (c) {
+    const KC = { ranged: '远程', orbit: '环绕', aura: '光环', chain: '连锁', tether: '链接', beam: '光束', deploy: '布置', summon: '召唤' };
+    const KD = {
+      ranged: '远程武器：自动瞄准发射弹丸，靠弹速、穿透、散射、追踪等特性拉开差异。',
+      orbit: '环绕武器：刀刃围绕角色旋转，贴身持续伤害，适合近身缠斗。',
+      aura: '光环武器：以角色为中心持续灼烧或护体，范围压制与生存兼顾。',
+      chain: '连锁武器：命中后在敌人之间跳跃，目标越密集收益越高。',
+      tether: '链接武器：持续连接敌人，边跑边磨血，适合拉扯。',
+      beam: '光束武器：瞬发直线穿透，射程远、命中稳定。',
+      deploy: '布置武器：提前放置地雷或尖刺，让敌人自己踩进来。',
+      summon: '召唤武器：召唤伙伴自动作战，数量与持续是核心。'
+    };
+    const SD = {
+      '穿透长弹': '单发高伤、直线穿透多个目标，适合排成一列的怪群。',
+      '散射弹丸': '一次多枚弹丸扇射，近距离爆发高，远距离会散。',
+      '蓄力重炮': '低射速高单发，命中反馈重，适合点杀精英。',
+      '速射连发': '极高攻速持续压制，单发低，靠数量和元素触发。',
+      '追踪弹': '弹丸自动转向，走位压力小，适合边跑边打。',
+      '抛物弹跳': '抛射落地后弹跳，能越过掩体打后排。',
+      '短刃快斩': '高攻速环绕刀刃，贴身连续切割。',
+      '长柄横扫': '环绕半径更大，一次扫过更多敌人。',
+      '重锤范围震荡': '低频重击附带范围震荡，清群和击退兼顾。',
+      '守护环绕': '刀刃偏防御，提供减伤或护盾收益。',
+      '持续灼烧': '范围持续掉血，适合绕圈拉扯。',
+      '守护光环': '光环提供减伤与回复，偏生存。',
+      '瞬发贯穿': '瞬发直线光束，射程远、命中稳定。',
+      '闪电跳跃': '命中后在敌人之间连锁跳跃，怪越密越强。',
+      '持续电弧': '持续连接目标，边跑边磨血。',
+      '触发地雷': '提前埋雷，敌人踩中触发爆炸。',
+      '地刺陷阱': '放置尖刺，持续伤害并减速。',
+      '召唤物': '召唤伙伴自动索敌攻击，数量与持续是核心。'
+    };
+    const groups = {};
+    D.characters.forEach(function (c) {
       const w = D.weapons[c.weapon] || {};
-      const ic = w.iconImg ? '<img src="' + w.iconImg + '" alt="">' : '<span class="cx-ph">?</span>';
-      return '<div class="cx-item">' + ic + '<b>' + (w.name || '—') + '</b><span>' + (KC[w.kind] || '') + (w.label ? ' · ' + w.label : '') + '</span><em>' + c.name + '</em></div>';
+      const key = (w.label || KC[w.kind] || '其他') + '|' + (w.kind || '');
+      if (!groups[key]) groups[key] = { label: w.label || KC[w.kind] || '其他', kind: w.kind, chars: [] };
+      groups[key].chars.push({ c: c, w: w });
+    });
+    const order = ['ranged', 'orbit', 'aura', 'beam', 'chain', 'tether', 'deploy', 'summon'];
+    const keys = Object.keys(groups).sort(function (a, b) {
+      const ga = groups[a], gb = groups[b];
+      const oa = order.indexOf(ga.kind), ob = order.indexOf(gb.kind);
+      return (oa < 0 ? 99 : oa) - (ob < 0 ? 99 : ob) || ga.label.localeCompare(gb.label, 'zh');
+    });
+    const html = keys.map(function (k) {
+      const grp = groups[k];
+      const chars = grp.chars.sort(function (a, b) { return (a.c.faction === b.c.faction) ? a.c.name.localeCompare(b.c.name, 'zh') : (a.c.faction === 'mouse' ? -1 : 1); });
+      return '<div class="codex-group"><div class="codex-gh"><b>' + grp.label + '</b><i>' + (KC[grp.kind] || '') + '</i><em>' + chars.length + ' 名</em></div>' +
+        '<p>' + (SD[grp.label] || KD[grp.kind] || '') + '</p><div class="codex-chars">' +
+        chars.map(function (o) {
+          return '<div class="codex-char"><img src="' + portraitSrc(o.c.id) + '" alt=""><div><b>' + o.c.name + '</b><span>' + (o.w.name || '') + '</span></div></div>';
+        }).join('') + '</div></div>';
     }).join('');
-    ov.innerHTML = '<div class="codex-box"><div class="codex-head"><b>武器图鉴</b><span>57 把 · 每角色独立</span><button class="codex-close">×</button></div><div class="codex-grid">' + items + '</div></div>';
+    ov.innerHTML = '<div class="codex-box"><div class="codex-head"><b>武器流派图鉴</b><span>18 种流派 · 57 名角色</span><button class="codex-close">×</button></div><div class="codex-body">' + html + '</div></div>';
     ov.classList.add('on');
     ov.querySelector('.codex-close').onclick = function () { ov.classList.remove('on'); };
     ov.onclick = function (ev) { if (ev.target === ov) ov.classList.remove('on'); };
