@@ -1210,3 +1210,38 @@ html.native #splash { display: flex; }
   .settings-grid { grid-template-columns: 1fr 1fr; }
 }
 @media (min-width: 761px) { .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; } }
+
+#pause .modal {
+  width: min(620px, 94vw) !important;
+  max-height: 88vh !important;
+  padding: 16px 20px 14px !important;
+  overflow-y: auto !important;
+}
+#pause h2 { font-size: 22px !important; margin: 2px 0 8px !important; }
+#pauseStats { margin: 4px 0 8px !important; }
+.pause-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 2px 18px !important; }
+.pg-row { font-size: 11px !important; padding: 2px 0 !important; }
+.pause-buffs { justify-content: flex-start !important; margin-top: 4px !important; }
+#pause .modal-actions {
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  margin-top: 10px !important;
+  padding: 10px 0 0 !important;
+  border-top: 1px solid rgba(138,106,82,.35);
+  background: transparent !important;
+}
+#pause .modal-actions .btn {
+  flex: 1 1 0;
+  min-width: 0 !important;
+  padding: 8px 4px !important;
+  font-size: 13px !important;
+}
+@media (max-width: 760px) {
+  #pause .modal { width: 94vw !important; padding: 12px 14px !important; }
+  #pause h2 { font-size: 19px !important; }
+  .pause-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 2px 12px !important; }
+  .pg-row { font-size: 10.5px !important; }
+  #pause .modal-actions { gap: 6px !important; }
+  #pause .modal-actions .btn { flex: 1 1 44%; font-size: 12px !important; padding: 8px 4px !important; }
+}
