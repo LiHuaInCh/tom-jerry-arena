@@ -2,7 +2,7 @@
 (function () {
   const TJ = (window.TJ = window.TJ || {});
   const KEY = 'tj_meta_v2', OLD = 'tj_meta_v1';
-  const def = { xp: 0, level: 1, wins: 0, covWins: 0, chars: {}, badges: {}, runes: {} };
+  const def = { v: 2, xp: 0, level: 1, wins: 0, covWins: 0, chars: {}, badges: {}, runes: {} };
   let m = null;
   try { m = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
   if (!m) {
@@ -11,6 +11,9 @@
     m = o ? { xp: o.xp || 0, level: o.level || 1, wins: o.wins || 0, covWins: o.covWins || 0, chars: o.chars || {}, badges: o.badges || {}, runes: {} } : JSON.parse(JSON.stringify(def));
     try { localStorage.setItem(KEY, JSON.stringify(m)); } catch (e) {}
   }
+  if (!m.v) m.v = 1;
+  if (m.v > 2) { m = JSON.parse(JSON.stringify(def)); }
+  m.v = 2;
   if (!m.chars) m.chars = {};
   if (!m.badges) m.badges = {};
   if (!m.runes) m.runes = {};
@@ -21,7 +24,7 @@
     tough: { name: '坚韧', desc: '生命 +2%/级' },
     armor: { name: '护甲', desc: '护甲 +0.5%/级，移速 -0.25%/级' }
   };
-  function save() { try { localStorage.setItem(KEY, JSON.stringify(m)); } catch (e) {} }
+  function save() { try { m.v = 2; localStorage.setItem(KEY, JSON.stringify(m)); } catch (e) {} }
   function levelFor(xp) { let lv = 1, need = 100, left = xp; while (left >= need && lv < 60) { left -= need; lv++; need = 100 + (lv - 1) * 60; } return { level: Math.min(60, lv), into: left, need: need }; }
   function totalPoints() { return Math.min(30, Math.floor(levelFor(m.xp).level / 2)); }
   function spentPoints() { let s = 0; for (const k in m.runes) s += m.runes[k] || 0; return s; }

@@ -1136,6 +1136,7 @@
 
   function director(g, dt) {
     g.elapsed += dt;
+    if (g.training) { const instant = (g.dmgDealt || 0) / Math.max(1, g.elapsed); g.dps = (g.dps == null ? instant : g.dps * 0.99 + instant * 0.01); return; }
     const instant = (g.dmgDealt || 0) / Math.max(1, g.elapsed);
     g.dps = (g.dps == null ? instant : g.dps * 0.99 + instant * 0.01);
     if (g.missionTimer > 0) {

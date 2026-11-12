@@ -3,7 +3,8 @@
   const TJ = (window.TJ = window.TJ || {});
   TJ.DATA_PARTS = TJ.DATA_PARTS || {};
 TJ.DATA_PARTS.enemies = {
-    bomber:  { name: '自爆怪', hp: 90, speed: 168, radius: 18, dmg: 0, xp: 4, score: 14, sprite: 'assets/enemies/pirate_big.png', fur: '#E2453C', furDark: '#A82B24', belly: '#FFD8D2', eye: '#2B1B12' },
+    dummy:   { name: '训练木桩', hp: 200000, speed: 0, radius: 34, dmg: 0, xp: 0, score: 0, sprite: 'assets/enemies/cheese_cut.png', fur: '#C9A27A', furDark: '#9A7550', belly: '#F4E3C8', eye: '#2B1B12' },
+  bomber:  { name: '自爆怪', hp: 90, speed: 168, radius: 18, dmg: 0, xp: 4, score: 14, sprite: 'assets/enemies/pirate_big.png', fur: '#E2453C', furDark: '#A82B24', belly: '#FFD8D2', eye: '#2B1B12' },
     bigboss: { name: '鼠王', hp: 10000, speed: 62, radius: 52, dmg: 26, xp: 60, score: 400, fur: '#8E2F2F', furDark: '#5E1D1D', belly: '#E8B4A8', eye: '#FFD34D', boss: true },
     hunter:  { name: '牢侍卫', hp: 240, speed: 118, radius: 22, dmg: 16, xp: 6, score: 22, sprite: 'assets/enemies/guard_big.png', fur: '#8E5BD0', furDark: '#6B3FA8', belly: '#E6D9F5', eye: '#2B1B12' },
     kitten:  { name: '兔子杰瑞', hp: 42, speed: 120, radius: 16, dmg: 8, xp: 3, score: 10, sprite: 'assets/enemies/bunny_big.png', fur: '#8C9AAD', furDark: '#66738A', belly: '#E7EDF5', eye: '#2B1B12' },

@@ -8,7 +8,7 @@
   <link rel="apple-touch-icon" href="assets/brand/app-icon.png">
   <title>猫鼠大作战 · Tom &amp; Jerry: Arrow Chase</title>
 <link rel="icon" href="assets/brand/icon.png">
-<link rel="stylesheet" href="css/style.css?v=1.7.2">
+<link rel="stylesheet" href="css/style.css?v=1.7.3">
 <script>
 (function(){
   var native = !!(window.androidBridge || (window.Capacitor && (window.Capacitor.isNativePlatform ? window.Capacitor.isNativePlatform() : (window.Capacitor.platform && window.Capacitor.platform !== 'web'))));
@@ -57,13 +57,14 @@
     </div>
 
     <div id="buffs"></div>
+    <div id="statusBar"></div>
     <div id="toast"></div>
     <div id="board" class="hidden"></div>
     <div id="feed"></div>
     <div id="respawn" class="hidden"><b id="respawnNum">3</b><span>秒后复活</span></div>
 
     <button id="pauseBtn" aria-label="暂停">❚❚</button>
-    <div id="dashBtn"><span>技能</span></div>
+    <div id="dashBtn"><span>技能</span><b id="skillCdTxt"></b></div>
     <div id="joy"><div id="joyKnob"></div></div>
   </div>
 
@@ -133,6 +134,13 @@
     </div>
   </div>
 
+  <div id="trainBar" class="hidden">
+    <button id="trainResetDummy">重置木桩</button>
+    <button id="trainResetCd">重置冷却</button>
+    <button id="trainExit">退出训练</button>
+    <span id="trainDps">DPS 0</span>
+  </div>
+
   <div id="pause" class="overlay hidden">
     <div class="modal">
       <h2>暂停</h2>
@@ -186,28 +194,29 @@
           <img id="cmSIcon" alt="">
           <div><b id="cmSName"></b><span id="cmSInfo"></span></div>
         </div>
+        <div id="cmSig" class="cm-sig"></div>
       </div>
     </div>
   </div>
 
-<script src="js/data-enemies.js?v=1.7.2"></script>
-  <script src="js/data-chars.js?v=1.7.2"></script>
-  <script src="js/data.js?v=1.7.2"></script>
-<script src="js/feedback.js?v=1.7.2"></script>
-  <script src="js/pickups.js?v=1.7.2"></script>
-  <script src="js/combat.js?v=1.7.2"></script>
-  <script src="js/systems.js?v=1.7.2"></script>
-  <script src="js/core.js?v=1.7.2"></script>
-  <script src="js/missions.js?v=1.7.2"></script>
-<script src="js/arena.js?v=1.7.2"></script>
-  <script src="js/skills.js?v=1.7.2"></script>
-<script src="js/render.js?v=1.7.2"></script>
-<script src="js/input.js?v=1.7.2"></script>
-<script src="js/audio.js?v=1.7.2"></script>
-<script src="js/fx.js?v=1.7.2"></script>
-  <script src="js/meta.js?v=1.7.2"></script>
-  <script src="js/splash.js?v=1.7.2"></script>
-<script src="js/main.js?v=1.7.2"></script>
+<script src="js/data-enemies.js?v=1.7.3"></script>
+  <script src="js/data-chars.js?v=1.7.3"></script>
+  <script src="js/data.js?v=1.7.3"></script>
+<script src="js/feedback.js?v=1.7.3"></script>
+  <script src="js/pickups.js?v=1.7.3"></script>
+  <script src="js/combat.js?v=1.7.3"></script>
+  <script src="js/systems.js?v=1.7.3"></script>
+  <script src="js/core.js?v=1.7.3"></script>
+  <script src="js/missions.js?v=1.7.3"></script>
+<script src="js/arena.js?v=1.7.3"></script>
+  <script src="js/skills.js?v=1.7.3"></script>
+<script src="js/render.js?v=1.7.3"></script>
+<script src="js/input.js?v=1.7.3"></script>
+<script src="js/audio.js?v=1.7.3"></script>
+<script src="js/fx.js?v=1.7.3"></script>
+  <script src="js/meta.js?v=1.7.3"></script>
+  <script src="js/splash.js?v=1.7.3"></script>
+<script src="js/main.js?v=1.7.3"></script>
 
     <div id="rotateHint" class="rotate-hint">请横屏游玩<br><span>旋转手机以获得完整视野</span></div>
 </body>

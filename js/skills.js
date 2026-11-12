@@ -78,7 +78,7 @@
     if (!w) return null;
     const kind = w.kind;
     const dmg = (sk.dmg || 40) * 0.6;
-    g.effects.push({ kind: 'flash', color: RES_COLOR[kind] || '#FFF6E0', life: 0.16, max: 0.16 });
+    if (TJ.vfxLevel >= 2) g.effects.push({ kind: 'flash', color: RES_COLOR[kind] || '#FFF6E0', life: 0.16, max: 0.16 });
     const RB = TJ.helpers;
     RB.burst(g, f.x, f.y, RES_COLOR[kind] || '#FFE08A', 10, 200, 3);
     const list = targets(g, f);

@@ -15,6 +15,7 @@
 
   function burst(g, x, y, color, n, spd, size) {
     if (g.particles.length > 700) return;
+    n = Math.max(1, Math.round(n * (TJ.vfxLevel === 0 ? 0.35 : (TJ.vfxLevel === 1 ? 0.65 : 1))));
     for (let i = 0; i < n; i++) {
       const a = rand(g, 0, TAU), s = rand(g, spd * 0.25, spd);
       g.particles.push({

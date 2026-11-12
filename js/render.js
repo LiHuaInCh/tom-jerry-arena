@@ -1341,6 +1341,8 @@
 
   function drawEffect(ctx, e) {
     if (TJ.lowFx && (e.kind === 'tex' || e.kind === 'spark')) return;
+    if ((TJ.vfxLevel || 0) === 0 && (e.kind === 'tex' || e.kind === 'spark' || e.kind === 'flash')) return;
+    if ((TJ.vfxLevel || 0) < 2 && e.kind === 'flash') return;
     const k = e.life / e.max;
     if (e.kind === 'ring') {
       ctx.save();
@@ -1588,7 +1590,7 @@
       camX = vw >= D.W ? D.W / 2 : clamp(camX, vw / 2, D.W - vw / 2);
       camY = vh >= D.H ? D.H / 2 : clamp(camY, vh / 2, D.H - vh / 2);
 
-      const shake = Math.min(8, (g.shake || 0) * 0.4);
+      const shake = Math.min(8, (g.shake || 0) * 0.4) * ((TJ.vfxLevel || 2) === 0 ? 0.25 : ((TJ.vfxLevel || 2) === 1 ? 0.6 : 1));
       const sx = (Math.random() - 0.5) * shake, sy = (Math.random() - 0.5) * shake;
 
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);

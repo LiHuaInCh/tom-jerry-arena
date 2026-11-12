@@ -26,6 +26,10 @@
   let best = 0;
   try { best = parseInt(localStorage.getItem('tj_best') || '0', 10) || 0; } catch (e) {}
   let auto = params.get('auto') === '1';
+  let trainingNext = false;
+  let vfxLevel = 2;
+  try { vfxLevel = parseInt(localStorage.getItem('tj_vfx') || '2', 10); } catch (e) {}
+  TJ.vfxLevel = isNaN(vfxLevel) ? 2 : vfxLevel;
   let difficulty = (params.get('diff') === 'hard') ? 'hard' : (function () { try { return localStorage.getItem('tj_diff') || 'normal'; } catch (e) { return 'normal'; } })();
   try { TJ.hideDamageText = localStorage.getItem('tj_dmgtext') === '0'; } catch (e) { TJ.hideDamageText = false; }
   let arenaBest = 0;
@@ -168,6 +172,10 @@
     if (sk.mul) sd += ' · 倍率 ' + sk.mul;
     $('cmSInfo').textContent = sd;
 
+    var __sig = TJ.skills && TJ.skills.signature ? TJ.skills.signature(c.id) : null;
+    var __res = TJ.skills && TJ.skills.RES_NAME ? (TJ.skills.RES_NAME[w.kind] || '') : '';
+    var __sigEl = $('cmSig');
+    if (__sigEl) __sigEl.innerHTML = '<b>武器共鸣：</b>' + (__res || '—') + '<br><b>专属签名：</b>' + (__sig ? __sig.name + ' — ' + __sig.desc : '—');
     $('charModal').classList.add('on');
   }
 
@@ -358,7 +366,7 @@
       ov.innerHTML = '<div class="guide-box"><div class="guide-head">设置<button class="guide-close">×</button></div><div class="guide-body" id="setBody"></div></div>';
       document.body.appendChild(ov);
       var body = ov.querySelector('#setBody');
-      [btn, nbtn, mbtn, dmgBtn, codexBtn, liveBtn, expBtn, impBtn, copyBtn].forEach(function (b) {
+      [btn, nbtn, mbtn, dmgBtn, fxBtn, trainBtn, codexBtn, liveBtn, expBtn, impBtn, copyBtn].forEach(function (b) {
         var row = document.createElement('button');
         row.className = 'set-row';
         row.textContent = b.textContent;
@@ -387,6 +395,20 @@
       dmgBtn.textContent = dmgLabel();
     };
     toolsRow.appendChild(dmgBtn);
+    var fxBtn = document.createElement('button');
+    fxBtn.className = 'guide-btn'; fxBtn.type = 'button';
+    function fxLabel() { return '特效：' + (TJ.vfxLevel >= 2 ? '高' : (TJ.vfxLevel === 1 ? '标准' : '低')); }
+    fxBtn.textContent = fxLabel();
+    fxBtn.onclick = function () {
+      TJ.vfxLevel = TJ.vfxLevel >= 2 ? 1 : (TJ.vfxLevel === 1 ? 0 : 2);
+      try { localStorage.setItem('tj_vfx', String(TJ.vfxLevel)); } catch (e) {}
+      fxBtn.textContent = fxLabel();
+    };
+    toolsRow.appendChild(fxBtn);
+    var trainBtn = document.createElement('button');
+    trainBtn.className = 'guide-btn'; trainBtn.type = 'button'; trainBtn.textContent = '训练场';
+    trainBtn.onclick = function () { trainingNext = true; startRun(); };
+    toolsRow.appendChild(trainBtn);
     var codexBtn = document.createElement('button');
     codexBtn.className = 'guide-btn'; codexBtn.type = 'button';
     codexBtn.textContent = '武器图鉴';
@@ -488,6 +510,19 @@
   }
 
   /* ---------- 开局 ---------- */
+  function spawnTrainingDummy() {
+    if (!g) return;
+    g.enemies = [];
+    var e = TJ.Core.spawnEnemy(g, 'dummy', 1, g.player.x + 150, g.player.y);
+    if (e) {
+      e.hp = e.maxHp = 300000;
+      e.speed = 0; e.dmg = 0; e.armor = 0;
+      e.def = Object.assign({}, e.def, { speed: 0, dmg: 0, armor: 0 });
+      e.spawnT = 0; e.training = true;
+    }
+    g.dmgDealt = 0; g.elapsed = 0; g.dps = 0;
+  }
+
   function startRun() {
     TJ.Audio.unlock();
     g = mode === 'arena' ? TJ.createArenaGame({ charId: selected }) : TJ.createGame({ charId: selected, hard: difficulty === 'hard' });
@@ -545,6 +580,15 @@
       g.player.maxHp = 1e9;
       g.player.hp = 1e9;
     }
+    if (trainingNext) {
+      g.training = true;
+      g.cov.list = ['训练场']; g.cov.score = 1;
+      g.missions = []; g.missionIdx = 0; g.missionPicks = 0;
+      g.player.maxHp = 1e9; g.player.hp = 1e9;
+      trainingNext = false;
+      var tbar = document.getElementById('trainBar');
+      if (tbar) tbar.classList.remove('hidden');
+    }
     state = 'playing';
     overShown = false; overTimer = 0; acc = 0; last = performance.now();
     $('title').classList.add('hidden');
@@ -557,6 +601,7 @@
     $('feed').innerHTML = '';
     $('respawn').classList.add('hidden');
     input.setEnabled(true);
+    if (g.training) spawnTrainingDummy();
     if (TJ.meta) { TJ.meta.addUse(selected); refreshProfile(); }
     $('pName').textContent = g.player.char.name;
     $('avatar').src = portraitSrc(g.player.char.id);
@@ -809,6 +854,22 @@
 
     const cd = Math.min(1, p.skillCd / Math.max(0.01, (p.skill ? p.skill.cd * (g.stats.skillCdMul || 1) : 1)));
     $('dashBtn').style.setProperty('--cd', cd.toFixed(3));
+    var __cdTxt = document.getElementById('skillCdTxt');
+    if (__cdTxt) __cdTxt.textContent = p.skillCd > 0.08 ? (p.skillCd < 10 ? p.skillCd.toFixed(1) : Math.ceil(p.skillCd)) : '';
+    var __sb = document.getElementById('statusBar');
+    if (__sb) {
+      var __chips = '';
+      if (p.hasteT > 0) __chips += '<div class="status-chip">疾<b>' + p.hasteT.toFixed(1) + '</b></div>';
+      if (p.stealthT > 0) __chips += '<div class="status-chip">隐<b>' + p.stealthT.toFixed(1) + '</b></div>';
+      if (p.invuln > 0) __chips += '<div class="status-chip">盾<b>' + p.invuln.toFixed(1) + '</b></div>';
+      if (p.nextHitCharges > 0) __chips += '<div class="status-chip">蓄<b>×' + p.nextHitCharges + '</b></div>';
+      if (p.slowT > 0) __chips += '<div class="status-chip">缓<b>' + p.slowT.toFixed(1) + '</b></div>';
+      if (p.freezeT > 0) __chips += '<div class="status-chip">冻<b>' + p.freezeT.toFixed(1) + '</b></div>';
+      if (p.rootT > 0) __chips += '<div class="status-chip">缚<b>' + p.rootT.toFixed(1) + '</b></div>';
+      if (__sb.__last !== __chips) { __sb.innerHTML = __chips; __sb.__last = __chips; }
+    }
+    var __tb = document.getElementById('trainDps');
+    if (__tb && g.training) __tb.textContent = 'DPS ' + Math.round(g.dps || 0);
     let ib = document.getElementById('itemBtn');
     if (!ib) {
       ib = document.createElement('button');
@@ -1062,7 +1123,7 @@
     input.setEnabled(false);
   }
 
-  const BUILD_TAG = '2026-11-12c';
+  const BUILD_TAG = '2026-11-13a';
   function titleLockScroll() {
     const t = document.getElementById('title');
     if (t) {
@@ -1113,6 +1174,8 @@
   })();
 
   function goHome() {
+    var tb = document.getElementById('trainBar');
+    if (tb) tb.classList.add('hidden');
     setTimeout(fitTitle, 60);
     if (TJ.Audio && TJ.Audio.setMood) TJ.Audio.setMood('title');
     state = 'title';
@@ -1415,6 +1478,12 @@
   $('quitBtn').addEventListener('click', endRun);
   $('resumeBtn').addEventListener('click', resumeGame);
   $('pauseBtn').addEventListener('click', pauseGame);
+  if ($('trainResetDummy')) $('trainResetDummy').addEventListener('click', function () { if (g && g.training) spawnTrainingDummy(); });
+  if ($('trainResetCd')) $('trainResetCd').addEventListener('click', function () {
+    if (!g) return;
+    g.player.skillCd = 0; g.player.fireCd = 0; g.player.subCd = 0; g.player.sumCd = 0; g.player.innerCd = 0;
+  });
+  if ($('trainExit')) $('trainExit').addEventListener('click', function () { goHome(); });
   (function initPauseZoom() {
     var zb = $('pauseZoom');
     if (!zb) return;
