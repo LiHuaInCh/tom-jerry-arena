@@ -785,13 +785,18 @@
       } else if (sw.kind === 'orbit') {
         f.subOrbitA = (f.subOrbitA || 0) + dt * 3.8;
         const sr = (sw.orbitR || 78);
+        const sn = sw.orbitN || 2;
         for (const e of g.fighters) {
           if (e === f || !e.alive || (e.subOrbitCd || 0) > g.t) continue;
-          const ox = f.x + Math.cos(f.subOrbitA) * sr;
-          const oy = f.y + Math.sin(f.subOrbitA) * sr;
-          if (Math.hypot(e.x - ox, e.y - oy) < e.r + 14) {
-            damageFighter(g, e, sw.dmg * f.stats.damage, f, false);
-            e.subOrbitCd = g.t + 0.4;
+          for (let bi = 0; bi < sn; bi++) {
+            const ba = f.subOrbitA + bi * Math.PI * 2 / sn;
+            const ox = f.x + Math.cos(ba) * sr;
+            const oy = f.y + Math.sin(ba) * sr;
+            if (Math.hypot(e.x - ox, e.y - oy) < e.r + 14) {
+              damageFighter(g, e, sw.dmg * f.stats.damage, f, false);
+              e.subOrbitCd = g.t + 0.4;
+              break;
+            }
           }
         }
       } else if (st2 && f.subCd <= 0) {

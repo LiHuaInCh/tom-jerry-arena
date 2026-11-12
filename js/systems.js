@@ -504,14 +504,19 @@
       if (sw.kind === 'orbit') {
         p.subOrbitA = (p.subOrbitA || 0) + dt * 3.8;
         const sr = (sw.orbitR || 78);
+        const sn = sw.orbitN || 2;
         for (const e of g.enemies) {
           if (e.dead || (e.subOrbitCd || 0) > g.t) continue;
-          const ox = p.x + Math.cos(p.subOrbitA) * sr;
-          const oy = p.y + Math.sin(p.subOrbitA) * sr;
-          if (Math.hypot(e.x - ox, e.y - oy) < e.r + 14) {
-            damageEnemy(g, e, sw.dmg * st.damage * 0.9 * (st.subDmgMul || 1), false);
-            e.subOrbitCd = g.t + 0.3;
-            g.effects.push({ kind: 'ring', x: ox, y: oy, r: 5, maxR: 20, life: 0.16, max: 0.16, color: '#9FE7FF' });
+          for (let bi = 0; bi < sn; bi++) {
+            const ba = p.subOrbitA + bi * Math.PI * 2 / sn;
+            const ox = p.x + Math.cos(ba) * sr;
+            const oy = p.y + Math.sin(ba) * sr;
+            if (Math.hypot(e.x - ox, e.y - oy) < e.r + 14) {
+              damageEnemy(g, e, sw.dmg * st.damage * 0.9 * (st.subDmgMul || 1), false);
+              e.subOrbitCd = g.t + 0.3;
+              g.effects.push({ kind: 'ring', x: ox, y: oy, r: 5, maxR: 20, life: 0.16, max: 0.16, color: '#9FE7FF' });
+              break;
+            }
           }
         }
       }
