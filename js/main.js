@@ -233,7 +233,7 @@
     nbtn.type = 'button';
     nbtn.textContent = '更新公告';
     toolsRow.appendChild(nbtn);
-    var NEWS_VER = '1.4.16';
+    var NEWS_VER = '1.4.17';
     var NEWS = [
       ['启动与画面', [
         'APK 启动动画：模糊背景铺满 + 完整画面居中，点视频里的「开始游戏」即可跳过',
@@ -250,6 +250,12 @@
         '六种普通怪全部换新立绘：兔子杰瑞、奶猫杰瑞、天使莱特宁、陈佳嵘车、牢侍卫、自爆怪',
         '天使莱特宁 / 陈佳嵘车 / 牢侍卫 / 自爆怪 / 牛头怪 局内体型 ×2',
         '所有敌人基础血量 ×2.5'
+      ]],
+      ['训练与信息', [
+        '标题页新增训练场：无限木桩、重置木桩、重置冷却、DPS 显示',
+        '技能按钮显示剩余冷却秒数，状态栏显示加速 / 隐身 / 护盾 / 蓄势 / 减速 / 冰冻',
+        '角色详情新增武器共鸣与专属签名说明',
+        '新增特效率设置：高（全特效）/ 标准（去全屏闪光）/ 低（只留关键提示）'
       ]],
       ['难度选择', [
         '标题页新增普通 / 高难切换，选择会保存',
@@ -513,7 +519,7 @@
   function spawnTrainingDummy() {
     if (!g) return;
     g.enemies = [];
-    var e = TJ.Core.spawnEnemy(g, 'dummy', 1, g.player.x + 150, g.player.y);
+    var e = TJ.Core.spawnEnemy(g, 'dummy', 1, g.player.x + 90, g.player.y);
     if (e) {
       e.hp = e.maxHp = 300000;
       e.speed = 0; e.dmg = 0; e.armor = 0;
