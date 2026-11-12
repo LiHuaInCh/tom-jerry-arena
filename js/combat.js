@@ -15,6 +15,11 @@
     if (g.player && g.player.profBase) dmg *= g.player.profBase * (1 + (g.player.profGrow || 0) * (g.player.level - 1));
     const __arm = Math.max(0, (e.armor || 0) - (g.stats.pen || 0));
     if (__arm) dmg *= (1 - __arm);
+    if (g.player && g.player.nextHitCharges > 0) {
+      dmg *= (g.player.nextHitMul || 1.5);
+      g.player.nextHitCharges--;
+      if (!TJ.hideDamageText) addText(g, e.x, e.y - e.r - 18, '蓄势', '#FFD34D', 14);
+    }
     if (g.stats.stunChance && !e.boss && g.rng() < g.stats.stunChance) e.stunT = 0.35;
     if (g.stats.slowOnHit && !e.boss) { e.slowT = 1.2; e.slowMul = 1 - g.stats.slowOnHit; }
     if (g.stats.dotDps && !e.boss) { e.dotT = 2.4; e.dotDps = g.stats.dotDps; e.dotTick = e.dotTick || 0; }

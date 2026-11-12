@@ -164,6 +164,10 @@
       H.sfx(g, 'shield');
       return;
     }
+    if (attacker && attacker.nextHitCharges > 0) {
+      dmg *= (attacker.nextHitMul || 1.5);
+      attacker.nextHitCharges--;
+    }
     if (attacker && attacker !== v) { attacker.dmgDealt = (attacker.dmgDealt || 0) + dmg; attacker.hits = (attacker.hits || 0) + 1; }
     v.dmgTaken = (v.dmgTaken || 0) + dmg;
     v.hp -= dmg;
