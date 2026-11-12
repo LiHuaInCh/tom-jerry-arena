@@ -350,7 +350,7 @@
         const __free = Math.max(0, __sumMax - __mainCount);
         const __spawn = Math.min(2, __free);
         for (let __si = 0; __si < __spawn; __si++) {
-          g.summons.push({ x: p.x + 30 + __si * 24, y: p.y, life: (ow.duration || 14) + (st.summonDur || 0), atkCd: 0, r: 15, spd: 240, icon: ow.iconImg, stationary: !!ow.stationary, range: 96, size: ow.stationary ? 56 : 76, w: ow });
+          g.summons.push({ x: p.x + 30 + __si * 24, y: p.y, life: (ow.duration || 14) + (st.summonDur || 0), atkCd: 0, r: 15, spd: 380, icon: ow.iconImg, stationary: !!ow.stationary, range: ow.stationary ? 180 : 520, size: ow.stationary ? 56 : 76, w: ow });
           g.effects.push({ kind: 'ring', x: p.x + 30 + __si * 24, y: p.y, r: 4, maxR: 60, life: 0.3, max: 0.3, color: '#FFD36A' });
         }
       }
@@ -395,7 +395,7 @@
           const su = g.summons[i];
           su.life -= dt;
           if (su.life <= 0) { g.summons.splice(i, 1); continue; }
-          const tg = nearestEnemy(g, su.x, su.y, su.range || 96);
+          const tg = nearestEnemy(g, su.x, su.y, su.range || 300);
           if (tg) {
             const dd = Math.hypot(tg.x - su.x, tg.y - su.y) || 1;
             if (!su.stationary && dd > 42) { su.x += (tg.x - su.x) / dd * su.spd * dt; su.y += (tg.y - su.y) / dd * su.spd * dt; }
@@ -405,7 +405,7 @@
             }
           } else {
             const pd = Math.hypot(p.x - su.x, p.y - su.y) || 1;
-            if (!su.stationary && pd > 90) { su.x += (p.x - su.x) / pd * 120 * dt; su.y += (p.y - su.y) / pd * 120 * dt; }
+            if (!su.stationary && pd > 90) { su.x += (p.x - su.x) / pd * 320 * dt; su.y += (p.y - su.y) / pd * 320 * dt; }
           }
     }
     }
@@ -449,7 +449,7 @@
           const __subCount = g.summons.filter(function (x) { return !!x.sub && !x.temp; }).length;
           const __sfree = Math.max(0, __subMax - __subCount);
           for (let __sj = 0; __sj < Math.min(2, __sfree); __sj++) {
-            g.summons.push({ x: p.x + 24 + __sj * 24, y: p.y, life: (sw.duration || 14) + (st.summonDur || 0), atkCd: 0, r: 15, spd: 240, icon: sw.iconImg, stationary: !!sw.stationary, range: 96, size: sw.stationary ? 56 : 76, w: sw, sub: true });
+            g.summons.push({ x: p.x + 24 + __sj * 24, y: p.y, life: (sw.duration || 14) + (st.summonDur || 0), atkCd: 0, r: 15, spd: 360, icon: sw.iconImg, stationary: !!sw.stationary, range: sw.stationary ? 180 : 520, size: sw.stationary ? 56 : 76, w: sw, sub: true });
             g.effects.push({ kind: 'ring', x: p.x + 24 + __sj * 24, y: p.y, r: 4, maxR: 60, life: 0.3, max: 0.3, color: '#FFD36A' });
           }
           p.subCd = (sw.cd || 4) * (st.summonCdMul || 1); sfx(g, 'shield');

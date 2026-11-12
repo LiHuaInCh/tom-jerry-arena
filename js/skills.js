@@ -253,7 +253,7 @@
     if (__wsk && __wsk.kind === 'summon' && g.summons && !g.fighters) {
       var __n = (f.char && f.char.id === 'toots') ? 3 : 2;
       for (var __i = 0; __i < __n; __i++) {
-        g.summons.push({ x: f.x + 24 + __i * 22, y: f.y + 10, life: 8, atkCd: 0, r: 15, spd: 240, icon: __wsk.iconImg, stationary: !!__wsk.stationary, range: 120, size: __wsk.stationary ? 56 : 76, w: __wsk, temp: true });
+        g.summons.push({ x: f.x + 24 + __i * 22, y: f.y + 10, life: 8, atkCd: 0, r: 15, spd: 240, icon: __wsk.iconImg, stationary: !!__wsk.stationary, range: 520, spd: 370, size: __wsk.stationary ? 56 : 76, w: __wsk, temp: true });
       }
       g.effects.push({ kind: 'ring', x: f.x, y: f.y, r: 20, maxR: 120, life: 0.4, max: 0.4, color: '#9FE7FF' });
       TJ.helpers.addText(g, f.x, f.y - 60, '召唤援军！', '#9FE7FF', 18);
