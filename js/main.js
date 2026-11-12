@@ -224,7 +224,7 @@
     nbtn.type = 'button';
     nbtn.textContent = '更新公告';
     toolsRow.appendChild(nbtn);
-    var NEWS_VER = '1.4.13';
+    var NEWS_VER = '1.4.14';
     var NEWS = [
       ['启动与画面', [
         'APK 启动动画：模糊背景铺满 + 完整画面居中，点视频里的「开始游戏」即可跳过',
@@ -246,7 +246,9 @@
         '57 个角色的技能全部接入武器共鸣，一次技能 = 基础效果 + 武器特性',
         '远程箭雨、环绕刃暴、光环灼域、光束三矛',
         '连锁五段、布置三雷区、召唤援护回血、链接引力拉怪',
-        '冲刺落地伤害、护盾击退、治疗净化、新星眩晕同步增强'
+        '冲刺落地伤害、护盾击退、治疗净化、新星眩晕同步增强',
+        '每个角色额外获得一个签名效果：霜缚 / 烈焰 / 震荡 / 汲取 / 圣盾 / 疾风 / 雷殛 / 扩域',
+        '技能特效强化：屏幕闪光、粒子爆发、刀光、光束、链电、爆炸纹理'
       ]],
       ['武器', [
         '远程武器攻速减半、射程降为 65%',
@@ -440,7 +442,8 @@
         '光环：灼域减速；光束：三道光矛',
         '连锁：五段链爆；布置：三处雷区',
         '召唤：援护双击并回血；链接：引力锁链拉怪',
-        '技能按钮长按可看名称、冷却和共鸣类型'
+        '每个角色还有一个签名效果（霜缚 / 烈焰 / 震荡 / 汲取 / 圣盾 / 疾风 / 雷殛 / 扩域）',
+        '技能按钮长按可看名称、冷却、共鸣和签名'
       ]],
       ['小提示', [
         '敌人血量整体偏高，前期优先拿伤害与攻速，别急着堆生存',
@@ -549,7 +552,8 @@
   if (sk) {
     sbtn.style.backgroundImage = "url('" + sk.iconImg + "')";
     var __wsk = (D.weapons[g.player.char.weapon] || {}).kind;
-    sbtn.title = sk.name + ' · ' + sk.cd + ' 秒 · 武器共鸣：' + ((TJ.skills.RES_NAME || {})[__wsk] || '爆发');
+    var __sig = TJ.skills.signature ? TJ.skills.signature(g.player.char.id) : null;
+    sbtn.title = sk.name + ' · ' + sk.cd + ' 秒 · 武器共鸣：' + ((TJ.skills.RES_NAME || {})[__wsk] || '爆发') + (__sig ? ' · 签名：' + __sig.name : '');
     const lab = sbtn.querySelector('span');
     if (lab) lab.textContent = sk.name.slice(0, 4);
   }
@@ -1045,7 +1049,7 @@
     input.setEnabled(false);
   }
 
-  const BUILD_TAG = '2026-11-12a';
+  const BUILD_TAG = '2026-11-12b';
   function titleLockScroll() {
     const t = document.getElementById('title');
     if (t) {
