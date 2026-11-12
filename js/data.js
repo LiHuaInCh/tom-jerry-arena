@@ -318,6 +318,7 @@
     const KIND_DMG_MUL = { ranged: 2.2, beam: 3.0, chain: 1.7, tether: 1.4, orbit: 0.62, summon: 0.62, deploy: 0.9 };
     if (w.kind === 'aura') { w.dmg = Math.round((w.dmg || 10) * 0.9); w.tickDmg = Math.round((w.tickDmg || 10) * 0.9); }
     else if (KIND_DMG_MUL[w.kind]) w.dmg = Math.max(1, Math.round((w.dmg || 10) * KIND_DMG_MUL[w.kind]));
+    if (w.sub === 'rapid' || w.sub === 'spread') w.dmg = Math.round((w.dmg || 10) * 1.12);
   });
   const TOP_NERF = ['c16', 'knightcat'];
   characters.forEach(function (c) {
