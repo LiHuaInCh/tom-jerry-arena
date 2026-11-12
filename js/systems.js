@@ -343,15 +343,18 @@
     if (ow.kind === 'summon') {
       g.summons = g.summons || [];
       p.sumCd = (p.sumCd || 0) - dt;
-      const __sumMax = Math.max(1, st.summonCount || 3);
-      const __mainCount = g.summons.filter(function (x) { return !x.sub; }).length;
-      while (__mainCount < __sumMax && p.sumCd <= 0) {
-        p.sumCd = (ow.cd || 4.0) * (st.summonCdMul || 1);
-        g.summons.push({ x: p.x + 34, y: p.y, life: (ow.duration || 8) + (st.summonDur || 0), atkCd: 0, r: 15, spd: 240, icon: ow.iconImg, stationary: !!ow.stationary, range: 96, size: ow.stationary ? 56 : 76, w: ow });
-        g.effects.push({ kind: 'ring', x: p.x + 34, y: p.y, r: 4, maxR: 60, life: 0.3, max: 0.3, color: '#FFD36A' });
-        break;
+      const __sumMax = Math.max(1, st.summonCount || 4);
+      const __mainCount = g.summons.filter(function (x) { return !x.sub && !x.temp; }).length;
+      if (p.sumCd <= 0) {
+        p.sumCd = (ow.cd || 3.5) * (st.summonCdMul || 1);
+        const __free = Math.max(0, __sumMax - __mainCount);
+        const __spawn = Math.min(2, __free);
+        for (let __si = 0; __si < __spawn; __si++) {
+          g.summons.push({ x: p.x + 30 + __si * 24, y: p.y, life: (ow.duration || 14) + (st.summonDur || 0), atkCd: 0, r: 15, spd: 240, icon: ow.iconImg, stationary: !!ow.stationary, range: 96, size: ow.stationary ? 56 : 76, w: ow });
+          g.effects.push({ kind: 'ring', x: p.x + 30 + __si * 24, y: p.y, r: 4, maxR: 60, life: 0.3, max: 0.3, color: '#FFD36A' });
+        }
       }
-      }
+    }
     if (ow.kind === 'tether') {
       p.tetT = (p.tetT || 0) - dt;
       if (p.tetT <= 0) {
@@ -442,11 +445,12 @@
           p.subCd = (sw.cd || 1) * (st.subCdMul || 1); sfx(g, 'eshoot');
         } else if (sw.kind === 'summon') {
           g.summons = g.summons || [];
-          const __subMax = Math.max(1, st.summonCount || 3);
-          const __subCount = g.summons.filter(function (x) { return !!x.sub; }).length;
-          if (__subCount < __subMax) {
-            g.summons.push({ x: p.x + 30, y: p.y, life: (sw.duration || 10) + (st.summonDur || 0), atkCd: 0, r: 15, spd: 240, icon: sw.iconImg, stationary: !!sw.stationary, range: 96, size: sw.stationary ? 56 : 76, w: sw, sub: true });
-            g.effects.push({ kind: 'ring', x: p.x + 30, y: p.y, r: 4, maxR: 60, life: 0.3, max: 0.3, color: '#FFD36A' });
+          const __subMax = Math.max(1, st.summonCount || 4);
+          const __subCount = g.summons.filter(function (x) { return !!x.sub && !x.temp; }).length;
+          const __sfree = Math.max(0, __subMax - __subCount);
+          for (let __sj = 0; __sj < Math.min(2, __sfree); __sj++) {
+            g.summons.push({ x: p.x + 24 + __sj * 24, y: p.y, life: (sw.duration || 14) + (st.summonDur || 0), atkCd: 0, r: 15, spd: 240, icon: sw.iconImg, stationary: !!sw.stationary, range: 96, size: sw.stationary ? 56 : 76, w: sw, sub: true });
+            g.effects.push({ kind: 'ring', x: p.x + 24 + __sj * 24, y: p.y, r: 4, maxR: 60, life: 0.3, max: 0.3, color: '#FFD36A' });
           }
           p.subCd = (sw.cd || 4) * (st.summonCdMul || 1); sfx(g, 'shield');
         } else if (sw.kind === 'deploy') {

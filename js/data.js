@@ -310,7 +310,7 @@
     if (sub === 'heavy') { w.dmg = Math.round((w.dmg || 10) * 1.35); w.cd = Math.round((w.cd || 1) * 1.25 * 100) / 100; }
     if (sub === 'spread') { w.pellets = 4; w.spread = 30; }
     if (sub === 'lob') { w.gravity = 900; w.bounce = 1; w.boom = Math.round((w.dmg || 10) * 0.3); }
-    if (sub === 'summon') { w.kind = 'summon'; w.cd = 4.0; w.duration = 10; w.dmg = Math.round((w.dmg || 14) * 1.15); if (c.id === 'm09') { w.stationary = true; w.range = 96; w.duration = 10; } }
+    if (sub === 'summon') { w.kind = 'summon'; w.cd = 3.5; w.duration = 14; w.dmg = Math.round((w.dmg || 14) * 1.15); if (c.id === 'm09') { w.stationary = true; w.range = 96; w.duration = 10; } }
     if (sub === 'mine') { w.duration = 12; w.triggerR = 46; w.armTime = 1.2; w.maxActive = 4; w.boomR = 90; }
     if (sub === 'spike') { w.duration = 12; w.triggerR = 40; w.armTime = 0.8; w.maxActive = 4; }
     if (sub === 'aegis') { w.selfDR = 0.08; w.auraR = 96; w.tickCd = 0.45; w.tickDmg = Math.round((w.dmg || 10) * 1.6); }

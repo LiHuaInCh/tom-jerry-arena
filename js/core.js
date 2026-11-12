@@ -31,7 +31,7 @@
       damage: 1.5, fireRate: 1.35, speed: 1, maxHp: 0, crit: 0.08, critMul: 1.8,
       pierce: 0, multishot: 0, bounce: 0, homing: 0, explode: 0, lifesteal: 0, regen: 0,
       magnet: 78, armor: 0, dashCd: 2.0, dashDamage: 0, skillCdMul: 1, projSpeed: 1, range: 0,
-      shieldMax: 0, luck: 0, summonCount: 3, summonDur: 0, summonDmgMul: 1, summonCdMul: 1
+      shieldMax: 0, luck: 0, summonCount: 4, summonDur: 0, summonDmgMul: 1, summonCdMul: 1
     };
   }
 
@@ -266,7 +266,7 @@
     }
     if (id.indexOf('sum_') === 0) {
       g.upgradeCounts[id] = (g.upgradeCounts[id] || 0) + 1;
-      if (id === 'sum_count') g.stats.summonCount = Math.min(7, (g.stats.summonCount || 3) + 1);
+      if (id === 'sum_count') g.stats.summonCount = Math.min(8, (g.stats.summonCount || 4) + 1);
       else if (id === 'sum_dmg') g.stats.summonDmgMul = (g.stats.summonDmgMul || 1) * 1.3;
       else if (id === 'sum_dur') g.stats.summonDur = (g.stats.summonDur || 0) + 4;
       else if (id === 'sum_cd') g.stats.summonCdMul = (g.stats.summonCdMul || 1) * 0.8;
