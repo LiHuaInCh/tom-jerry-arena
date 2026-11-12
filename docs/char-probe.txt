@@ -1,0 +1,15 @@
+chars 6 avgDeathRate 0.88 reach5 0.92 reach10 0.52 reach15 0.17 avgTime 229
+TOP10
+兔八哥 reach10 0.7 wave 10.1 kills 578 lvl 19
+侦探汤姆 reach10 0.6 wave 9.6 kills 770 lvl 19.5
+牛仔杰瑞 reach10 0.6 wave 9.1 kills 399 lvl 17.9
+斯飞 reach10 0.5 wave 10.6 kills 501 lvl 18.5
+侍卫汤姆 reach10 0.4 wave 7.5 kills 416 lvl 16.8
+图多盖洛 reach10 0.3 wave 6.3 kills 350 lvl 14.4
+ALL
+兔八哥 reach10 0.7 wave 10.1 kills 578 lvl 19
+侦探汤姆 reach10 0.6 wave 9.6 kills 770 lvl 19.5
+牛仔杰瑞 reach10 0.6 wave 9.1 kills 399 lvl 17.9
+斯飞 reach10 0.5 wave 10.6 kills 501 lvl 18.5
+侍卫汤姆 reach10 0.4 wave 7.5 kills 416 lvl 16.8
+图多盖洛 reach10 0.3 wave 6.3 kills 350 lvl 14.4
