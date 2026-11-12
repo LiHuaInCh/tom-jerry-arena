@@ -8,7 +8,7 @@
   <link rel="apple-touch-icon" href="assets/brand/app-icon.png">
   <title>猫鼠大作战 · Tom &amp; Jerry: Arrow Chase</title>
 <link rel="icon" href="assets/brand/icon.png">
-<link rel="stylesheet" href="css/style.css?v=1.7.4">
+<link rel="stylesheet" href="css/style.css?v=1.7.5">
 <script>
 (function(){
   var native = !!(window.androidBridge || (window.Capacitor && (window.Capacitor.isNativePlatform ? window.Capacitor.isNativePlatform() : (window.Capacitor.platform && window.Capacitor.platform !== 'web'))));
@@ -87,10 +87,6 @@
         <button class="mode-tab sel" data-mode="survival"><b>生存模式</b><span>Boss 独立刷新 · 冲最高分</span></button>
         <button class="mode-tab" data-mode="arena"><b>乱斗模式</b><span>6 人混战 · 副武器</span></button>
       </div>
-      <div class="diff-tabs" id="diffTabs">
-        <button class="diff-tab sel" data-diff="normal">普通</button>
-        <button class="diff-tab" data-diff="hard">高难</button>
-      </div>
       <div class="faction-tabs" id="factionTabs">
         <button class="faction-tab sel" data-faction="mouse">鼠阵营</button>
         <button class="faction-tab" data-faction="cat">猫阵营</button>
@@ -104,6 +100,8 @@
           <button class="cov" data-cov="elite" type="button">精英翻倍</button>
           <button class="cov" data-cov="noheal" type="button">禁血包 +经验</button>
           <button class="cov" data-cov="psycho" type="button">精神攻击</button>
+          <button class="cov action" id="hardCov" type="button">高难</button>
+          <button class="cov action" id="trainCov" type="button">训练场</button>
         </div>
       </div>
       <button id="startBtn" class="btn primary">开 始 游 戏</button>
@@ -137,6 +135,9 @@
   <div id="trainBar" class="hidden">
     <button id="trainResetDummy">重置木桩</button>
     <button id="trainResetCd">重置冷却</button>
+    <button id="trainLevel">升级</button>
+    <button id="trainSub">副武器</button>
+    <button id="trainElem">元素</button>
     <button id="trainExit">退出训练</button>
     <span id="trainDps">DPS 0</span>
   </div>
@@ -199,24 +200,24 @@
     </div>
   </div>
 
-<script src="js/data-enemies.js?v=1.7.4"></script>
-  <script src="js/data-chars.js?v=1.7.4"></script>
-  <script src="js/data.js?v=1.7.4"></script>
-<script src="js/feedback.js?v=1.7.4"></script>
-  <script src="js/pickups.js?v=1.7.4"></script>
-  <script src="js/combat.js?v=1.7.4"></script>
-  <script src="js/systems.js?v=1.7.4"></script>
-  <script src="js/core.js?v=1.7.4"></script>
-  <script src="js/missions.js?v=1.7.4"></script>
-<script src="js/arena.js?v=1.7.4"></script>
-  <script src="js/skills.js?v=1.7.4"></script>
-<script src="js/render.js?v=1.7.4"></script>
-<script src="js/input.js?v=1.7.4"></script>
-<script src="js/audio.js?v=1.7.4"></script>
-<script src="js/fx.js?v=1.7.4"></script>
-  <script src="js/meta.js?v=1.7.4"></script>
-  <script src="js/splash.js?v=1.7.4"></script>
-<script src="js/main.js?v=1.7.4"></script>
+<script src="js/data-enemies.js?v=1.7.5"></script>
+  <script src="js/data-chars.js?v=1.7.5"></script>
+  <script src="js/data.js?v=1.7.5"></script>
+<script src="js/feedback.js?v=1.7.5"></script>
+  <script src="js/pickups.js?v=1.7.5"></script>
+  <script src="js/combat.js?v=1.7.5"></script>
+  <script src="js/systems.js?v=1.7.5"></script>
+  <script src="js/core.js?v=1.7.5"></script>
+  <script src="js/missions.js?v=1.7.5"></script>
+<script src="js/arena.js?v=1.7.5"></script>
+  <script src="js/skills.js?v=1.7.5"></script>
+<script src="js/render.js?v=1.7.5"></script>
+<script src="js/input.js?v=1.7.5"></script>
+<script src="js/audio.js?v=1.7.5"></script>
+<script src="js/fx.js?v=1.7.5"></script>
+  <script src="js/meta.js?v=1.7.5"></script>
+  <script src="js/splash.js?v=1.7.5"></script>
+<script src="js/main.js?v=1.7.5"></script>
 
     <div id="rotateHint" class="rotate-hint">请横屏游玩<br><span>旋转手机以获得完整视野</span></div>
 </body>

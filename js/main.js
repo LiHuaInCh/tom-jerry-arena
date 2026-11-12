@@ -233,7 +233,7 @@
     nbtn.type = 'button';
     nbtn.textContent = '更新公告';
     toolsRow.appendChild(nbtn);
-    var NEWS_VER = '1.4.17';
+    var NEWS_VER = '1.4.18';
     var NEWS = [
       ['启动与画面', [
         'APK 启动动画：模糊背景铺满 + 完整画面居中，点视频里的「开始游戏」即可跳过',
@@ -252,13 +252,13 @@
         '所有敌人基础血量 ×2.5'
       ]],
       ['训练与信息', [
-        '标题页新增训练场：无限木桩、重置木桩、重置冷却、DPS 显示',
+        '试炼盟约一行新增训练场：无限木桩、重置木桩/冷却、DPS 显示',
         '技能按钮显示剩余冷却秒数，状态栏显示加速 / 隐身 / 护盾 / 蓄势 / 减速 / 冰冻',
         '角色详情新增武器共鸣与专属签名说明',
         '新增特效率设置：高（全特效）/ 标准（去全屏闪光）/ 低（只留关键提示）'
       ]],
       ['难度选择', [
-        '标题页新增普通 / 高难切换，选择会保存',
+        '试炼盟约一行新增高难开关，红色高亮表示开启',
         '普通：敌人血量 ×2.0，6~11 波 2 精英，12~15 波 2 精英，敌人伤害 -8%',
         '高难：敌人血量 ×2.5、精英 3 只、Boss 血量系数 0.7、敌人伤害 100%、分数 ×1.25'
       ]],
@@ -372,7 +372,7 @@
       ov.innerHTML = '<div class="guide-box"><div class="guide-head">设置<button class="guide-close">×</button></div><div class="guide-body" id="setBody"></div></div>';
       document.body.appendChild(ov);
       var body = ov.querySelector('#setBody');
-      [btn, nbtn, mbtn, dmgBtn, fxBtn, trainBtn, codexBtn, liveBtn, expBtn, impBtn, copyBtn].forEach(function (b) {
+      [btn, nbtn, mbtn, dmgBtn, fxBtn, codexBtn, liveBtn, expBtn, impBtn, copyBtn].forEach(function (b) {
         var row = document.createElement('button');
         row.className = 'set-row';
         row.textContent = b.textContent;
@@ -411,10 +411,6 @@
       fxBtn.textContent = fxLabel();
     };
     toolsRow.appendChild(fxBtn);
-    var trainBtn = document.createElement('button');
-    trainBtn.className = 'guide-btn'; trainBtn.type = 'button'; trainBtn.textContent = '训练场';
-    trainBtn.onclick = function () { trainingNext = true; startRun(); };
-    toolsRow.appendChild(trainBtn);
     var codexBtn = document.createElement('button');
     codexBtn.className = 'guide-btn'; codexBtn.type = 'button';
     codexBtn.textContent = '武器图鉴';
@@ -445,7 +441,7 @@
       ['难度', [
         '普通：当前平衡后的数值，适合正常推进',
         '高难：敌人初版血量 / 伤害 / 精英数量，分数结算 ×1.25',
-        '标题页模式下方切换，选择会保存到本地'
+        '在试炼盟约一行点击「高难」切换，红色高亮表示开启，选择会保存'
       ]],
       ['武器与进化', [
         '57 名角色、57 把武器，分 7 大类 18 个子类',
@@ -516,6 +512,45 @@
   }
 
   /* ---------- 开局 ---------- */
+  function openTrainSub() {
+    if (!g || !g.training) return;
+    var ov = document.createElement('div');
+    ov.className = 'guide-modal on';
+    var keys = Object.keys(D.weapons).filter(function (k) { return D.weapons[k].label; });
+    ov.innerHTML = '<div class="guide-box"><div class="guide-head">选择副武器<button class="guide-close">×</button></div><div class="guide-body"><div class="train-grid">' +
+      keys.map(function (k) { var w = D.weapons[k]; return '<button class="train-pick" data-w="' + k + '">' + w.name + '<span>' + (w.label || '') + '</span></button>'; }).join('') +
+      '</div></div></div>';
+    document.body.appendChild(ov);
+    ov.querySelector('.guide-close').onclick = function () { ov.remove(); };
+    ov.querySelectorAll('.train-pick').forEach(function (b) {
+      b.onclick = function () {
+        g.player.subWeapon = b.dataset.w; g.player.subCd = 0; g.player.subOrbitA = 0;
+        ov.remove(); TJ.Audio.play('click');
+      };
+    });
+  }
+
+  function openTrainElem() {
+    if (!g || !g.training) return;
+    var slot = 0;
+    var ov = document.createElement('div');
+    ov.className = 'guide-modal on';
+    function render() {
+      var names = D.elementNames || { fire: '火', ice: '冰', thunder: '雷', light: '光', dark: '暗' };
+      ov.innerHTML = '<div class="guide-box"><div class="guide-head">选择元素<button class="guide-close">×</button></div><div class="guide-body">' +
+        '<div class="train-slots"><button class="train-slot' + (slot === 0 ? ' on' : '') + '" data-s="0">第 1 槽</button><button class="train-slot' + (slot === 1 ? ' on' : '') + '" data-s="1">第 2 槽</button></div>' +
+        '<div class="train-grid">' + Object.keys(names).map(function (k) { return '<button class="train-pick" data-el="' + k + '">' + names[k] + '</button>'; }).join('') + '</div>' +
+        '<p class="muted">当前：' + (g.player.elemSlots[0] || '空') + ' + ' + (g.player.elemSlots[1] || '空') + '</p></div></div>';
+      ov.querySelector('.guide-close').onclick = function () { ov.remove(); };
+      ov.querySelectorAll('.train-slot').forEach(function (b) { b.onclick = function () { slot = Number(b.dataset.s); render(); }; });
+      ov.querySelectorAll('[data-el]').forEach(function (b) {
+        b.onclick = function () { g.player.elemSlots[slot] = b.dataset.el; ov.remove(); };
+      });
+    }
+    document.body.appendChild(ov);
+    render();
+  }
+
   function spawnTrainingDummy() {
     if (!g) return;
     g.enemies = [];
@@ -1129,7 +1164,7 @@
     input.setEnabled(false);
   }
 
-  const BUILD_TAG = '2026-11-13a';
+  const BUILD_TAG = '2026-11-13b';
   function titleLockScroll() {
     const t = document.getElementById('title');
     if (t) {
@@ -1378,18 +1413,16 @@
 
   /* ---------- 绑定 ---------- */
   (function initDifficulty() {
-    var host = document.getElementById('diffTabs');
-    if (!host) return;
-    function paint() {
-      host.querySelectorAll('.diff-tab').forEach(function (b) { b.classList.toggle('sel', b.dataset.diff === difficulty); });
-    }
-    host.querySelectorAll('.diff-tab').forEach(function (b) {
-      b.onclick = function () {
-        difficulty = b.dataset.diff;
-        try { localStorage.setItem('tj_diff', difficulty); } catch (e) {}
-        paint();
-      };
-    });
+    var hb = document.getElementById('hardCov');
+    function paint() { if (hb) hb.classList.toggle('on', difficulty === 'hard'); }
+    if (hb) hb.onclick = function () {
+      difficulty = difficulty === 'hard' ? 'normal' : 'hard';
+      try { localStorage.setItem('tj_diff', difficulty); } catch (e) {}
+      paint();
+      TJ.Audio.play('click');
+    };
+    var tc = document.getElementById('trainCov');
+    if (tc) tc.onclick = function () { trainingNext = true; startRun(); };
     paint();
   })();
 
@@ -1432,7 +1465,7 @@
       b.classList.toggle('sel', f === faction);
     });
   }
-  document.querySelectorAll('.cov').forEach(function (b) {
+  document.querySelectorAll('.cov[data-cov]').forEach(function (b) {
     b.addEventListener('click', function () {
       const k = b.dataset.cov;
       if (covenants.has(k)) { covenants.delete(k); b.classList.remove('on'); }
@@ -1485,6 +1518,14 @@
   $('resumeBtn').addEventListener('click', resumeGame);
   $('pauseBtn').addEventListener('click', pauseGame);
   if ($('trainResetDummy')) $('trainResetDummy').addEventListener('click', function () { if (g && g.training) spawnTrainingDummy(); });
+  if ($('trainLevel')) $('trainLevel').addEventListener('click', function () {
+    if (!g || !g.training) return;
+    g.player.level = (g.player.level || 1) + 1;
+    g.pendingLevels = (g.pendingLevels || 0) + 1;
+    showLevelUp(true);
+  });
+  if ($('trainSub')) $('trainSub').addEventListener('click', openTrainSub);
+  if ($('trainElem')) $('trainElem').addEventListener('click', openTrainElem);
   if ($('trainResetCd')) $('trainResetCd').addEventListener('click', function () {
     if (!g) return;
     g.player.skillCd = 0; g.player.fireCd = 0; g.player.subCd = 0; g.player.sumCd = 0; g.player.innerCd = 0;
@@ -1543,6 +1584,6 @@
   try {
     const __savedCov = JSON.parse(localStorage.getItem('tj_cov') || '[]');
     __savedCov.forEach(function (k) { covenants.add(k); });
-    document.querySelectorAll('.cov').forEach(function (b) { if (covenants.has(b.dataset.cov)) b.classList.add('on'); });
+    document.querySelectorAll('.cov[data-cov]').forEach(function (b) { if (covenants.has(b.dataset.cov)) b.classList.add('on'); });
   } catch (e) {}
 })();
