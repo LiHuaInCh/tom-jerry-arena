@@ -26,6 +26,7 @@
   let best = 0;
   try { best = parseInt(localStorage.getItem('tj_best') || '0', 10) || 0; } catch (e) {}
   let auto = params.get('auto') === '1';
+  let difficulty = (params.get('diff') === 'hard') ? 'hard' : (function () { try { return localStorage.getItem('tj_diff') || 'normal'; } catch (e) { return 'normal'; } })();
   try { TJ.hideDamageText = localStorage.getItem('tj_dmgtext') === '0'; } catch (e) { TJ.hideDamageText = false; }
   let arenaBest = 0;
   try { arenaBest = parseInt(localStorage.getItem('tj_arena_best') || '0', 10) || 0; } catch (e) {}
@@ -224,7 +225,7 @@
     nbtn.type = 'button';
     nbtn.textContent = '更新公告';
     toolsRow.appendChild(nbtn);
-    var NEWS_VER = '1.4.15';
+    var NEWS_VER = '1.4.16';
     var NEWS = [
       ['启动与画面', [
         'APK 启动动画：模糊背景铺满 + 完整画面居中，点视频里的「开始游戏」即可跳过',
@@ -241,6 +242,11 @@
         '六种普通怪全部换新立绘：兔子杰瑞、奶猫杰瑞、天使莱特宁、陈佳嵘车、牢侍卫、自爆怪',
         '天使莱特宁 / 陈佳嵘车 / 牢侍卫 / 自爆怪 / 牛头怪 局内体型 ×2',
         '所有敌人基础血量 ×2.5'
+      ]],
+      ['难度选择', [
+        '标题页新增普通 / 高难切换，选择会保存',
+        '普通：敌人血量 ×2.0，6~11 波 2 精英，12~15 波 2 精英，敌人伤害 -8%',
+        '高难：敌人血量 ×2.5、精英 3 只、Boss 血量系数 0.7、敌人伤害 100%、分数 ×1.25'
       ]],
       ['技能共鸣', [
         '57 个角色的技能全部接入武器共鸣，一次技能 = 基础效果 + 武器特性',
@@ -408,6 +414,11 @@
         'Boss 半血狂暴：移速 ×1.35、技能冷却 ×0.65',
         '精英从第 3 波起每波 3 只（20 波后 4 只），带红线 / 红圈 / 扇形前摇'
       ]],
+      ['难度', [
+        '普通：当前平衡后的数值，适合正常推进',
+        '高难：敌人初版血量 / 伤害 / 精英数量，分数结算 ×1.25',
+        '标题页模式下方切换，选择会保存到本地'
+      ]],
       ['武器与进化', [
         '57 名角色、57 把武器，分 7 大类 18 个子类',
         '3 级、6 级各选一把副武器：全武器卡池、排除自己、满强度、独立冷却',
@@ -479,11 +490,13 @@
   /* ---------- 开局 ---------- */
   function startRun() {
     TJ.Audio.unlock();
-    g = mode === 'arena' ? TJ.createArenaGame({ charId: selected }) : TJ.createGame({ charId: selected });
+    g = mode === 'arena' ? TJ.createArenaGame({ charId: selected }) : TJ.createGame({ charId: selected, hard: difficulty === 'hard' });
     if (TJ.Audio && TJ.Audio.setTrack) TJ.Audio.setTrack(covenants.has('psycho') ? 'psycho' : 'default');
     if (TJ.Missions && TJ.Missions.recenter) TJ.Missions.recenter(g);
     g.cov = { spawn: 1, elite: 1, noHeal: 0, score: 1, list: [] };
+    g.diff = difficulty;
     if (mode !== 'arena') {
+      if (difficulty === 'hard') { g.cov.score *= 1.25; g.cov.list.push('高难'); }
       if (covenants.has('horde')) { g.cov.spawn = 0.8; g.cov.score *= 1.2; g.cov.list.push('怪潮'); }
       if (covenants.has('elite')) { g.cov.elite = 2; g.cov.score *= 1.2; g.cov.list.push('精英'); }
       if (covenants.has('noheal')) { g.cov.noHeal = 1; g.cov.score *= 1.3; g.cov.list.push('禁疗'); }
@@ -1295,6 +1308,22 @@
   }
 
   /* ---------- 绑定 ---------- */
+  (function initDifficulty() {
+    var host = document.getElementById('diffTabs');
+    if (!host) return;
+    function paint() {
+      host.querySelectorAll('.diff-tab').forEach(function (b) { b.classList.toggle('sel', b.dataset.diff === difficulty); });
+    }
+    host.querySelectorAll('.diff-tab').forEach(function (b) {
+      b.onclick = function () {
+        difficulty = b.dataset.diff;
+        try { localStorage.setItem('tj_diff', difficulty); } catch (e) {}
+        paint();
+      };
+    });
+    paint();
+  })();
+
   function refreshModeUI() {
     document.querySelectorAll('.mode-tab').forEach(function (b) {
       b.classList.toggle('sel', b.dataset.mode === mode);

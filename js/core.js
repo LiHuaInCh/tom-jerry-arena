@@ -38,6 +38,7 @@
   /* ---------------- 创建对局 ---------------- */
   TJ.createGame = function (opts) {
     opts = opts || {};
+    opts = opts || {};
     const __seed = opts.seed == null ? (Date.now() & 0x7fffffff) : opts.seed;
     opts = opts || {};
     const g = {

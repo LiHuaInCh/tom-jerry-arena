@@ -163,14 +163,16 @@
     if (!ok) return;
     const late = wave > 10 ? Math.pow(1.015, wave - 10) : 1;
     const dyn = Math.max(0.85, Math.min(2.0, Math.sqrt((g.dps || 80) / 100)));
-    let scale = (def.boss ? (1 + Math.max(0, wave - 1) * 0.07) * (wave <= 4 ? 0.6 : (wave < 12 ? 0.6 : (wave < 20 ? 0.7 : 1.05))) : (1 + Math.max(0, wave - 1) * 0.14) * (wave <= 5 ? 1.1 : 1)) * late * dyn;
-    if (!def.boss && wave <= 5) scale *= 0.88;
-    if (!def.boss && wave >= 6 && wave <= 11) scale *= 1.12;
+    const hard = !!g.hard;
+    const bossF = hard ? (wave <= 4 ? 0.6 : (wave < 20 ? 0.7 : 1.05)) : (wave <= 4 ? 0.6 : (wave < 20 ? 0.6 : 1.05));
+    let scale = (def.boss ? (1 + Math.max(0, wave - 1) * 0.07) * bossF : (1 + Math.max(0, wave - 1) * 0.14) * (wave <= 5 ? 1.1 : 1)) * late * dyn;
+    if (!def.boss && !hard && wave <= 5) scale *= 0.88;
+    if (!def.boss && !hard && wave >= 6 && wave <= 11) scale *= 1.12;
     if (!def.boss && wave >= 8 && rand(g, 0, 1) < 0.05) scale *= 1.35;
     const e = {
       id: ++g._eid || (g._eid = 1), kind, def, x, y, vx: 0, vy: 0, r: def.radius,
-      hp: Math.round(def.hp * scale * 2.0), maxHp: Math.round(def.hp * scale * 2.5),
-      speed: def.speed * (1 + Math.min(0.45, wave * 0.016)) * (wave >= 6 && wave <= 9 ? 1.08 : 1), dmg: def.dmg * Math.min(2.2, 1.85 + Math.max(0, wave - 5) * 0.04) * (1 + wave * 0.043) * (def.boss && wave < 6 ? 0.6 : 1) * (wave <= 5 ? 1.15 : 1) * 0.92,
+      hp: Math.round(def.hp * scale * (hard ? 2.5 : 2.0)), maxHp: Math.round(def.hp * scale * (hard ? 2.5 : 2.0)),
+      speed: def.speed * (1 + Math.min(0.45, wave * 0.016)) * (wave >= 6 && wave <= 9 ? 1.08 : 1), dmg: def.dmg * Math.min(2.2, 1.85 + Math.max(0, wave - 5) * 0.04) * (1 + wave * 0.043) * (def.boss && wave < 6 ? 0.6 : 1) * (wave <= 5 ? 1.15 : 1) * (hard ? 1 : 0.92),
       flash: 0, hitCd: 0, spawnT: 0.35, dead: false, kx: 0, ky: 0,
       armor: Math.min(0.55, (def.armor || 0) + wave * (def.boss ? 0.0035 : 0.0015)),
       state: 'idle', stateT: 0, atkCd: rand(g, 0.6, 1.6) * (wave <= 3 ? 1.2 : 1), charge: null,
@@ -1185,7 +1187,10 @@
       const ELITE_UNLOCK = [['spikejr',1],['security',1],['cowhead',3],['spike',5],['kunkun',12],['cthulhu',13],['giant',14]];
       let avail = ELITE_UNLOCK.filter(function (x) { return wave >= x[1]; });
       (g.elitePool || []).forEach(function (k) { if (!avail.some(function (a) { return a[0] === k; })) avail.push([k, 0]); });
-      const ecount = Math.min(6, Math.round((wave >= 20 ? 4 : (wave >= 12 ? 3 : (wave >= 6 ? 2 : (wave >= 3 ? 3 : (wave >= 2 ? 2 : 1))))) * ((g.cov && g.cov.elite) || 1)));
+      const ebase = g.hard
+        ? (wave >= 20 ? 4 : (wave >= 3 ? 3 : (wave >= 2 ? 2 : 1)))
+        : (wave >= 20 ? 4 : (wave >= 16 ? 3 : (wave >= 6 ? 2 : (wave >= 3 ? 3 : (wave >= 2 ? 2 : 1)))));
+      const ecount = Math.min(6, Math.round(ebase * ((g.cov && g.cov.elite) || 1)));
       for (let ei = 0; ei < ecount; ei++) {
         const pickE = avail[Math.floor(g.rng() * avail.length)][0];
         const ea2 = g.rng() * Math.PI * 2;
