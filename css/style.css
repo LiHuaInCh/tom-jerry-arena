@@ -1245,3 +1245,31 @@ html.native #splash { display: flex; }
   #pause .modal-actions { gap: 6px !important; }
   #pause .modal-actions .btn { flex: 1 1 44%; font-size: 12px !important; padding: 8px 4px !important; }
 }
+
+#levelup .lu-box { width: min(920px, 94vw); }
+#cards { display: flex !important; flex-wrap: wrap !important; align-items: stretch !important; justify-content: center !important; gap: 10px !important; }
+#cards .up-card {
+  flex: 1 1 0 !important;
+  width: auto !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  flex-direction: row !important;
+  align-items: flex-start !important;
+  text-align: left !important;
+  gap: 10px !important;
+  padding: 12px !important;
+}
+#cards .up-card .up-icon { flex: none; width: 46px !important; height: 46px !important; font-size: 20px !important; }
+#cards .up-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; align-items: flex-start; }
+#cards .up-name { font-size: 14px !important; line-height: 1.25; }
+#cards .up-desc { font-size: 10.5px !important; line-height: 1.42 !important; white-space: normal !important; min-height: 0 !important; }
+#cards .up-stack { font-size: 9px !important; margin-top: 2px; }
+#cards .lu-refresh { flex: 1 0 100% !important; width: auto !important; max-width: none !important; min-height: 34px; margin-top: 0 !important; }
+@media (max-width: 760px) {
+  #cards { flex-direction: column !important; flex-wrap: nowrap !important; gap: 7px !important; }
+  #cards .up-card { flex: 0 0 auto !important; width: 100% !important; padding: 10px 11px !important; gap: 8px !important; }
+  #cards .up-icon { width: 40px !important; height: 40px !important; font-size: 17px !important; }
+  #cards .up-name { font-size: 13.5px !important; }
+  #cards .up-desc { font-size: 10px !important; line-height: 1.35 !important; }
+  #cards .lu-refresh { flex: 0 0 auto !important; }
+}

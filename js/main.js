@@ -778,26 +778,29 @@
         ic.textContent = u.icon;
       }
       el.appendChild(ic);
+      const body = document.createElement('div');
+      body.className = 'up-body';
+      el.appendChild(body);
 
       const rar = document.createElement('span');
       rar.className = 'up-rarity';
       rar.textContent = u.kind === 'evo_main' ? '主武器进化' : u.kind === 'evo_sub' ? '副武器进化' : u.kind === 'weapon_up' ? '武器进化' : u.kind === 'switch' ? '切换武器' : TJ.RARITY[u.rarity] + ' · 强化';
-      el.appendChild(rar);
+      body.appendChild(rar);
 
       const nm = document.createElement('span');
       nm.className = 'up-name'; nm.textContent = u.name;
-      el.appendChild(nm);
+      body.appendChild(nm);
 
       const ds = document.createElement('span');
       ds.className = 'up-desc'; ds.textContent = u.desc;
-      el.appendChild(ds);
+      body.appendChild(ds);
 
       const st = document.createElement('span');
       st.className = 'up-stack';
       const __owned = ((g.upgradeCounts || {})[u.id] || 0);
       const __max = (u.max != null) ? u.max : (u.kind && u.kind.indexOf('evo') === 0 ? 1 : (u.kind && u.kind.indexOf('sub') === 0 ? 1 : '—'));
       st.textContent = u.stack ? u.stack : ('已拥有 ' + __owned + ' / ' + __max);
-      el.appendChild(st);
+      body.appendChild(st);
 
       el.addEventListener('click', function () { choose(u.key || u.id); });
       wrap.appendChild(el);
@@ -1212,7 +1215,7 @@
     input.setEnabled(false);
   }
 
-  const BUILD_TAG = '2026-11-13b';
+  const BUILD_TAG = '2026-11-13c';
   function titleLockScroll() {
     const t = document.getElementById('title');
     if (t) {
