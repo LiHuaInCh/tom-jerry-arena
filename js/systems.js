@@ -346,12 +346,13 @@
       const __sumMax = Math.max(1, st.summonCount || 4);
       const __mainCount = g.summons.filter(function (x) { return !x.sub && !x.temp; }).length;
       if (p.sumCd <= 0) {
-        p.sumCd = (ow.cd || 3.5) * (st.summonCdMul || 1);
+        p.sumCd = (ow.cd || 2.2) * (st.summonCdMul || 1);
         const __free = Math.max(0, __sumMax - __mainCount);
-        const __spawn = Math.min(2, __free);
+        const __spawn = Math.min(1, __free);
         for (let __si = 0; __si < __spawn; __si++) {
-          g.summons.push({ x: p.x + 30 + __si * 24, y: p.y, life: (ow.duration || 14) + (st.summonDur || 0), atkCd: 0, r: 15, spd: 380, icon: ow.iconImg, stationary: !!ow.stationary, range: ow.stationary ? 180 : 520, size: ow.stationary ? 56 : 76, w: ow });
-          g.effects.push({ kind: 'ring', x: p.x + 30 + __si * 24, y: p.y, r: 4, maxR: 60, life: 0.3, max: 0.3, color: '#FFD36A' });
+          var __sa = ((g.summons.length + __si) * 2.399) % (Math.PI * 2);
+          g.summons.push({ x: p.x + Math.cos(__sa) * 46, y: p.y + Math.sin(__sa) * 46, life: (ow.duration || 16) + (st.summonDur || 0), atkCd: 0, r: 15, spd: 380, icon: ow.iconImg, stationary: !!ow.stationary, range: ow.stationary ? 180 : 520, size: ow.stationary ? 56 : 76, w: ow });
+          g.effects.push({ kind: 'ring', x: p.x + Math.cos(__sa) * 46, y: p.y + Math.sin(__sa) * 46, r: 4, maxR: 60, life: 0.3, max: 0.3, color: '#FFD36A' });
         }
       }
     }
@@ -395,6 +396,11 @@
           const su = g.summons[i];
           su.life -= dt;
           if (su.life <= 0) { g.summons.splice(i, 1); continue; }
+          for (let j = 0; j < i; j++) {
+            const o = g.summons[j];
+            const dx2 = su.x - o.x, dy2 = su.y - o.y, d2 = Math.hypot(dx2, dy2) || 1;
+            if (d2 < 46) { const push = (46 - d2) * 0.5; su.x += dx2 / d2 * push; su.y += dy2 / d2 * push; o.x -= dx2 / d2 * push; o.y -= dy2 / d2 * push; }
+          }
           const tg = nearestEnemy(g, su.x, su.y, su.range || 300);
           if (tg) {
             const dd = Math.hypot(tg.x - su.x, tg.y - su.y) || 1;
@@ -448,11 +454,12 @@
           const __subMax = Math.max(1, st.summonCount || 4);
           const __subCount = g.summons.filter(function (x) { return !!x.sub && !x.temp; }).length;
           const __sfree = Math.max(0, __subMax - __subCount);
-          for (let __sj = 0; __sj < Math.min(2, __sfree); __sj++) {
-            g.summons.push({ x: p.x + 24 + __sj * 24, y: p.y, life: (sw.duration || 14) + (st.summonDur || 0), atkCd: 0, r: 15, spd: 360, icon: sw.iconImg, stationary: !!sw.stationary, range: sw.stationary ? 180 : 520, size: sw.stationary ? 56 : 76, w: sw, sub: true });
-            g.effects.push({ kind: 'ring', x: p.x + 24 + __sj * 24, y: p.y, r: 4, maxR: 60, life: 0.3, max: 0.3, color: '#FFD36A' });
+          for (let __sj = 0; __sj < Math.min(1, __sfree); __sj++) {
+            var __sb = ((g.summons.length + __sj) * 2.399) % (Math.PI * 2);
+            g.summons.push({ x: p.x + Math.cos(__sb) * 46, y: p.y + Math.sin(__sb) * 46, life: (sw.duration || 16) + (st.summonDur || 0), atkCd: 0, r: 15, spd: 360, icon: sw.iconImg, stationary: !!sw.stationary, range: sw.stationary ? 180 : 520, size: sw.stationary ? 56 : 76, w: sw, sub: true });
+            g.effects.push({ kind: 'ring', x: p.x + Math.cos(__sb) * 46, y: p.y + Math.sin(__sb) * 46, r: 4, maxR: 60, life: 0.3, max: 0.3, color: '#FFD36A' });
           }
-          p.subCd = (sw.cd || 4) * (st.summonCdMul || 1); sfx(g, 'shield');
+          p.subCd = (sw.cd || 2.2) * (st.summonCdMul || 1); sfx(g, 'shield');
         } else if (sw.kind === 'deploy') {
           const R2 = sw.boomR || sw.auraR || 100;
           for (const e of g.enemies) if (!e.dead && Math.hypot(e.x - subTarget.x, e.y - subTarget.y) < R2 + e.r) damageEnemy(g, e, sw.dmg * st.damage * (st.subDmgMul || 1) * 1.2, false);
@@ -996,6 +1003,18 @@
         pr.vy *= k;
       }
       pr.life -= dt;
+      if (pr.from === 'enemy' && g.summons && g.summons.length) {
+        var __blocked = false;
+        for (const __su of g.summons) {
+          if (Math.hypot(pr.x - __su.x, pr.y - __su.y) < 20 + pr.r) {
+            __blocked = true;
+            g.effects.push({ kind: 'ring', x: pr.x, y: pr.y, r: 4, maxR: 30, life: 0.18, max: 0.18, color: '#9FE7FF' });
+            g.effects.push({ kind: 'spark', x: __su.x, y: __su.y, n: 5, r0: 4, r1: 22, color: '#9FE7FF', life: 0.16, max: 0.16 });
+            break;
+          }
+        }
+        if (__blocked) { pr.dead = true; continue; }
+      }
       if (pr.from === 'enemy' && !pr._auraPass) {
         const mwA = D.weapons[p.char.weapon];
         const swA = p.subWeapon ? D.weapons[p.subWeapon] : null;
