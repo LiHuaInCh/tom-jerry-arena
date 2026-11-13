@@ -134,23 +134,28 @@
     const arr = EVO[sub] || EVO.rapid;
     return arr.map(function (it, i) { return { id: 'evo_' + sub + '_' + i, name: it[0], desc: it[1], icon: it[0].slice(0,1), rarity: 'epic', kind: 'evo_main', apply: it[2] }; });
   }
-  function subEvoChoices() {
-    return [
-      { id: 'evo_sub_dmg', name: '副武器 · 重击', desc: '副武器伤害 +50%', icon: '副', rarity: 'epic', kind: 'evo_sub', apply: function (s) { s.subDmgMul = (s.subDmgMul || 1) * 1.5; } },
-      { id: 'evo_sub_cd', name: '副武器 · 连发', desc: '副武器冷却 -30%', icon: '连', rarity: 'epic', kind: 'evo_sub', apply: function (s) { s.subCdMul = (s.subCdMul || 1) * 0.7; } }
-    ];
+  function subEvoChoices(g) {
+    const p = g && g.player;
+    if (!p || !p.subWeapon) return [];
+    const sw = D.weapons[p.subWeapon] || {};
+    const sub = sw.sub || 'rapid';
+    return (EVO[sub] || EVO.rapid).map(function (it, i) {
+      return { id: 'evo_sub_' + sub + '_' + i, name: '副武器 · ' + it[0], desc: it[1], icon: '副', rarity: 'epic', kind: 'evo_sub', apply: it[2] };
+    });
   }
+  TJ.getEvolutionChoices = function (g) {
+    const p = g.player;
+    const counts = g.upgradeCounts || {};
+    const pool = evoChoices(g).filter(function (u) { return !(counts[u.id] > 0); });
+    if (p.subWeapon) pool.push.apply(pool, subEvoChoices(g).filter(function (u) { return !(counts[u.id] > 0); }));
+    else pool.push({ id: 'evo_generic_dmg', name: '武器专精', desc: '武器伤害 +25%', icon: '专', rarity: 'epic', kind: 'evo_main', apply: function (s) { s.damage *= 1.25; } });
+    for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(g.rng() * (i + 1)); const t = pool[i]; pool[i] = pool[j]; pool[j] = t; }
+    return pool.slice(0, 3);
+  };
   TJ.getUpgradeChoices = function (g) {
     const p = g.player;
     if (p.level >= 7 && !p.elemSlots[0]) return elemChoices(g, 0);
     if (p.level >= 14 && p.elemSlots[0] && !p.elemSlots[1]) return elemChoices(g, 1);
-    if (p.level % 4 === 0) {
-      const pool = evoChoices(g).slice();
-      if (p.subWeapon) pool.push.apply(pool, subEvoChoices());
-      else pool.push({ id: 'evo_generic_dmg', name: '武器专精', desc: '武器伤害 +25%', icon: '专', rarity: 'epic', kind: 'evo_main' });
-      for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(g.rng() * (i + 1)); const t = pool[i]; pool[i] = pool[j]; pool[j] = t; }
-      return pool.slice(0, 3);
-    }
     if ((p.level === 3 || p.level === 6) && !p.subWeapon) {
       const __mk = D.weapons[p.char.weapon].kind;
       let wids = Object.keys(D.weapons).filter(function (k) {
@@ -223,11 +228,11 @@
   TJ.applyUpgrade = function (g, id) {
     if (id.indexOf('evo_') === 0) {
       g.upgradeCounts[id] = (g.upgradeCounts[id] || 0) + 1;
-      const pool = (id.indexOf('evo_sub') === 0) ? subEvoChoices() : evoChoices(g);
+      const pool = evoChoices(g).concat(subEvoChoices(g));
+      pool.push({ id: 'evo_generic_dmg', name: '武器专精', desc: '武器伤害 +25%', icon: '专', rarity: 'epic', kind: 'evo_main', apply: function (s) { s.damage *= 1.25; } });
       const card = pool.filter(function (x) { return x.id === id; })[0];
       if (!card) return null;
       if (card.apply) card.apply(g.stats, g);
-      if (g.pendingLevels > 0) g.pendingLevels--;
       g.events.push({ type: 'upgrade', id: id });
       return { name: card.name };
     }

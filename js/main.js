@@ -705,9 +705,30 @@
     return true;
   }
 
+  function grantEvo() {
+    if (!g || g.mode === 'arena') return;
+    const reach = Math.floor((g.player.level || 1) / 3);
+    if (reach > (g._evoLevel || 0)) {
+      g.evoPicks = (g.evoPicks || 0) + (reach - (g._evoLevel || 0));
+      g._evoLevel = reach;
+    }
+  }
+
   function maybeLevelUp() {
-    if (!g || pendingCount() <= 0) return;
+    if (!g) return;
+    grantEvo();
+    if (pendingCount() <= 0 && !(g.evoPicks > 0)) return;
     if (auto) {
+      while (g.missionPicks > 0) {
+        applyMissionPick(MISSION_SPECIALS[Math.floor(Math.random() * MISSION_SPECIALS.length)].id);
+        g.missionPicks--;
+      }
+      while (g.evoPicks > 0) {
+        const ec = TJ.getEvolutionChoices(g);
+        if (!ec.length) { g.evoPicks = 0; break; }
+        TJ.applyUpgrade(g, ec[Math.floor(Math.random() * ec.length)].id);
+        g.evoPicks--;
+      }
       while (pendingCount() > 0) { if (!autoPickOne()) break; }
       renderBuffs();
       return;
@@ -738,24 +759,32 @@
   function showLevelUp(force) {
     if (!g) return;
     if (state === 'levelup' && !force) return;
+    grantEvo();
     const missionMode = g.mode !== 'arena' && (g.missionPicks || 0) > 0;
+    const evoMode = g.mode !== 'arena' && !missionMode && (g.evoPicks || 0) > 0;
     let choices;
-    if (missionMode) {
+    if (evoMode) {
+      choices = TJ.getEvolutionChoices(g);
+      if (!choices.length) g.evoPicks = 0;
+    } else if (missionMode) {
       choices = MISSION_SPECIALS.slice().sort(function () { return g.rng() - 0.5; }).slice(0, 3);
       if (g.ultGiven && !g.ultUsed) choices = [ULTIMATE_CARD].concat(choices.slice(0, 2));
     } else {
       choices = g.mode === 'arena' ? TJ.getArenaChoices(g, g.player) : TJ.getUpgradeChoices(g);
     }
-    if (!missionMode && g._lastChoices && g._lastChoices.length) {
+    if (!evoMode && !missionMode && g._lastChoices && g._lastChoices.length) {
       const filtered = choices.filter(function (c) { return g._lastChoices.indexOf(c.id || c.key) < 0; });
       if (filtered.length >= 3) choices = filtered;
     }
     g._lastChoices = choices.map(function (c) { return c.id || c.key; });
-    if (!choices.length) { if (missionMode) { g.missionPicks = 0; } else { clearPending(); } return; }
+    if (!choices.length) { if (evoMode) { g.evoPicks = 0; } else if (missionMode) { g.missionPicks = 0; } else { clearPending(); } return; }
     if (!choices.length) { clearPending(); return; }
     state = 'levelup';
     input.setEnabled(false);
-    $('luLeft').textContent = missionMode ? ('任务奖励 ' + g.missionPicks) : pendingCount();
+    g.evoShowing = evoMode;
+    var __h2 = document.querySelector('#levelup h2');
+    if (__h2) __h2.textContent = evoMode ? '选择武器进化' : '选择一项强化';
+    $('luLeft').textContent = evoMode ? ('每 3 级一次 · 剩余 ' + g.evoPicks) : (missionMode ? ('任务奖励 ' + g.missionPicks) : pendingCount());
     const wrap = $('cards');
     wrap.innerHTML = '';
     choices.forEach(function (u, i) {
@@ -816,7 +845,7 @@
       TJ.Audio.play('click');
       showLevelUp(true);
     };
-    if (!(choices.length && (choices[0].kind === 'evo_main' || choices[0].kind === 'evo_sub'))) wrap.appendChild(rf);
+    if (!evoMode && !(choices.length && (choices[0].kind === 'evo_main' || choices[0].kind === 'evo_sub'))) wrap.appendChild(rf);
     $('levelup').classList.remove('hidden');
     if (g && g.effects) g.effects.push({ kind: 'tex', src: 'assets/fx/kenney/star_04.png', x: g.player.x, y: g.player.y - 10, life: 0.6, max: 0.6, s0: 20, s1: 90, alpha: 0.9, spin: 1 });
   }
@@ -831,6 +860,19 @@
       last = performance.now(); acc = 0;
       renderBuffs(); updateHud();
       if (g.missionPicks > 0) setTimeout(showLevelUp, 180);
+      return;
+    }
+    if (g.evoShowing) {
+      TJ.applyUpgrade(g, key);
+      g.evoPicks = Math.max(0, (g.evoPicks || 0) - 1);
+      g.evoShowing = false;
+      TJ.Audio.play('levelup');
+      $('levelup').classList.add('hidden');
+      state = 'playing';
+      input.setEnabled(true);
+      last = performance.now(); acc = 0;
+      renderBuffs(); updateHud();
+      if (g.evoPicks > 0 || pendingCount() > 0) setTimeout(showLevelUp, 180);
       return;
     }
     if (g.mode === 'arena') TJ.applyArenaChoice(g, g.player, key);
@@ -1215,7 +1257,7 @@
     input.setEnabled(false);
   }
 
-  const BUILD_TAG = '2026-11-13e';
+  const BUILD_TAG = '2026-11-13f';
   function titleLockScroll() {
     const t = document.getElementById('title');
     if (t) {
@@ -1438,7 +1480,7 @@
           if (pendingCount() > 0) { acc = 0; break; }
         }
         if (pendingCount() > 0) maybeLevelUp();
-        if (g.missions && g.missionPicks > 0 && state === 'playing') showLevelUp();
+        if (g.missions && g.missionPicks > 0 && state === 'playing' && !auto) showLevelUp();
         if (g.missions) {
           const el = $('missionHud');
           if (el) el.innerHTML = g.missions.filter(function (m) { return m.active; }).map(function (m) {
@@ -1457,6 +1499,23 @@
       if (overTimer > 1.0 && !overShown) showOver();
     }
 
+    if (state === 'levelup' && g && !g.over) {
+      var __lu2 = document.getElementById('levelup');
+      if (__lu2 && __lu2.classList.contains('hidden')) {
+        state = 'playing';
+        input.setEnabled(true);
+        last = now;
+      }
+    }
+    if (g && g.over && state !== 'over' && state !== 'title') {
+      state = 'over';
+      input.setEnabled(false);
+      var __lu = document.getElementById('levelup');
+      if (__lu) __lu.classList.add('hidden');
+      var __pa = document.getElementById('pause');
+      if (__pa) __pa.classList.add('hidden');
+      overTimer = 0;
+    }
     if (g) renderer.draw(g, now / 1000);
     if (state === 'playing' || state === 'levelup' || state === 'paused' || state === 'over') updateHud();
     requestAnimationFrame(frame);
@@ -1588,7 +1647,7 @@
     function label() {
       var v2 = '0';
       try { v2 = localStorage.getItem('tj_view2') || '0'; } catch (e) {}
-      zb.textContent = v2 === '1' ? '视角：1.5×' : '视角：1×';
+      zb.textContent = v2 === '1' ? '视角：远' : '视角：近';
     }
     zb.addEventListener('click', function () {
       var v2 = '0';

@@ -112,7 +112,7 @@
     g.effects.push({ kind: 'tex', src: 'assets/fx/kenney/smoke_01.png', x: e.x, y: e.y, life: 0.5, max: 0.5, s0: 18, s1: 58, alpha: 0.55, rot: rand(g, 0, 6.28) });
     if (e.boss) g.effects.push({ kind: 'tex', src: 'assets/fx/kenney/circle_05.png', x: e.x, y: e.y, life: 0.7, max: 0.7, s0: 40, s1: 220, alpha: 0.8 });
     g.effects.push({ kind: 'ring', x: e.x, y: e.y, r: 8, maxR: e.r * 2.4, life: 0.28, max: 0.28, color: '#FFFFFF' });
-    const orbCount = e.boss ? 22 : (e.def.xp >= 6 ? 3 : 1);
+    const orbCount = (e.boss || e.def.boss) ? 22 : (e.def.xp >= 6 ? 3 : 1);
     for (let i = 0; i < orbCount; i++) {
       g.pickups.push({
         kind: 'xp', x: e.x + rand(g, -14, 14), y: e.y + rand(g, -14, 14),
