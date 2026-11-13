@@ -291,7 +291,7 @@
     p.orbitRBonus = st.orbitRBonus || 0;
     p.auraT = (p.auraT || 0) - dt;
     if (p.auraT <= 0) {
-      p.auraT = 0.45;
+      p.auraT = 0.45 / (st.fireRate || 1);
       const rad = (aw.orbitR || 88) + (st.orbitRBonus || 0);
       for (const e2 of g.enemies) {
         if (e2.dead) continue;
@@ -304,7 +304,7 @@
       g.traps = g.traps || [];
       p.depCd = (p.depCd || 0) - dt;
       if (p.depCd <= 0) {
-        p.depCd = (ow.cd || 1.2) * 0.85;
+        p.depCd = (ow.cd || 1.2) * 0.85 / (st.fireRate || 1);
         const tgt = nearestEnemy(g, p.x, p.y, 900);
         let dx = tgt ? tgt.x - p.x : Math.cos(p.facing || 0) * 200;
         let dy = tgt ? tgt.y - p.y : Math.sin(p.facing || 0) * 200;
@@ -346,7 +346,7 @@
       const __sumMax = Math.max(1, st.summonCount || 4);
       const __mainCount = g.summons.filter(function (x) { return !x.sub && !x.temp; }).length;
       if (p.sumCd <= 0) {
-        p.sumCd = (ow.cd || 2.2) * (st.summonCdMul || 1);
+        p.sumCd = (ow.cd || 2.2) * (st.summonCdMul || 1) / (st.fireRate || 1);
         const __free = Math.max(0, __sumMax - __mainCount);
         const __spawn = Math.min(1, __free);
         for (let __si = 0; __si < __spawn; __si++) {
@@ -359,7 +359,7 @@
     if (ow.kind === 'tether') {
       p.tetT = (p.tetT || 0) - dt;
       if (p.tetT <= 0) {
-        p.tetT = 0.35;
+        p.tetT = 0.35 / (st.fireRate || 1);
         const tt = nearestEnemy(g, p.x, p.y, 280);
         if (tt) {
           damageEnemy(g, tt, (ow.dmg || 10) * st.damage * 0.9, false);
@@ -523,7 +523,7 @@
             const oy = p.y + Math.sin(ba) * sr;
             if (Math.hypot(e.x - ox, e.y - oy) < e.r + 14) {
               damageEnemy(g, e, sw.dmg * st.damage * 0.9 * (st.subDmgMul || 1) * (st.orbitDmgMul || 1), false);
-              e.subOrbitCd = g.t + 0.3;
+              e.subOrbitCd = g.t + 0.3 / (sb.fireRate || 1);
               g.effects.push({ kind: 'ring', x: ox, y: oy, r: 5, maxR: 20, life: 0.16, max: 0.16, color: '#9FE7FF' });
               break;
             }
