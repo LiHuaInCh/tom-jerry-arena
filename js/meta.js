@@ -17,21 +17,24 @@
   if (!m.chars) m.chars = {};
   if (!m.badges) m.badges = {};
   if (!m.runes) m.runes = {};
+  Object.keys(m.runes).forEach(function (k) { if (m.runes[k] > 30) m.runes[k] = 30; });
+  const RUNE_MAX = 30;
   const RUNES = {
-    sharp: { name: '锐利', desc: '伤害 +2%/级' },
-    swift: { name: '疾行', desc: '移速 +1.5%/级' },
-    learn: { name: '求知', desc: '经验 +3%/级' },
-    tough: { name: '坚韧', desc: '生命 +2%/级' },
-    armor: { name: '护甲', desc: '护甲 +0.5%/级，移速 -0.25%/级' }
+    sharp: { name: '锐利', desc: '伤害 +1.2%/级（最高 30 级）' },
+    swift: { name: '疾行', desc: '移速 +1%/级（最高 30 级）' },
+    learn: { name: '求知', desc: '经验 +2%/级（最高 30 级）' },
+    tough: { name: '坚韧', desc: '生命 +1.5%/级（最高 30 级）' },
+    armor: { name: '护甲', desc: '护甲 +0.4%/级，移速 -0.15%/级（最高 30 级）' }
   };
   function save() { try { m.v = 2; localStorage.setItem(KEY, JSON.stringify(m)); } catch (e) {} }
-  function levelFor(xp) { let lv = 1, need = 100, left = xp; while (left >= need && lv < 60) { left -= need; lv++; need = 100 + (lv - 1) * 60; } return { level: Math.min(60, lv), into: left, need: need }; }
-  function totalPoints() { return Math.min(30, Math.floor(levelFor(m.xp).level / 2)); }
+  function levelFor(xp) { let lv = 1, need = 100, left = Math.max(0, xp); while (left >= need) { left -= need; lv++; need = 100 + (lv - 1) * 60; } return { level: lv, into: left, need: need }; }
+  function totalPoints() { return Math.floor(levelFor(m.xp).level / 2); }
   function spentPoints() { let s = 0; for (const k in m.runes) s += m.runes[k] || 0; return s; }
   TJ.meta = {
     get level() { return m.level; },
     get data() { return m; },
     RUNES: RUNES,
+    RUNE_MAX: RUNE_MAX,
     addUse(id) { return; },
     addRun(o) {
       const gain = Math.max(0, Math.round((o.score || 0) / 10) + (o.kills || 0) * 2);
@@ -45,9 +48,9 @@
     levelInfo() { return levelFor(m.xp); },
     points() { return { total: totalPoints(), spent: spentPoints() }; },
     runeLv(id) { return m.runes[id] || 0; },
-    spend(id) { if (spentPoints() >= totalPoints() || (m.runes[id] || 0) >= 50) return false; m.runes[id] = (m.runes[id] || 0) + 1; save(); return true; },
+    spend(id) { if (spentPoints() >= totalPoints() || (m.runes[id] || 0) >= RUNE_MAX) return false; m.runes[id] = (m.runes[id] || 0) + 1; save(); return true; },
     refund(id) { if ((m.runes[id] || 0) <= 0) return false; m.runes[id]--; save(); return true; },
     resetRunes() { m.runes = {}; save(); },
-    bonuses() { return { dmg: 0.02 * (m.runes.sharp || 0), speed: 0.015 * (m.runes.swift || 0) - 0.0025 * (m.runes.armor || 0), xp: 0.03 * (m.runes.learn || 0), hp: 0.02 * (m.runes.tough || 0), armor: 0.005 * (m.runes.armor || 0) }; }
+    bonuses() { const r = function (k) { return Math.min(RUNE_MAX, m.runes[k] || 0); }; return { dmg: 0.012 * r('sharp'), speed: 0.01 * r('swift') - 0.0015 * r('armor'), xp: 0.02 * r('learn'), hp: 0.015 * r('tough'), armor: 0.004 * r('armor') }; }
   };
 })();

@@ -1220,7 +1220,7 @@
     ov.innerHTML = '<div class="rm-box"><div class="rm-head">符文 <span>可用 ' + (p.total - p.spent) + ' / 已用 ' + p.spent + '</span><button class="rm-close">×</button></div>' +
       Object.keys(R).map(function (k) {
         return '<div class="rm-row"><div class="rm-info"><b>' + R[k].name + '</b><span>' + R[k].desc + '</span></div>' +
-          '<div class="rm-ctl"><button data-r="' + k + '" data-d="-1">−</button><em>' + TJ.meta.runeLv(k) + '</em><button data-r="' + k + '" data-d="1">＋</button></div></div>';
+          '<div class="rm-ctl"><button data-r="' + k + '" data-d="-1">−</button><em>' + TJ.meta.runeLv(k) + ' / ' + TJ.meta.RUNE_MAX + '</em><button data-r="' + k + '" data-d="1">＋</button></div></div>';
       }).join('') +
 
       '<div class="rm-foot"><button id="rmReset">免费重置</button></div></div>';
@@ -1394,7 +1394,7 @@
     input.setEnabled(false);
   }
 
-  const BUILD_TAG = '2026-11-13p';
+  const BUILD_TAG = '2026-11-13q';
   function titleLockScroll() {
     const t = document.getElementById('title');
     if (t) {
