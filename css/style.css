@@ -1287,3 +1287,15 @@ html.native #splash { display: flex; }
 #splashStart { display: none; position: absolute; z-index: 4; left: 50%; bottom: 14%; transform: translateX(-50%); padding: 12px 38px; border: 0; border-radius: 999px; background: #E4572E; color: #FFF6E0; font: 900 18px/1 system-ui, sans-serif; letter-spacing: .08em; box-shadow: 0 6px 0 #8E3218, 0 12px 26px rgba(0,0,0,.35); cursor: pointer; }
 #splash.poster-mode #splashStart { display: block; }
 #splash.poster-mode #splashSkip { display: none; }
+
+.relic-overlay .relic-box { width: min(760px, 94vw); }
+.relic-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.relic-card { border: 3px solid var(--rc, #B06BE0); background: linear-gradient(180deg, #FFF8E7, #F6E9CC); border-radius: 14px; padding: 12px 10px; text-align: left; cursor: pointer; font-family: inherit; color: #3A2418; }
+.relic-card b { display: block; font-size: 15px; margin-bottom: 6px; }
+.relic-pos { display: block; font-size: 11px; color: #2E7D4F; font-weight: 800; }
+.relic-neg { display: block; font-size: 10px; color: #B33B4A; margin-top: 4px; }
+.relic-tip { font-size: 10px; color: #8A6A52; text-align: center; margin: 8px 0 0; }
+.pause-relics { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: 6px; font-size: 10px; }
+.pause-relics b { color: #8A6A52; }
+.adv-card.locked { opacity: .45; }
+@media (max-width: 760px) { .relic-grid { grid-template-columns: 1fr; } }

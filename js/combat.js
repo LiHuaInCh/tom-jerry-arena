@@ -129,6 +129,7 @@
       g.effects.push({ kind: 'ring', x: e.x, y: e.y, r: 10, maxR: 320, life: 0.6, max: 0.6, color: '#FFD34D' });
       addText(g, e.x, e.y - 60, 'BOSS 击破！3 波后下一只', '#FFD34D', 30);
       g.nextBossWave = (g.wave || 1) + 3;
+      g.pickups.push({ kind: 'relic', x: e.x, y: e.y, vx: 0, vy: 0, r: 18, value: 0, life: 30, pull: false });
       if (e.kind === 'chenjr') g.finalBoss = true;
       g.elitePool = g.elitePool || [];
       if (g.elitePool.indexOf(e.kind) < 0) g.elitePool.push(e.kind);

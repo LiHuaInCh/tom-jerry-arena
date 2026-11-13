@@ -27,7 +27,8 @@
       }
       if (d < p.r + pk.r + 6) {
         pk.dead = true;
-        if (pk.kind === 'xp') { addXp(g, pk.value); sfx(g, 'xp'); TJ.Missions.bump(g, 'collect', 1); }
+        if (pk.kind === 'relic') { if (TJ.Relics) TJ.Relics.offer(g); }
+        else if (pk.kind === 'xp') { addXp(g, pk.value); sfx(g, 'xp'); TJ.Missions.bump(g, 'collect', 1); }
       else if (pk.kind === 'cheese') { p.carry = true; sfx(g, 'coin'); addText(g, p.x, p.y - 40, '搬起奶酪', '#FFD34D', 18); }
         else if (pk.kind === 'magnet') {
           let n = 0;

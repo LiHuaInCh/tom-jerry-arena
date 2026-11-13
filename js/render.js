@@ -1254,6 +1254,17 @@
       ctx.restore();
       return;
     }
+    if (pk.kind === 'relic') {
+      var __t = (t || 0) * 2;
+      ctx.save(); ctx.rotate(__t);
+      ctx.fillStyle = 'rgba(201,167,255,.25)'; ellipse(ctx, 0, 0, 19, 19); ctx.fill();
+      ctx.fillStyle = '#B06BE0'; ctx.strokeStyle = '#F2C14E'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(0, -13); ctx.lineTo(10, 0); ctx.lineTo(0, 13); ctx.lineTo(-10, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.restore();
+      ctx.fillStyle = '#FFF6E0'; ctx.font = 'bold 11px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('圣', 0, 1);
+      ctx.restore(); return;
+    }
     if (pk.kind === 'xp') {
       if (drawCake(ctx, 0, 0)) { ctx.restore(); return; }
       ctx.fillStyle = 'rgba(255,210,80,0.25)';
@@ -1538,6 +1549,32 @@
     return pat;
   }
 
+  function drawLargeFloorDecor(ctx, g, camX, camY, vw, vh) {
+    var sd = g.seed || 1;
+    var zr = [[0.25,0.25],[0.75,0.25],[0.25,0.75],[0.75,0.75]];
+    for (var i = 0; i < zr.length; i++) {
+      var zx = D.W * zr[i][0] + ((sd * (i + 2)) % 120) - 60;
+      var zy = D.H * zr[i][1] + ((sd * (i + 9)) % 100) - 50;
+      if (Math.abs(zx - camX) > vw / 2 + 260 || Math.abs(zy - camY) > vh / 2 + 220) continue;
+      ctx.save(); ctx.translate(zx, zy);
+      ctx.fillStyle = 'rgba(120,48,36,.16)'; ctx.beginPath(); ctx.ellipse(0, 10, 210, 128, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = 'rgba(158,68,48,.34)'; ctx.beginPath(); ctx.ellipse(0, 0, 200, 120, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = 'rgba(242,193,78,.55)'; ctx.lineWidth = 7; ctx.beginPath(); ctx.ellipse(0, 0, 174, 96, 0, 0, Math.PI * 2); ctx.stroke();
+      ctx.strokeStyle = 'rgba(255,240,200,.2)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(0, 0, 120, 60, 0, 0, Math.PI * 2); ctx.stroke();
+      ctx.fillStyle = 'rgba(255,240,200,.12)'; ctx.beginPath(); ctx.moveTo(0,-70); ctx.lineTo(70,0); ctx.lineTo(0,70); ctx.lineTo(-70,0); ctx.closePath(); ctx.fill();
+      for (var p = 0; p < 4; p++) {
+        var a = p * Math.PI / 2 + Math.PI / 4;
+        var px = Math.cos(a) * 228, py = Math.sin(a) * 138;
+        ctx.fillStyle = 'rgba(30,18,10,.24)'; ctx.beginPath(); ctx.ellipse(px, py + 18, 26, 10, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#8A5A38'; ctx.fillRect(px - 13, py - 2, 26, 24);
+        ctx.fillStyle = '#3E7D4C'; ctx.beginPath(); ctx.ellipse(px - 12, py - 20, 17, 10, -0.6, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#4E9158'; ctx.beginPath(); ctx.ellipse(px + 2, py - 27, 17, 10, 0.3, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#2F6B3C'; ctx.beginPath(); ctx.ellipse(px + 14, py - 14, 15, 9, 0.7, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
+    }
+  }
+
   function drawZones(ctx, g) {
       const zones = [
         { name: '厨房', x: 0, y: 0, w: 0.5, h: 0.5, color: '#E8A85C' },
@@ -1626,10 +1663,68 @@
         ctx.fillRect(camX - vw / 2 - 80, camY - vh / 2 - 80, vw + 160, vh + 160);
         ctx.restore();
         }
+
+        var __sd = g.seed || 1;
+        var __zr = [[0.25,0.25],[0.75,0.25],[0.25,0.75],[0.75,0.75]];
+        for (var __zi = 0; __zi < __zr.length; __zi++) {
+          var __zx = D.W * __zr[__zi][0] + ((__sd * (__zi + 2)) % 120) - 60;
+          var __zy = D.H * __zr[__zi][1] + ((__sd * (__zi + 9)) % 100) - 50;
+          ctx.save(); ctx.translate(__zx, __zy);
+          ctx.fillStyle = 'rgba(120,48,36,.18)'; ctx.beginPath(); ctx.ellipse(0, 10, 210, 128, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = 'rgba(158,68,48,.36)'; ctx.beginPath(); ctx.ellipse(0, 0, 200, 120, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = 'rgba(242,193,78,.55)'; ctx.lineWidth = 7; ctx.beginPath(); ctx.ellipse(0, 0, 174, 96, 0, 0, Math.PI * 2); ctx.stroke();
+          ctx.strokeStyle = 'rgba(255,240,200,.22)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(0, 0, 120, 60, 0, 0, Math.PI * 2); ctx.stroke();
+          ctx.fillStyle = 'rgba(255,240,200,.13)'; ctx.beginPath(); ctx.moveTo(0,-70); ctx.lineTo(70,0); ctx.lineTo(0,70); ctx.lineTo(-70,0); ctx.closePath(); ctx.fill();
+          for (var __pj = 0; __pj < 4; __pj++) {
+            var __pa = __pj * Math.PI / 2 + Math.PI / 4;
+            var __ppx = Math.cos(__pa) * 228, __ppy = Math.sin(__pa) * 138;
+            ctx.fillStyle = 'rgba(30,18,10,.24)'; ctx.beginPath(); ctx.ellipse(__ppx, __ppy + 18, 26, 10, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#8A5A38'; ctx.fillRect(__ppx - 13, __ppy - 2, 26, 24);
+            ctx.fillStyle = '#3E7D4C'; ctx.beginPath(); ctx.ellipse(__ppx - 12, __ppy - 20, 17, 10, -0.6, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#4E9158'; ctx.beginPath(); ctx.ellipse(__ppx + 2, __ppy - 27, 17, 10, 0.3, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#2F6B3C'; ctx.beginPath(); ctx.ellipse(__ppx + 14, __ppy - 14, 15, 9, 0.7, 0, Math.PI * 2); ctx.fill();
+          }
+          ctx.restore();
+        }
+
+        for (var __ri = 0; __ri < 9; __ri++) {
+          var __rx = ((__sd * (__ri + 3) * 977) % (D.W - 700)) + 350;
+          var __ry = ((__sd * (__ri + 7) * 613) % (D.H - 500)) + 250;
+          if (Math.abs(__rx - camX) > vw / 2 + 260 || Math.abs(__ry - camY) > vh / 2 + 260) continue;
+          ctx.save(); ctx.translate(__rx, __ry);
+          ctx.fillStyle = 'rgba(120,48,36,.20)';
+          ctx.beginPath(); ctx.ellipse(0, 8, 150, 92, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = 'rgba(166,74,52,.34)';
+          ctx.beginPath(); ctx.ellipse(0, 0, 142, 84, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = 'rgba(242,193,78,.45)'; ctx.lineWidth = 5;
+          ctx.beginPath(); ctx.ellipse(0, 0, 122, 66, 0, 0, Math.PI * 2); ctx.stroke();
+          ctx.strokeStyle = 'rgba(255,240,200,.18)'; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(-110, 0); ctx.lineTo(110, 0); ctx.moveTo(0, -58); ctx.lineTo(0, 58); ctx.stroke();
+          ctx.restore();
+        }
+        for (var __pi = 0; __pi < 14; __pi++) {
+          var __px = ((__sd * (__pi + 11) * 431) % (D.W - 300)) + 150;
+          var __py = ((__sd * (__pi + 5) * 829) % (D.H - 300)) + 150;
+          if (Math.abs(__px - camX) > vw / 2 + 120 || Math.abs(__py - camY) > vh / 2 + 120) continue;
+          ctx.save(); ctx.translate(__px, __py);
+          ctx.fillStyle = 'rgba(30,18,10,.22)'; ctx.beginPath(); ctx.ellipse(0, 16, 26, 10, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#8A5A38'; ctx.fillRect(-13, -4, 26, 24);
+          ctx.fillStyle = '#6B4423'; ctx.fillRect(-16, 16, 32, 6);
+          ctx.fillStyle = '#3E7D4C'; ctx.beginPath(); ctx.ellipse(-12, -18, 16, 9, -0.6, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#4E9158'; ctx.beginPath(); ctx.ellipse(2, -26, 16, 9, 0.3, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#2F6B3C'; ctx.beginPath(); ctx.ellipse(13, -12, 14, 8, 0.7, 0, Math.PI * 2); ctx.fill();
+          ctx.restore();
+        }
+        var __vg = ctx.createRadialGradient(camX, camY, Math.min(vw, vh) * 0.34, camX, camY, Math.max(vw, vh) * 0.72);
+        __vg.addColorStop(0, 'rgba(20,12,8,0)');
+        __vg.addColorStop(1, 'rgba(20,12,8,.34)');
+        ctx.fillStyle = __vg;
+        ctx.fillRect(camX - vw / 2 - 2, camY - vh / 2 - 2, vw + 4, vh + 4);
       } else {
         ctx.drawImage(bg, 0, 0, D.W, D.H);
       }
       drawZones(ctx, g);
+      if (largeMap) drawLargeFloorDecor(ctx, g, camX, camY, vw, vh);
       if (g.escort) {
         const e = g.escort;
         ctx.save();

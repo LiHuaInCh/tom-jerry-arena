@@ -21,7 +21,7 @@
   let selected = params.get('char') || 'jerry';
   const covenants = new Set();
   let faction = (D.characters.find(function (c) { return c.id === selected; }) || D.characters[0]).faction || 'mouse';
-  let mode = params.get('mode') === 'arena' ? 'arena' : 'survival';
+  let mode = params.get('mode') === 'arena' ? 'arena' : (params.get('mode') === 'adventure' ? 'adventure' : 'survival');
   const ERR_KEY = 'tj_errlog';
   let errLogs = [];
   try { errLogs = JSON.parse(localStorage.getItem(ERR_KEY) || '[]') || []; } catch (e) { errLogs = []; }
@@ -92,6 +92,48 @@
   }
   TJ.openErrorLog = openErrorLog;
   paintErrBadge();
+
+  const ADV_STAGES = [
+    { id: 'a1', name: '厨房突围', map: 'standard', waves: 4, desc: '狭小厨房，先活过 4 波' },
+    { id: 'a2', name: '花园追猎', map: 'standard', waves: 6, desc: '花园怪潮，坚持 6 波' },
+    { id: 'a3', name: '仓库围城', map: 'large', waves: 5, desc: '大型仓库，利用空间拉扯' },
+    { id: 'a4', name: '庄园决战', map: 'large', waves: 8, desc: '庄园终局，8 波生存' }
+  ];
+  function advCleared() {
+    try { return parseInt(localStorage.getItem('tj_adv_clear') || '0', 10) || 0; } catch (e) { return 0; }
+  }
+  function advStage() {
+    var sid = '';
+    try { sid = localStorage.getItem('tj_adv_stage') || 'a1'; } catch (e) {}
+    for (var i = 0; i < ADV_STAGES.length; i++) if (ADV_STAGES[i].id === sid) return ADV_STAGES[i];
+    return ADV_STAGES[0];
+  }
+  function openAdventure() {
+    var ov = document.getElementById('mapPicker');
+    if (!ov) { ov = document.createElement('div'); ov.id = 'mapPicker'; ov.className = 'map-modal'; document.body.appendChild(ov); }
+    var cleared = advCleared();
+    ov.innerHTML = '<div class="map-box"><div class="map-head">冒险模式 · 选择关卡</div><div class="map-list">' +
+      ADV_STAGES.map(function (s, i) {
+        var locked = i > cleared;
+        return '<button class="map-card adv-card' + (locked ? ' locked' : '') + '" data-i="' + i + '"' + (locked ? ' disabled' : '') + '><b>' + (i + 1) + '. ' + s.name + (locked ? ' 🔒' : '') + '</b><span>' + s.desc + ' · ' + (s.map === 'large' ? '大型地图' : '标准地图') + '</span></button>';
+      }).join('') + '</div><button class="map-cancel">取消</button></div>';
+    ov.classList.add('on');
+    ov.querySelectorAll('.map-card').forEach(function (b) {
+      if (b.disabled) return;
+      b.onclick = function () {
+        var s = ADV_STAGES[Number(b.dataset.i)];
+        try {
+          localStorage.setItem('tj_mapsize', s.map);
+          localStorage.setItem('tj_adv_stage', s.id);
+          localStorage.setItem('tj_last_char', selected);
+          localStorage.setItem('tj_last_mode', 'adventure');
+          localStorage.setItem('tj_pending', '1');
+        } catch (e) {}
+        location.reload();
+      };
+    });
+    ov.querySelector('.map-cancel').onclick = function () { ov.classList.remove('on'); };
+  }
 
   function portraitSrc(id) { return 'assets/portraits/' + id + '.png'; }
   let best = 0;
@@ -642,7 +684,9 @@
 
   function startRun() {
     TJ.Audio.unlock();
+    var __adv = (mode === 'adventure') ? advStage() : null;
     g = mode === 'arena' ? TJ.createArenaGame({ charId: selected }) : TJ.createGame({ charId: selected, hard: difficulty === 'hard' });
+    if (__adv) { g.adventure = __adv; g.adventureClear = false; g.mode = 'adventure'; }
     if (TJ.Audio && TJ.Audio.setTrack) TJ.Audio.setTrack(covenants.has('psycho') ? 'psycho' : 'default');
     if (TJ.Missions && TJ.Missions.recenter) TJ.Missions.recenter(g);
     g.cov = { spawn: 1, elite: 1, noHeal: 0, score: 1, list: [] };
@@ -1137,7 +1181,7 @@
       ['爆伤', Math.round((st.critMul || 1) * 100) + '%'], ['穿透', st.pierce || 0], ['多重', st.multishot || 0],
       ['吸血', pct(st.lifesteal)], ['回血', pct(st.regen)], ['经验', pct(st.xpMul)]
     ];
-    $('pauseStats').innerHTML = '<div class="pause-grid">' + rows.map(function (r) { return '<div class="pg-row"><span>' + r[0] + '</span><b>' + r[1] + '</b></div>'; }).join('') + '</div>' + (($('buffs') && $('buffs').innerHTML) ? '<div class="pause-buffs">' + $('buffs').innerHTML + '</div>' : '');
+    $('pauseStats').innerHTML = '<div class="pause-grid">' + rows.map(function (r) { return '<div class="pg-row"><span>' + r[0] + '</span><b>' + r[1] + '</b></div>'; }).join('') + '</div>' + (($('buffs') && $('buffs').innerHTML) ? '<div class="pause-buffs">' + $('buffs').innerHTML + '</div>' : '') + ((g.relics && g.relics.length) ? '<div class="pause-relics"><b>圣遗物</b>' + g.relics.map(function (id) { var rr = (TJ.Relics && TJ.Relics.list || []).filter(function (x) { return x.id === id; })[0]; return rr ? '<span style="color:' + rr.color + '">' + rr.name + '</span>' : ''; }).join('') + '</div>' : '');
     $('pause').classList.remove('hidden');
   }
 
@@ -1286,6 +1330,24 @@
     }
     if (!g) return;
     overShown = true;
+    if (g.mode === 'adventure') {
+      var __clear = !!g.adventureClear;
+      if (__clear) {
+        var __idx = ADV_STAGES.findIndex(function (s) { return s.id === g.adventure.id; });
+        if (__idx + 1 > advCleared()) { try { localStorage.setItem('tj_adv_clear', String(__idx + 1)); } catch (e) {} }
+      }
+      $('overTitle').textContent = __clear ? '冒险通关！' : '冒险失败';
+      $('overStats').innerHTML =
+        '<div class="stat wide"><span>' + g.adventure.name + '</span><b>' + (__clear ? '通关' : '未通关') + '</b></div>' +
+        '<div class="stat"><span>坚持时间</span><b>' + fmt(g.elapsed) + '</b></div>' +
+        '<div class="stat"><span>到达波次</span><b>' + g.wave + ' / ' + g.adventure.waves + '</b></div>' +
+        '<div class="stat"><span>击倒猫咪</span><b>' + g.kills + '</b></div>' +
+        '<div class="stat"><span>角色等级</span><b>' + g.level + '</b></div>' +
+        (__clear ? '<div class="stat wide"><span>已解锁</span><b>' + (advCleared() >= ADV_STAGES.length ? '全部关卡' : '下一关') + '</b></div>' : '');
+      $('over').classList.remove('hidden');
+      state = 'over';
+      return;
+    }
     if (g.mode === 'arena') {
       const list = (g.ranking && g.ranking.length) ? g.ranking : g.fighters.slice().sort(function (a, b) { return b.kills - a.kills; });
       const rank = list.map(function (f, i) {
@@ -1541,7 +1603,7 @@
     }
 
     if (state === 'playing' && g) {
-      if (!g.over) {
+      if (!g.over && !g.relicPause) {
         acc += dt;
         const slow = (g.hitStop || 0) > 0 ? 0.35 : 1;
         if (g.hitStop) g.hitStop = Math.max(0, g.hitStop - dt);
@@ -1562,6 +1624,10 @@
             return '<div class="m-row' + (m.done ? ' done' : '') + '">' + m.text + ' ' + Math.min(m.cur, m.need) + '/' + m.need + '</div>';
           }).join('');
         }
+      }
+      if (g.adventure && !g.over && g.wave > g.adventure.waves) {
+        g.adventureClear = true;
+        g.over = true;
       }
       if (g.over) {
         state = 'over';
@@ -1676,7 +1742,7 @@
   refreshModeUI();
   refreshFactionUI();
 
-  $('startBtn').addEventListener('click', openMapPicker);
+  $('startBtn').addEventListener('click', function () { if (mode === 'adventure') openAdventure(); else openMapPicker(); });
 
   (function resumePendingRun() {
     try {
