@@ -140,7 +140,7 @@
     const sw = D.weapons[p.subWeapon] || {};
     const sub = sw.sub || 'rapid';
     return (EVO[sub] || EVO.rapid).map(function (it, i) {
-      return { id: 'evo_sub_' + sub + '_' + i, name: '副武器 · ' + it[0], desc: it[1] + ' · 副武器伤害 +15%', icon: '副', rarity: 'epic', kind: 'evo_sub', apply: function (s, g) { it[2](s, g); s.subDmgMul = (s.subDmgMul || 1) * 1.15; } };
+      return { id: 'evo_sub_' + sub + '_' + i, name: '副武器 · ' + it[0], desc: it[1], icon: '副', rarity: 'epic', kind: 'evo_sub', apply: it[2] };
     });
   }
   TJ.getEvolutionChoices = function (g) {

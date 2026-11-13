@@ -429,7 +429,7 @@
           g.effects.push({ kind: 'ring', x: p.x, y: p.y, r: 12, maxR: R, life: 0.3, max: 0.3, color: sw.color || '#FFD34D' });
           p.subCd = (sw.cd || 1) * (st.subCdMul || 1) / (st.fireRate || 1); sfx(g, 'slash');
         } else if (sw.kind === 'beam') {
-          const L = sw.range || 500, hw = (sw.width || 20) / 2;
+          const L = sw.range || 500, hw = (sw.width || 20) * (st.beamWidthMul || 1) / 2;
           for (const e of g.enemies) {
             if (e.dead) continue;
             const ex = e.x - p.x, ey = e.y - p.y, t2 = ex * Math.cos(sa) + ey * Math.sin(sa);
@@ -441,7 +441,7 @@
         } else if (sw.kind === 'chain' || sw.kind === 'tether') {
           let cur = subTarget, dmg2 = sw.dmg * st.damage * (st.subDmgMul || 1) * (sw.kind === 'tether' ? 0.9 : 1), hit2 = {};
           const pts2 = [{ x: p.x, y: p.y }];
-          for (let i = 0; i < (sw.kind === 'tether' ? 1 : (sw.jumps || 3)) && cur; i++) {
+          for (let i = 0; i < (sw.kind === 'tether' ? 1 : ((sw.jumps || 3) + (st.chainJumps || 0))) && cur; i++) {
             hit2[cur.id] = 1; pts2.push({ x: cur.x, y: cur.y }); damageEnemy(g, cur, dmg2, false); dmg2 *= 0.82;
             let nxt = null, nd = 280;
             for (const e of g.enemies) { if (e.dead || hit2[e.id]) continue; const dd = Math.hypot(e.x - cur.x, e.y - cur.y); if (dd < nd) { nd = dd; nxt = e; } }
@@ -466,12 +466,19 @@
           g.effects.push({ kind: 'ring', x: subTarget.x, y: subTarget.y, r: 10, maxR: R2, life: 0.3, max: 0.3, color: sw.color || '#FFB44D' });
           p.subCd = (sw.cd || 1) * (st.subCdMul || 1) / (st.fireRate || 1); sfx(g, 'explode');
         } else {
-          g.projectiles.push({
-            x: p.x, y: p.y, vx: Math.cos(sa) * (sw.speed || 500), vy: Math.sin(sa) * (sw.speed || 500),
-            r: 8, dmg: sw.dmg * st.damage * (st.subDmgMul || 1), from: 'player', kind: sw.proj || 'orb',
-            life: 2, hit: {}, color: sw.color || '#BFE9FF',
-            splash: sw.splash || 0, explodeOnDeath: !!sw.splash, pierce: sw.pierce || 0, _sub: sw.sub || 'ranged', _icon: sw.iconImg
-          });
+          const __sn = 1 + (st.multishot || 0);
+          for (let __si = 0; __si < __sn; __si++) {
+            const __sa2 = sa + (__si - (__sn - 1) / 2) * 0.13;
+            const __crit = g.rng() < (st.crit || 0);
+            g.projectiles.push({
+              x: p.x, y: p.y, vx: Math.cos(__sa2) * (sw.speed || 500), vy: Math.sin(__sa2) * (sw.speed || 500),
+              r: 8, dmg: sw.dmg * st.damage * (st.subDmgMul || 1) * (__crit ? (st.critMul || 2) : 1), from: 'player', kind: sw.proj || 'orb',
+              life: 2, hit: {}, color: sw.color || '#BFE9FF', crit: __crit,
+              splash: (sw.splash || 0) + (st.explode ? 80 : 0), explodeOnDeath: !!(sw.splash || st.explode),
+              pierce: (sw.pierce || 0) + (st.pierce || 0), bounce: (sw.bounce || 0) + (st.bounce || 0),
+              homing: (sw.homing || 0) + (st.homing || 0), _sub: sw.sub || 'ranged', _icon: sw.iconImg
+            });
+          }
           p.subCd = (sw.cd || 1) * (st.subCdMul || 1) / (st.fireRate || 1);
           sfx(g, 'shoot');
         }
