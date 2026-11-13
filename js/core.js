@@ -52,6 +52,7 @@
       bossIdx: 0, nextBossWave: 3, elitePool: [], finalBoss: false,
       events: [], cam: { x: D.W / 2, y: D.H / 2 }, seed: __seed
     };
+    g.stats.subBase = JSON.parse(JSON.stringify(g.stats));
     TJ.Missions.init(g);
     g.player = makePlayer(g, opts.charId);
     if (g.W > 3000) { g.player.x = Math.round(g.W * 0.28); g.player.y = Math.round(g.H * 0.30); }
@@ -222,7 +223,8 @@
       pool.push({ id: 'evo_generic_dmg', name: '武器专精', desc: '武器伤害 +25%', icon: '专', rarity: 'epic', kind: 'evo_main', apply: function (s) { s.damage *= 1.25; } });
       const card = pool.filter(function (x) { return x.id === id; })[0];
       if (!card) return null;
-      if (card.apply) card.apply(g.stats, g);
+      const __target = (id.indexOf('evo_sub') === 0) ? (g.stats.subBase || g.stats) : g.stats;
+      if (card.apply) card.apply(__target, g);
       g.events.push({ type: 'upgrade', id: id });
       return { name: card.name };
     }
@@ -324,4 +326,21 @@
   TJ.Core = { spawnEnemy: spawnEnemy, fire: fire };
   TJ.helpers = { baseStats, resolveObstacles, burst, addText, sfx, clamp, rand };
   TJ.helpers.hurtEnemy = function (g, f, e, d) { damageEnemy(g, e, d, false); };
+})();
+
+/* keep generic upgrades in sync with subweapon stats; evolution cards stay separate */
+(function () {
+  var TJ = window.TJ;
+  if (!TJ || !TJ.applyUpgrade || TJ.applyUpgrade.__wrapped) return;
+  const orig = TJ.applyUpgrade;
+  TJ.applyUpgrade = function (g, id) {
+    const sb = g && g.stats && g.stats.subBase;
+    if (!sb || String(id).indexOf('evo_') === 0) return orig(g, id);
+    const before = {};
+    for (const k in g.stats) if (typeof g.stats[k] === 'number') before[k] = g.stats[k];
+    const res = orig(g, id);
+    for (const k in g.stats) if (typeof g.stats[k] === 'number' && g.stats[k] !== before[k]) sb[k] = (typeof sb[k] === 'number' ? sb[k] : 0) + (g.stats[k] - before[k]);
+    return res;
+  };
+  TJ.applyUpgrade.__wrapped = true;
 })();

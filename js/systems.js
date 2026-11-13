@@ -417,69 +417,70 @@
     }
     if (p.subWeapon) {
       const sw = D.weapons[p.subWeapon];
+      const sb = st.subBase || st;
       p.subCd = Math.max(0, (p.subCd || 0) - dt);
-      const subTarget = nearestEnemy(g, p.x, p.y, (sw.range || 800) + st.range);
+      const subTarget = nearestEnemy(g, p.x, p.y, (sw.range || 800) + sb.range);
       if (subTarget && p.subCd <= 0) {
         const sa = Math.atan2(subTarget.y - p.y, subTarget.x - p.x);
         if (sw.kind === 'orbit') {
           p.subOrbitA = (p.subOrbitA || 0) + dt;
         } else if (sw.kind === 'aura') {
           const R = sw.auraR || 90;
-          for (const e of g.enemies) if (!e.dead && Math.hypot(e.x - p.x, e.y - p.y) < R + e.r) damageEnemy(g, e, sw.dmg * st.damage * (st.subDmgMul || 1) * 0.9, false);
+          for (const e of g.enemies) if (!e.dead && Math.hypot(e.x - p.x, e.y - p.y) < R + e.r) damageEnemy(g, e, sw.dmg * sb.damage * (sb.subDmgMul || 1) * 0.9, false);
           g.effects.push({ kind: 'ring', x: p.x, y: p.y, r: 12, maxR: R, life: 0.3, max: 0.3, color: sw.color || '#FFD34D' });
-          p.subCd = (sw.cd || 1) * (st.subCdMul || 1) / (st.fireRate || 1); sfx(g, 'slash');
+          p.subCd = (sw.cd || 1) * (sb.subCdMul || 1) / (sb.fireRate || 1); sfx(g, 'slash');
         } else if (sw.kind === 'beam') {
-          const L = sw.range || 500, hw = (sw.width || 20) * (st.beamWidthMul || 1) / 2;
+          const L = sw.range || 500, hw = (sw.width || 20) * (sb.beamWidthMul || 1) / 2;
           for (const e of g.enemies) {
             if (e.dead) continue;
             const ex = e.x - p.x, ey = e.y - p.y, t2 = ex * Math.cos(sa) + ey * Math.sin(sa);
             if (t2 < 0 || t2 > L) continue;
-            if (Math.hypot(ex - Math.cos(sa) * t2, ey - Math.sin(sa) * t2) <= hw + e.r) damageEnemy(g, e, sw.dmg * st.damage * (st.subDmgMul || 1), false);
+            if (Math.hypot(ex - Math.cos(sa) * t2, ey - Math.sin(sa) * t2) <= hw + e.r) damageEnemy(g, e, sw.dmg * sb.damage * (sb.subDmgMul || 1), false);
           }
           g.effects.push({ kind: 'beam', x: p.x, y: p.y, ang: sa, len: L, life: 0.18, max: 0.18, color: sw.color || '#FFD34D' });
-          p.subCd = (sw.cd || 1) * (st.subCdMul || 1) / (st.fireRate || 1); sfx(g, 'shoot');
+          p.subCd = (sw.cd || 1) * (sb.subCdMul || 1) / (sb.fireRate || 1); sfx(g, 'shoot');
         } else if (sw.kind === 'chain' || sw.kind === 'tether') {
-          let cur = subTarget, dmg2 = sw.dmg * st.damage * (st.subDmgMul || 1) * (sw.kind === 'tether' ? 0.9 : 1), hit2 = {};
+          let cur = subTarget, dmg2 = sw.dmg * sb.damage * (sb.subDmgMul || 1) * (sw.kind === 'tether' ? 0.9 : 1), hit2 = {};
           const pts2 = [{ x: p.x, y: p.y }];
-          for (let i = 0; i < (sw.kind === 'tether' ? 1 : ((sw.jumps || 3) + (st.chainJumps || 0))) && cur; i++) {
+          for (let i = 0; i < (sw.kind === 'tether' ? 1 : ((sw.jumps || 3) + (sb.chainJumps || 0))) && cur; i++) {
             hit2[cur.id] = 1; pts2.push({ x: cur.x, y: cur.y }); damageEnemy(g, cur, dmg2, false); dmg2 *= 0.82;
             let nxt = null, nd = 280;
             for (const e of g.enemies) { if (e.dead || hit2[e.id]) continue; const dd = Math.hypot(e.x - cur.x, e.y - cur.y); if (dd < nd) { nd = dd; nxt = e; } }
             cur = nxt;
           }
           g.effects.push({ kind: 'chain', pts: pts2, life: 0.26, max: 0.26, color: sw.color || '#9CD8FF' });
-          p.subCd = (sw.cd || 1) * (st.subCdMul || 1) / (st.fireRate || 1); sfx(g, 'eshoot');
+          p.subCd = (sw.cd || 1) * (sb.subCdMul || 1) / (sb.fireRate || 1); sfx(g, 'eshoot');
         } else if (sw.kind === 'summon') {
           g.summons = g.summons || [];
-          const __subMax = Math.max(1, st.summonCount || 4);
+          const __subMax = Math.max(1, sb.summonCount || 4);
           const __subCount = g.summons.filter(function (x) { return !!x.sub && !x.temp; }).length;
           const __sfree = Math.max(0, __subMax - __subCount);
           for (let __sj = 0; __sj < Math.min(1, __sfree); __sj++) {
             var __sb = ((g.summons.length + __sj) * 2.399) % (Math.PI * 2);
-            g.summons.push({ x: p.x + Math.cos(__sb) * 46, y: p.y + Math.sin(__sb) * 46, life: (sw.duration || 16) + (st.summonDur || 0), atkCd: 0, r: 15, spd: 360, icon: sw.iconImg, stationary: !!sw.stationary, range: sw.stationary ? 180 : 520, size: sw.stationary ? 56 : 76, w: sw, sub: true });
+            g.summons.push({ x: p.x + Math.cos(__sb) * 46, y: p.y + Math.sin(__sb) * 46, life: (sw.duration || 16) + (sb.summonDur || 0), atkCd: 0, r: 15, spd: 360, icon: sw.iconImg, stationary: !!sw.stationary, range: sw.stationary ? 180 : 520, size: sw.stationary ? 56 : 76, w: sw, sub: true });
             g.effects.push({ kind: 'ring', x: p.x + Math.cos(__sb) * 46, y: p.y + Math.sin(__sb) * 46, r: 4, maxR: 60, life: 0.3, max: 0.3, color: '#FFD36A' });
           }
-          p.subCd = (sw.cd || 2.2) * (st.summonCdMul || 1); sfx(g, 'shield');
+          p.subCd = (sw.cd || 2.2) * (sb.summonCdMul || 1); sfx(g, 'shield');
         } else if (sw.kind === 'deploy') {
           const R2 = sw.boomR || sw.auraR || 100;
-          for (const e of g.enemies) if (!e.dead && Math.hypot(e.x - subTarget.x, e.y - subTarget.y) < R2 + e.r) damageEnemy(g, e, sw.dmg * st.damage * (st.subDmgMul || 1) * 1.2, false);
+          for (const e of g.enemies) if (!e.dead && Math.hypot(e.x - subTarget.x, e.y - subTarget.y) < R2 + e.r) damageEnemy(g, e, sw.dmg * sb.damage * (sb.subDmgMul || 1) * 1.2, false);
           g.effects.push({ kind: 'ring', x: subTarget.x, y: subTarget.y, r: 10, maxR: R2, life: 0.3, max: 0.3, color: sw.color || '#FFB44D' });
-          p.subCd = (sw.cd || 1) * (st.subCdMul || 1) / (st.fireRate || 1); sfx(g, 'explode');
+          p.subCd = (sw.cd || 1) * (sb.subCdMul || 1) / (sb.fireRate || 1); sfx(g, 'explode');
         } else {
-          const __sn = 1 + (st.multishot || 0);
+          const __sn = 1 + (sb.multishot || 0);
           for (let __si = 0; __si < __sn; __si++) {
             const __sa2 = sa + (__si - (__sn - 1) / 2) * 0.13;
-            const __crit = g.rng() < (st.crit || 0);
+            const __crit = g.rng() < (sb.crit || 0);
             g.projectiles.push({
               x: p.x, y: p.y, vx: Math.cos(__sa2) * (sw.speed || 500), vy: Math.sin(__sa2) * (sw.speed || 500),
-              r: 8, dmg: sw.dmg * st.damage * (st.subDmgMul || 1) * (__crit ? (st.critMul || 2) : 1), from: 'player', kind: sw.proj || 'orb',
+              r: 8, dmg: sw.dmg * sb.damage * (sb.subDmgMul || 1) * (__crit ? (sb.critMul || 2) : 1), from: 'player', kind: sw.proj || 'orb',
               life: 2, hit: {}, color: sw.color || '#BFE9FF', crit: __crit,
-              splash: (sw.splash || 0) + (st.explode ? 80 : 0), explodeOnDeath: !!(sw.splash || st.explode),
-              pierce: (sw.pierce || 0) + (st.pierce || 0), bounce: (sw.bounce || 0) + (st.bounce || 0),
-              homing: (sw.homing || 0) + (st.homing || 0), _sub: sw.sub || 'ranged', _icon: sw.iconImg
+              splash: (sw.splash || 0) + (sb.explode ? 80 : 0), explodeOnDeath: !!(sw.splash || sb.explode),
+              pierce: (sw.pierce || 0) + (sb.pierce || 0), bounce: (sw.bounce || 0) + (sb.bounce || 0),
+              homing: (sw.homing || 0) + (sb.homing || 0), _sub: sw.sub || 'ranged', _icon: sw.iconImg
             });
           }
-          p.subCd = (sw.cd || 1) * (st.subCdMul || 1) / (st.fireRate || 1);
+          p.subCd = (sw.cd || 1) * (sb.subCdMul || 1) / (sb.fireRate || 1);
           sfx(g, 'shoot');
         }
       }
