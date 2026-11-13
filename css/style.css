@@ -1273,3 +1273,8 @@ html.native #splash { display: flex; }
   #cards .up-desc { font-size: 10px !important; line-height: 1.35 !important; }
   #cards .lu-refresh { flex: 0 0 auto !important; }
 }
+
+#errBadge { position: fixed; left: 10px; bottom: 12px; z-index: 150; border: 2px solid #B5482A; background: #FFF3D8; color: #B5482A; border-radius: 999px; padding: 4px 10px; font: 800 10px/1.2 system-ui, sans-serif; cursor: pointer; box-shadow: 0 3px 8px rgba(0,0,0,.25); }
+.err-actions { display: flex; gap: 6px; margin-bottom: 8px; }
+.err-actions button { border: 2px solid #C9A87A; background: #FFF6E0; color: #3A2418; border-radius: 8px; padding: 5px 10px; font: 800 11px/1 system-ui, sans-serif; cursor: pointer; }
+.err-pre { margin: 0; white-space: pre-wrap; word-break: break-word; font: 10px/1.45 Consolas, monospace; color: #5C3B26; max-height: 55vh; overflow: auto; background: #FFFDF6; border: 1px solid #E3CBA8; border-radius: 10px; padding: 8px; }

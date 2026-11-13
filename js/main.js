@@ -22,6 +22,77 @@
   const covenants = new Set();
   let faction = (D.characters.find(function (c) { return c.id === selected; }) || D.characters[0]).faction || 'mouse';
   let mode = params.get('mode') === 'arena' ? 'arena' : 'survival';
+  const ERR_KEY = 'tj_errlog';
+  let errLogs = [];
+  try { errLogs = JSON.parse(localStorage.getItem(ERR_KEY) || '[]') || []; } catch (e) { errLogs = []; }
+  function errText(e) {
+    if (!e) return '';
+    if (typeof e === 'string') return e;
+    return (e.stack || e.message || String(e));
+  }
+  function logError(source, err, extra) {
+    try {
+      const rec = {
+        t: new Date().toISOString(),
+        source: source || 'error',
+        msg: errText(err).slice(0, 4000),
+        state: (typeof state !== 'undefined' ? state : ''),
+        char: (typeof g !== 'undefined' && g && g.player && g.player.char) ? g.player.char.id : '',
+        wave: (typeof g !== 'undefined' && g) ? g.wave : '',
+        elapsed: (typeof g !== 'undefined' && g) ? Math.round(g.elapsed || 0) : '',
+        ua: navigator.userAgent
+      };
+      errLogs.push(rec);
+      if (errLogs.length > 30) errLogs = errLogs.slice(-30);
+      try { localStorage.setItem(ERR_KEY, JSON.stringify(errLogs)); } catch (e) {}
+      paintErrBadge();
+    } catch (e) {}
+  }
+  TJ.logError = logError;
+  window.addEventListener('error', function (ev) { logError('window', ev.error || ev.message); });
+  window.addEventListener('unhandledrejection', function (ev) { logError('promise', ev.reason); });
+  function paintErrBadge() {
+    var b = document.getElementById('errBadge');
+    if (!errLogs.length) { if (b) b.remove(); return; }
+    if (!b) {
+      b = document.createElement('button');
+      b.id = 'errBadge'; b.type = 'button';
+      b.onclick = openErrorLog;
+      document.body.appendChild(b);
+    }
+    b.textContent = '错误日志 ×' + errLogs.length;
+  }
+  function openErrorLog() {
+    var ov = document.getElementById('errOverlay');
+    if (!ov) {
+      ov = document.createElement('div'); ov.id = 'errOverlay'; ov.className = 'codex-overlay'; document.body.appendChild(ov);
+    }
+    var lines = errLogs.slice().reverse().map(function (r, i) {
+      return '#' + (errLogs.length - i) + ' [' + r.source + '] ' + r.t + '\n' +
+        '状态=' + r.state + ' 角色=' + r.char + ' 波次=' + r.wave + ' 时间=' + r.elapsed + 's\n' +
+        r.msg + '\n';
+    }).join('\n');
+    if (!lines) lines = '暂无错误。';
+    ov.innerHTML = '<div class="codex-box"><div class="codex-head"><b>错误日志</b><span>' + errLogs.length + ' 条 · 最近 30 条</span><button class="codex-close">×</button></div>' +
+      '<div class="err-actions"><button id="errCopy">复制全部</button><button id="errClear">清空</button></div>' +
+      '<pre class="err-pre">' + lines.replace(/[<>&]/g, function (c) { return ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' })[c]; }) + '</pre></div>';
+    ov.classList.add('on');
+    ov.querySelector('.codex-close').onclick = function () { ov.classList.remove('on'); };
+    ov.onclick = function (ev) { if (ev.target === ov) ov.classList.remove('on'); };
+    ov.querySelector('#errClear').onclick = function () { errLogs = []; try { localStorage.removeItem(ERR_KEY); } catch (e) {} paintErrBadge(); ov.classList.remove('on'); };
+    ov.querySelector('#errCopy').onclick = function () {
+      var txt = lines;
+      if (navigator.clipboard) navigator.clipboard.writeText(txt).then(function () { ov.querySelector('#errCopy').textContent = '已复制'; }, function () {});
+      else {
+        var ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); } catch (e) {}
+        ta.remove(); ov.querySelector('#errCopy').textContent = '已复制';
+      }
+    };
+  }
+  TJ.openErrorLog = openErrorLog;
+  paintErrBadge();
+
   function portraitSrc(id) { return 'assets/portraits/' + id + '.png'; }
   let best = 0;
   try { best = parseInt(localStorage.getItem('tj_best') || '0', 10) || 0; } catch (e) {}
@@ -373,7 +444,7 @@
       document.body.appendChild(ov);
       var body = ov.querySelector('#setBody');
       body.classList.add('settings-grid');
-      [btn, nbtn, mbtn, dmgBtn, fxBtn, codexBtn, liveBtn, expBtn, impBtn, copyBtn].forEach(function (b) {
+      [btn, nbtn, mbtn, dmgBtn, fxBtn, errBtn, codexBtn, liveBtn, expBtn, impBtn, copyBtn].forEach(function (b) {
         var row = document.createElement('button');
         row.className = 'set-row';
         row.textContent = b.textContent;
@@ -412,6 +483,10 @@
       fxBtn.textContent = fxLabel();
     };
     toolsRow.appendChild(fxBtn);
+    var errBtn = document.createElement('button');
+    errBtn.className = 'guide-btn'; errBtn.type = 'button'; errBtn.textContent = '错误日志';
+    errBtn.onclick = openErrorLog;
+    toolsRow.appendChild(errBtn);
     var codexBtn = document.createElement('button');
     codexBtn.className = 'guide-btn'; codexBtn.type = 'button';
     codexBtn.textContent = '武器图鉴';
@@ -1257,7 +1332,7 @@
     input.setEnabled(false);
   }
 
-  const BUILD_TAG = '2026-11-13l';
+  const BUILD_TAG = '2026-11-13m';
   function titleLockScroll() {
     const t = document.getElementById('title');
     if (t) {
@@ -1525,6 +1600,7 @@
     try { frameInner(now); }
     catch (e) {
       window.__tjErrs = (window.__tjErrs || 0) + 1;
+      if (TJ.logError) TJ.logError('frame', e);
       if (!window.__tjErrT || performance.now() - window.__tjErrT > 3000) {
         window.__tjErrT = performance.now();
         console.error('[tj frame]', e);
