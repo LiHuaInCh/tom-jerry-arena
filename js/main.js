@@ -233,7 +233,7 @@
     nbtn.type = 'button';
     nbtn.textContent = '更新公告';
     toolsRow.appendChild(nbtn);
-    var NEWS_VER = '1.4.20';
+    var NEWS_VER = '1.4.21';
     var NEWS = [
       ['启动与画面', [
         'APK 启动动画：模糊背景铺满 + 完整画面居中，点视频里的「开始游戏」即可跳过',
@@ -847,6 +847,12 @@
   }
 
   /* ---------- HUD ---------- */
+  function fmtNum(n) {
+    n = Math.max(0, n || 0);
+    if (n >= 1e8) return (n / 1e8).toFixed(1) + '亿';
+    if (n >= 1e4) return (n / 1e4).toFixed(1) + '万';
+    return Math.round(n) + '';
+  }
   function fmt(sec) {
     sec = Math.max(0, Math.floor(sec));
     const m = Math.floor(sec / 60), s = sec % 60;
@@ -893,7 +899,7 @@
     const pct = Math.max(0, Math.min(1, p.hp / p.maxHp)) * 100;
     $('hpFill').style.width = pct + '%';
     $('hpFill').classList.toggle('low', pct < 30);
-    $('hpText').textContent = Math.ceil(Math.max(0, p.hp)) + '/' + Math.round(p.maxHp);
+    $('hpText').textContent = fmtNum(Math.ceil(Math.max(0, p.hp))) + '/' + fmtNum(Math.round(p.maxHp));
     $('xpFill').style.width = Math.min(100, (g.xp / g.xpNeed) * 100) + '%';
     $('lvlBadge').textContent = g.level;
 
@@ -1215,7 +1221,7 @@
     input.setEnabled(false);
   }
 
-  const BUILD_TAG = '2026-11-13c';
+  const BUILD_TAG = '2026-11-13d';
   function titleLockScroll() {
     const t = document.getElementById('title');
     if (t) {
@@ -1227,30 +1233,10 @@
   setTimeout(titleLockScroll, 100);
 
   function fitTitle() {
-    const t = document.getElementById('title');
-    if (!t || t.classList.contains('hidden')) return;
-    const inn = t.querySelector('.title-inner');
-    if (!inn) return;
-    inn.style.position = '';
-    inn.style.left = '';
-    inn.style.marginLeft = '';
-    inn.style.transform = '';
-    inn.style.height = '';
-    inn.style.maxHeight = '';
-    const availH = t.clientHeight - 6, availW = t.clientWidth - 6;
-    const h = inn.scrollHeight, w = inn.scrollWidth;
-    if (!h || !w || availH <= 0) return;
-    const k = Math.min(1, availH / h, availW / w);
-    if (k < 0.995) {
-      inn.style.position = 'absolute';
-      inn.style.top = Math.max(3, (availH - h * k) / 2 + 2) + 'px';
-      inn.style.left = Math.max(0, (t.clientWidth - w * k) / 2) + 'px';
-      inn.style.marginLeft = '0px';
-      inn.style.transformOrigin = 'top left';
-      inn.style.transform = 'scale(' + k.toFixed(4) + ')';
-    }
-    t.scrollTop = 0;
+    var t = document.getElementById('title');
+    if (t) t.scrollTop = 0;
   }
+
   window.addEventListener('resize', function () { setTimeout(fitTitle, 50); });
   setTimeout(fitTitle, 60);
   setTimeout(fitTitle, 300);
