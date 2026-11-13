@@ -1779,13 +1779,6 @@
           ctx.globalAlpha = 0.10; ctx.fillStyle = __col; ctx.fill();
           ctx.globalAlpha = 0.30 + 0.18 * (1 - __ready); ctx.fillStyle = '#2A1A10'; ctx.fill();
         }
-        const __aico = __aw.iconImg ? orbitImg(__aw.iconImg) : null;
-        if (__aico) {
-          const __is = __rad * 1.98;
-          ctx.globalAlpha = 0.38;
-          ctx.drawImage(__aico, -__is / 2, -__is / 2, __is, __is);
-          ctx.globalAlpha = 1;
-        }
         ctx.restore();
       }
       const __swAura = __ap.subWeapon ? D.weapons[__ap.subWeapon] : null;
@@ -1796,8 +1789,6 @@
         ctx.translate(__ap.x, __ap.y - __srad * 0.05);
         ctx.beginPath(); ctx.arc(0, 0, __srad, 0, Math.PI * 2);
         ctx.globalAlpha = 0.14; ctx.fillStyle = __scol; ctx.fill();
-        const __sico = __swAura.iconImg ? orbitImg(__swAura.iconImg) : null;
-        if (__sico) { const __ss = __srad * 1.5; ctx.globalAlpha = 0.3; ctx.drawImage(__sico, -__ss / 2, -__ss / 2, __ss, __ss); }
         ctx.restore(); /* __swAura */
       }
       if (g.stage) {

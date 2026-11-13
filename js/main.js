@@ -49,7 +49,7 @@
     } catch (e) {}
   }
   TJ.logError = logError;
-  window.addEventListener('error', function (ev) { logError('window', ev.error || ev.message); });
+  window.addEventListener('error', function (ev) { if (ev.target && ev.target !== window) return; logError('window', ev.error || ev.message); });
   window.addEventListener('unhandledrejection', function (ev) { logError('promise', ev.reason); });
   function paintErrBadge() {
     var b = document.getElementById('errBadge');
@@ -91,7 +91,6 @@
     };
   }
   TJ.openErrorLog = openErrorLog;
-  paintErrBadge();
 
   const ADV_STAGES = [
     { id: 'a1', name: '厨房突围', map: 'standard', waves: 4, desc: '狭小厨房，先活过 4 波' },
