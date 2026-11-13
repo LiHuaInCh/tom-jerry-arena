@@ -1257,7 +1257,7 @@
     input.setEnabled(false);
   }
 
-  const BUILD_TAG = '2026-11-13k';
+  const BUILD_TAG = '2026-11-13l';
   function titleLockScroll() {
     const t = document.getElementById('title');
     if (t) {
@@ -1442,10 +1442,10 @@
   window.addEventListener('error', function () { window.__tjErrs = (window.__tjErrs || 0) + 1; });
 
   let __lastDraw = 0;
-  function frame(now) {
+  function frameInner(now) {
     const __coarse = window.matchMedia('(pointer: coarse)').matches;
     const __fps = 60;
-    if (__lastDraw && now - __lastDraw < 1000 / __fps - 1.5) { requestAnimationFrame(frame); return; }
+    if (__lastDraw && now - __lastDraw < 1000 / __fps - 1.5) { return; }
     __lastDraw = now;
     window.__drawN = (window.__drawN || 0) + 1;
     if (!window.__drawT) window.__drawT = now;
@@ -1518,6 +1518,19 @@
     }
     if (g) renderer.draw(g, now / 1000);
     if (state === 'playing' || state === 'levelup' || state === 'paused' || state === 'over') updateHud();
+
+  }
+
+  function frame(now) {
+    try { frameInner(now); }
+    catch (e) {
+      window.__tjErrs = (window.__tjErrs || 0) + 1;
+      if (!window.__tjErrT || performance.now() - window.__tjErrT > 3000) {
+        window.__tjErrT = performance.now();
+        console.error('[tj frame]', e);
+      }
+    }
+
     requestAnimationFrame(frame);
   }
 
