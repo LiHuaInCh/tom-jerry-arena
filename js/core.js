@@ -184,16 +184,6 @@
       && !(ORBIT_ONLY[u.id] && !(wk === 'orbit' || (wk === 'aura' && u.id === 'orbitR')))
       && !(RANGED_ONLY[u.id] && wk !== 'ranged'));
     const out = [];
-    if (p.subWeapon && p.level >= 9 && (counts.sub_swap || 0) < 1) {
-      pool.push({ id: 'sub_swap', name: '更换副武器', desc: '随机换一把副武器（限一次）', icon: '换', rarity: 'epic', max: 1 });
-    }
-    if (p.subWeapon) {
-      const subs = [
-        { id: 'sup_dmg', name: '副武器 · 重击', desc: '副武器伤害 +30%', icon: '副', rarity: 'rare', max: 5 },
-        { id: 'sup_cd', name: '副武器 · 连发', desc: '副武器冷却 -20%', icon: '副', rarity: 'rare', max: 4 }
-      ];
-      for (const u of subs) if ((counts[u.id] || 0) < u.max) pool.push(u);
-    }
     if (wk === 'summon') {
       const sumCards = [
         { id: 'sum_count', name: '召唤增援', desc: '同时存在的召唤物 +1', icon: '援', rarity: 'epic', max: 4 },

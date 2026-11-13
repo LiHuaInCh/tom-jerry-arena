@@ -50,12 +50,13 @@
       if (fallbackT) { clearTimeout(fallbackT); fallbackT = null; }
       v.classList.add('playing');
     });
-    v.addEventListener('ended', finish);
-    v.addEventListener('error', function () { setTimeout(finish, 900); });
+    v.addEventListener('error', function () { sp.classList.add('poster-mode'); });
+    v.addEventListener('stalled', function () { if (!v.classList.contains('playing')) sp.classList.add('poster-mode'); });
     var p = v.play();
     if (p && p.catch) p.catch(function () {});
-    // 若 WebView 拒绝视频自动播放，用静态海报停留 4.2 秒后进入游戏
-    fallbackT = setTimeout(finish, 4200);
+    // 自动播放失败时显示海报和开始按钮；不自动结束
+    setTimeout(function () { if (!v.classList.contains('playing')) sp.classList.add('poster-mode'); }, 1200);
+    if (music) music.loop = true;
   }
 
   var sk = document.getElementById('splashSkip');
@@ -72,8 +73,9 @@
     sk.style.height = (hh * 0.105) + 'px';
   }
   if (sk) sk.onclick = finish;
+  var st = document.getElementById('splashStart');
+  if (st) st.onclick = finish;
   if (v) v.addEventListener('loadedmetadata', placeSkip);
   window.addEventListener('resize', placeSkip);
   placeSkip();
-  setTimeout(finish, 9500);
 })();
