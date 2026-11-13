@@ -125,7 +125,7 @@
     aegis: [['圣盾','减伤 +12%、回血翻倍', function(s){ s.armor+=0.12; s.regen=(s.regen||0)+0.006; }], ['惩戒','灼烧 ×1.8、减伤降至 10%', function(s){ s.damage*=1.8; }]],
     arc: [['衰减抑制','连锁衰减降低', function(s){ s.damage*=1.25; }], ['多重电弧','跳跃 +2', function(s){ s.chainJumps=(s.chainJumps||0)+2; }], ['分裂电弧','电弧数量 +1', function(s){ s.chainExtra=(s.chainExtra||0)+1; }]],
     tether: [['高压','电弧伤害 +35%、减速 35%', function(s){ s.damage*=1.35; }], ['分流','链接数量 +1', function(s){ s.linkExtra=(s.linkExtra||0)+1; }], ['双生链接','链接数量 +1', function(s){ s.linkExtra=(s.linkExtra||0)+1; }]],
-    lance: [['聚焦','光束变宽 50%、伤害 +30%', function(s){ s.damage*=1.3; s.beamWidthMul=(s.beamWidthMul||1)*1.5; }], ['延音','追加一段延迟光柱，造成 80% 伤害', function(s){ s.beamPulse=(s.beamPulse||0)+1; }]],
+    lance: [['聚焦','光束变宽 50%、伤害 +30%', function(s){ s.damage*=1.3; s.beamWidthMul=(s.beamWidthMul||1)*1.5; }], ['延音','每层追加一段延迟光柱，造成 80% 伤害', function(s){ s.beamPulse=(s.beamPulse||0)+1; }]],
     mine: [['连环引爆','爆炸 +40%', function(s){ s.explode+=1; }], ['雷场速布','冷却 -45%、上限 +1，伤害 -20%', function(s){ s.damage*=1.2; }]],
     spike: [['淬毒尖刺','持续伤害 7/s、减速 28%', function(s){ s.dotDps=7; s.slowOnHit=0.28; }], ['弹簧地刺','触发冷却减半', function(s){ s.fireRate*=1.4; }]],
     summon: [['精锐化','召唤物伤害 +40%', function(s){ s.damage*=1.4; }], ['群体召唤','召唤上限 +1', function(s){ s.multishot+=1; }]]

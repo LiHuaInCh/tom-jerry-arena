@@ -70,7 +70,9 @@
       g.effects.push({ kind: 'beam', x: p.x, y: p.y, ang: ang, len: len, life: 0.18, max: 0.18, color: w.color });
       if (st.beamPulse) {
         g.beams = g.beams || [];
-        g.beams.push({ t: 0.18, x: p.x, y: p.y, ang: ang, len: len, half: half, dmg: dmg0 * 0.8, color: w.color, life: 0.18 });
+        for (let bp = 0; bp < st.beamPulse; bp++) {
+          g.beams.push({ t: 0.18 * (bp + 1), x: p.x, y: p.y, ang: ang, len: len, half: half, dmg: dmg0 * 0.8, color: w.color, life: 0.18 });
+        }
       }
       sfx(g, 'shoot');
       p.fireCd = w.cd / st.fireRate;

@@ -103,7 +103,8 @@
     TJ.Missions.bump(g, 'zone', 1, TJ.Missions.zoneOf(g, e.x, e.y));
     if (e.elite) TJ.Missions.bump(g, 'elite', 1);
     g.score += Math.round((e.def.score + Math.floor(g.wave * 2)) * ((g.cov && g.cov.score) || 1));
-    if (e.def.boss || e.elite) g.hitStop = 0.1;
+    if (e.def.boss) g.hitStop = 0.045;
+    else if (e.elite) g.hitStop = 0.02;
     const tk = g.player.char.talent;
     if (tk && tk.healKill) healPlayer(g, Math.min(g.player.maxHp * 0.03, 4 + g.wave * 0.5));
     burst(g, e.x, e.y, e.def.fur, 14, 260, 5);
