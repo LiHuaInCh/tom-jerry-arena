@@ -7,10 +7,13 @@
   if (!native || pending) { sp.remove(); return; }
 
   var v = document.getElementById('splashVid');
+  var v2 = document.getElementById('splashVid2');
   var vb = document.getElementById('splashBg');
   var music = document.getElementById('splashMusic');
+  var vids = [v, v2];
+  var active = 0;
+  var switching = false;
   var done = false;
-  var fallbackT = null;
 
   function startMusic() {
     if (!music) return;
@@ -33,9 +36,8 @@
   function finish() {
     if (done) return;
     done = true;
-    if (fallbackT) clearTimeout(fallbackT);
     fadeMusic();
-    if (v) { try { v.pause(); } catch (e) {} }
+    vids.forEach(function (x) { if (x) { try { x.pause(); } catch (e) {} } });
     if (vb) { try { vb.pause(); } catch (e) {} }
     sp.classList.add('gone');
     setTimeout(function () { if (sp.parentNode) sp.parentNode.removeChild(sp); }, 700);
@@ -43,21 +45,43 @@
 
   startMusic();
   sp.addEventListener('pointerdown', startMusic, { once: true });
-
   if (vb) { var pb = vb.play(); if (pb && pb.catch) pb.catch(function () {}); }
-  if (v) {
-    v.addEventListener('playing', function () {
-      if (fallbackT) { clearTimeout(fallbackT); fallbackT = null; }
-      v.classList.add('playing');
-    });
-    v.addEventListener('error', function () { sp.classList.add('poster-mode'); });
-    v.addEventListener('stalled', function () { if (!v.classList.contains('playing')) sp.classList.add('poster-mode'); });
-    var p = v.play();
+
+  function play(i) {
+    var x = vids[i];
+    if (!x) return;
+    var p = x.play();
     if (p && p.catch) p.catch(function () {});
-    // 自动播放失败时显示海报和开始按钮；不自动结束
-    setTimeout(function () { if (!v.classList.contains('playing')) sp.classList.add('poster-mode'); }, 1200);
-    if (music) music.loop = true;
   }
+  vids.forEach(function (x) {
+    if (!x) return;
+    x.addEventListener('playing', function () {
+      x.classList.add('on');
+      if (music) music.loop = true;
+    });
+    x.addEventListener('error', function () {
+      if (!vids[active].classList.contains('on')) sp.classList.add('poster-mode');
+    });
+  });
+  play(0);
+
+  setInterval(function () {
+    if (done || switching) return;
+    var cur = vids[active], next = vids[1 - active];
+    if (!cur || !next || !cur.duration) return;
+    if (cur.currentTime < cur.duration - 0.55) return;
+    switching = true;
+    try { next.currentTime = 0; } catch (e) {}
+    next.classList.add('on');
+    cur.classList.remove('on');
+    play(1 - active);
+    var old = cur;
+    setTimeout(function () { try { old.pause(); } catch (e) {} }, 480);
+    active = 1 - active;
+    setTimeout(function () { switching = false; }, 620);
+  }, 110);
+
+  setTimeout(function () { if (!vids[0].classList.contains('on') && !vids[1].classList.contains('on')) sp.classList.add('poster-mode'); }, 1400);
 
   var sk = document.getElementById('splashSkip');
   function placeSkip() {

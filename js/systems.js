@@ -394,6 +394,7 @@
     if (g.summons && g.summons.length) {
         for (let i = g.summons.length - 1; i >= 0; i--) {
           const su = g.summons[i];
+          const ss = su.sub ? (st.subBase || st) : st;
           su.life -= dt;
           if (su.life <= 0) { g.summons.splice(i, 1); continue; }
           for (let j = 0; j < i; j++) {
@@ -407,7 +408,7 @@
             if (!su.stationary && dd > 42) { su.x += (tg.x - su.x) / dd * su.spd * dt; su.y += (tg.y - su.y) / dd * su.spd * dt; }
             else {
               su.atkCd -= dt;
-              if (su.atkCd <= 0) { su.atkCd = 0.5 / (st.fireRate || 1); damageEnemy(g, tg, (su.w.dmg || 14) * st.damage * (st.summonDmgMul || 1) * 1.3, false); if (su.stationary) g.effects.push({ kind: 'beam', x: su.x, y: su.y, ang: Math.atan2(tg.y - su.y, tg.x - su.x), len: Math.hypot(tg.x - su.x, tg.y - su.y), life: 0.12, max: 0.12, color: '#9FE7FF' }); else g.effects.push({ kind: 'ring', x: tg.x, y: tg.y, r: 4, maxR: 22, life: 0.16, max: 0.16, color: '#FFD36A' }); }
+              if (su.atkCd <= 0) { su.atkCd = 0.5 / (ss.fireRate || 1); damageEnemy(g, tg, (su.w.dmg || 14) * ss.damage * (ss.summonDmgMul || 1) * 1.3, false); if (su.stationary) g.effects.push({ kind: 'beam', x: su.x, y: su.y, ang: Math.atan2(tg.y - su.y, tg.x - su.x), len: Math.hypot(tg.x - su.x, tg.y - su.y), life: 0.12, max: 0.12, color: '#9FE7FF' }); else g.effects.push({ kind: 'ring', x: tg.x, y: tg.y, r: 4, maxR: 22, life: 0.16, max: 0.16, color: '#FFD36A' }); }
             }
           } else {
             const pd = Math.hypot(p.x - su.x, p.y - su.y) || 1;
@@ -490,10 +491,11 @@
       const swL = p.subWeapon ? D.weapons[p.subWeapon] : null;
       const lk = (lw && (lw.kind === 'chain' || lw.kind === 'tether')) ? lw : ((swL && (swL.kind === 'chain' || swL.kind === 'tether')) ? swL : null);
       if (lk) {
-        const __ln = 1 + (st.linkExtra || 0);
+        const __lst = (swL && lk === swL) ? (st.subBase || st) : st;
+        const __ln = 1 + (__lst.linkExtra || 0);
         const __cands = g.enemies.filter(function (e) { return !e.dead; })
           .map(function (e) { return { e: e, d: Math.hypot(e.x - p.x, e.y - p.y) }; })
-          .filter(function (o) { return o.d < (lk.range || 400) + st.range; })
+          .filter(function (o) { return o.d < (lk.range || 400) + __lst.range; })
           .sort(function (a, b) { return a.d - b.d; })
           .slice(0, __ln).map(function (o) { return o.e; });
         p.links = __cands;

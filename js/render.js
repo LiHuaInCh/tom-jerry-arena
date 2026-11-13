@@ -516,7 +516,7 @@
       const sw2 = D.weapons[ent.subWeapon];
       if (sw2 && sw2.kind === 'orbit') {
         ctx.save();
-        drawOrbit(ctx, { x: ent.x, y: ent.y, weapon: ent.subWeapon, orbitA: ent.subOrbitA || 0, orbitBonus: (ent.stats || (window.__tjG && window.__tjG.stats) || {}).orbitBonus || 0, orbitRBonus: (ent.stats || (window.__tjG && window.__tjG.stats) || {}).orbitRBonus || 0 });
+        drawOrbit(ctx, { x: ent.x, y: ent.y, weapon: ent.subWeapon, orbitA: ent.subOrbitA || 0, orbitBonus: (ent.stats || (window.__tjG && (window.__tjG.stats.subBase || window.__tjG.stats)) || {}).orbitBonus || 0, orbitRBonus: (ent.stats || (window.__tjG && (window.__tjG.stats.subBase || window.__tjG.stats)) || {}).orbitRBonus || 0 });
         ctx.restore();
       }
     }

@@ -1299,3 +1299,6 @@ html.native #splash { display: flex; }
 .pause-relics b { color: #8A6A52; }
 .adv-card.locked { opacity: .45; }
 @media (max-width: 760px) { .relic-grid { grid-template-columns: 1fr; } }
+
+#splashVid, #splashVid2 { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; opacity: 0; transition: opacity .42s ease; }
+#splashVid.on, #splashVid2.on { opacity: 1; }
