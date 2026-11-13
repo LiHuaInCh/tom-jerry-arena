@@ -146,8 +146,8 @@
   TJ.getEvolutionChoices = function (g) {
     const p = g.player;
     const counts = g.upgradeCounts || {};
-    const pool = evoChoices(g).filter(function (u) { return !(counts[u.id] > 0); });
-    if (p.subWeapon) pool.push.apply(pool, subEvoChoices(g).filter(function (u) { return !(counts[u.id] > 0); }));
+    const pool = evoChoices(g).slice();
+    if (p.subWeapon) pool.push.apply(pool, subEvoChoices(g));
     else pool.push({ id: 'evo_generic_dmg', name: '武器专精', desc: '武器伤害 +25%', icon: '专', rarity: 'epic', kind: 'evo_main', apply: function (s) { s.damage *= 1.25; } });
     for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(g.rng() * (i + 1)); const t = pool[i]; pool[i] = pool[j]; pool[j] = t; }
     return pool.slice(0, 3);
