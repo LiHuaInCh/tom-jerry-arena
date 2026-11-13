@@ -6,6 +6,8 @@
     return g.enemies.filter(function (e) { return !e.dead; });
   }
   function hurt(g, f, t, d) {
+    const mul = f.stats ? Math.max(0.5, f.stats.damage || 1) : 1;
+    d = d * mul;
     if (g.fighters) TJ.helpers.hurtFighter(g, f, t, d);
     else TJ.helpers.hurtEnemy(g, f, t, d);
   }
