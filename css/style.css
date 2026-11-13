@@ -1302,3 +1302,17 @@ html.native #splash { display: flex; }
 
 #splashVid, #splashVid2 { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; opacity: 0; transition: opacity .42s ease; }
 #splashVid.on, #splashVid2.on { opacity: 1; }
+
+.rune-modal { padding: 10px; }
+.rm-box { width: min(560px, 96vw); max-height: 88dvh; display: flex; flex-direction: column; padding: 12px 14px; }
+.rm-head { flex: 0 0 auto; }
+.rm-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding-right: 4px; }
+.rm-row { padding: 6px 0; }
+.rm-ctl button { width: 34px; height: 34px; font-size: 16px; }
+.rm-ctl em { width: 52px; font-size: 11px; }
+.rm-foot { flex: 0 0 auto; padding-top: 8px; }
+@media (max-width: 760px) {
+  .rm-box { width: 96vw; max-height: 86dvh; }
+  .rm-info span { font-size: 10px; }
+  .rm-ctl { gap: 5px; }
+}
