@@ -516,7 +516,7 @@
       const sw2 = D.weapons[ent.subWeapon];
       if (sw2 && sw2.kind === 'orbit') {
         ctx.save();
-        drawOrbit(ctx, { x: ent.x, y: ent.y, weapon: ent.subWeapon, orbitA: ent.subOrbitA || 0, orbitBonus: 0, orbitRBonus: 0 });
+        drawOrbit(ctx, { x: ent.x, y: ent.y, weapon: ent.subWeapon, orbitA: ent.subOrbitA || 0, orbitBonus: (ent.stats || (window.__tjG && window.__tjG.stats) || {}).orbitBonus || 0, orbitRBonus: (ent.stats || (window.__tjG && window.__tjG.stats) || {}).orbitRBonus || 0 });
         ctx.restore();
       }
     }
@@ -1584,7 +1584,7 @@
       try { const z = localStorage.getItem('tj_zoom'); if (z) zoomMul = parseFloat(z); } catch (e) {}
       let view2 = false;
       try { view2 = localStorage.getItem('tj_view2') === '1'; } catch (e) {}
-      const zoom = clamp(Math.min(cw, ch) / 560, 0.56, 1.15) * 0.9 * (view2 ? 1 / 1.5 : 1.15);
+      const zoom = clamp(Math.min(cw, ch) / 560, 0.56, 1.15) * 0.9 * (view2 ? 1 / 1.5 : 1.15 / 1.2);
       const vw = cw / zoom, vh = ch / zoom;
       let camX = g.cam.x, camY = g.cam.y;
       camX = vw >= D.W ? D.W / 2 : clamp(camX, vw / 2, D.W - vw / 2);
